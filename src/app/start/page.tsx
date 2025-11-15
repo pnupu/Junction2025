@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
+// NOT CURRENTLY USED
 const steps = [
   {
     title: "Name pulse",

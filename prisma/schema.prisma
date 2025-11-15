@@ -234,7 +234,7 @@ model EventGroup {
     id          String   @id @default(cuid())
     name        String?  // Optional group name
     description String?  // What the group is planning
-    inviteCode  String   @unique @default(cuid()) // Short code for joining
+    inviteCode  String   @unique // Short code for joining
     creatorId   String?  // User who created the event
 
     // Group preferences (aggregated or manually set)

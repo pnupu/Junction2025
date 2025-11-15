@@ -1,62 +1,163 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ProfileModal, getUserProfile, type UserProfile } from "@/components/profile-modal";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <div className="w-full max-w-3xl px-6 py-12">
-        {/* Hero Section */}
-        <div className="mb-16 text-center">
-          <div className="mb-6 text-6xl">🎉</div>
-          <h1 className="mb-4 text-5xl font-semibold tracking-tight text-slate-900 sm:text-6xl">
-            Plan Together
+  const router = useRouter();
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const [eventCode, setEventCode] = useState("");
+
+  useEffect(() => {
+    const profile = getUserProfile();
+    setHasProfile(!!profile);
+  }, []);
+
+  const handleProfileSave = (profile: UserProfile) => {
+    setHasProfile(true);
+    setShowProfileForm(false);
+  };
+
+  const handleJoinEvent = () => {
+    if (!eventCode.trim()) return;
+    // Convert to uppercase for consistency with generated codes
+    const code = eventCode.trim().toUpperCase();
+    router.push(`/event/${code}`);
+  };
+
+  // Loading state
+  if (hasProfile === null) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#029DE2]">
+        <div className="text-white">Loading...</div>
+      </main>
+    );
+  }
+
+  // Render ProfileModal if shown
+  if (showProfileForm) {
+    return (
+      <>
+        {/* Background page for desktop */}
+        <main className="relative hidden min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12 md:flex">
+          <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
+            <img
+              src="/happy-times.png"
+              alt=""
+              className="h-full w-full object-cover object-bottom"
+            />
+          </div>
+        </main>
+        
+        <ProfileModal
+          isOpen={showProfileForm}
+          onClose={() => setShowProfileForm(false)}
+          onSave={handleProfileSave}
+          showAsModal={true}
+        />
+      </>
+    );
+  }
+
+  // Join event form
+  if (showJoinForm) {
+    return (
+      <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
+        {/* Background image */}
+        <div className="absolute bottom-0 left-1/2 h-[55vh] w-full -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
+          <img
+            src="/happy-times.png"
+            alt=""
+            className="h-full w-full object-cover object-bottom"
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 w-full max-w-md">
+          <h1 className="mb-12 text-center text-4xl font-bold text-white">
+            Join Event
           </h1>
-          <p className="mx-auto max-w-xl text-xl text-slate-600">
-            AI-powered event planning that adapts to everyone&apos;s preferences
-          </p>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
-          <Link
-            href="/create"
-            className="group flex h-16 items-center justify-center gap-3 rounded-xl bg-[#029DE2] px-8 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:bg-[#029DE2]/90 hover:shadow-2xl"
-          >
-            <span className="text-2xl transition-transform group-hover:scale-110">✨</span>
-            <span>Create Event</span>
-          </Link>
-          <Link
-            href="/join"
-            className="flex h-16 items-center justify-center gap-3 rounded-xl border-2 border-[#029DE2] bg-white px-8 text-lg font-semibold text-[#029DE2] backdrop-blur transition-all hover:scale-105 hover:bg-[#029DE2]/5"
-          >
-            <span className="text-2xl">🔗</span>
-            <span>Join Event</span>
-          </Link>
-        </div>
+          <div className="space-y-6">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-white">
+                Enter event code
+              </label>
+              <Input
+                type="text"
+                value={eventCode}
+                onChange={(e) => setEventCode(e.target.value.toUpperCase())}
+                placeholder="Event code"
+                className="h-12 rounded-xl border-2 border-white/30 bg-white/10 text-center text-lg uppercase text-white placeholder:text-white/50"
+              />
+            </div>
 
-        {/* Features */}
-        <div className="grid gap-6 sm:grid-cols-3">
-          <div className="rounded-2xl bg-slate-900/50 p-6 text-center backdrop-blur">
-            <div className="mb-3 text-4xl">🎯</div>
-            <h3 className="mb-2 font-semibold text-white">Simple</h3>
-            <p className="text-sm text-slate-400">No text inputs, just tap</p>
-          </div>
-          <div className="rounded-2xl bg-slate-900/50 p-6 text-center backdrop-blur">
-            <div className="mb-3 text-4xl">��</div>
-            <h3 className="mb-2 font-semibold text-white">Together</h3>
-            <p className="text-sm text-slate-400">Everyone&apos;s voice matters</p>
-          </div>
-          <div className="rounded-2xl bg-slate-900/50 p-6 text-center backdrop-blur">
-            <div className="mb-3 text-4xl">🚀</div>
-            <h3 className="mb-2 font-semibold text-white">Fast</h3>
-            <p className="text-sm text-slate-400">Results in seconds</p>
+            <Button
+              onClick={handleJoinEvent}
+              disabled={!eventCode.trim()}
+              className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90 disabled:opacity-50"
+            >
+              Join Event
+            </Button>
+
+            <button
+              onClick={() => setShowJoinForm(false)}
+              className="w-full text-center text-sm text-white/80 hover:text-white"
+            >
+              Cancel
+            </button>
           </div>
         </div>
+      </main>
+    );
+  }
 
-        {/* Dev Tools */}
-        <div className="mt-12 rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-600">
-          <div className="mb-2 text-slate-500">Dev Tools:</div>
-          <div>Alternative routes: /start/name (old flow), /join (join with code)</div>
-          <div>Design: Apple-inspired, mobile-first, single-screen layout</div>
+  // Main landing page
+  return (
+    <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
+      {/* Background image */}
+      <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
+        <img
+          src="/happy-times.png"
+          alt=""
+          className="h-full w-full object-cover object-bottom overflow-visible"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex w-full max-w-md flex-col items-center gap-16">
+        <h1 className="mt-32 text-center text-5xl font-bold leading-none text-white">
+          Wolt Events
+        </h1>        <div className="w-full space-y-4">
+          {!hasProfile ? (
+            <Button
+              onClick={() => setShowProfileForm(true)}
+              className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90"
+            >
+              Create quick profile
+            </Button>
+          ) : (
+            <>
+              <Link href="/create" className="block">
+                <Button className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90">
+                  Create Event
+                </Button>
+              </Link>
+              <Button
+                onClick={() => setShowJoinForm(true)}
+                variant="outline"
+                className="h-12 w-full rounded-xl border-2 border-white bg-transparent text-base font-semibold text-white hover:bg-white/10"
+              >
+                Join Event
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </main>

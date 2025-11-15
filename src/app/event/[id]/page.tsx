@@ -11,70 +11,63 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api } from "@/trpc/react";
-
-const userIcons = [
-  { emoji: "🐱", name: "Cat with a Hat" },
-  { emoji: "🦊", name: "Clever Fox" },
-  { emoji: "🐻", name: "Busy Bear" },
-  { emoji: "🐼", name: "Chill Panda" },
-  { emoji: "🐨", name: "Koala Cool" },
-  { emoji: "🦁", name: "Brave Lion" },
-  { emoji: "🐸", name: "Happy Frog" },
-  { emoji: "🦉", name: "Wise Owl" },
-];
-
-const moodOptions = [
-  { id: "chill", label: "Chill", emoji: "😌" },
-  { id: "celebratory", label: "Celebratory", emoji: "🎉" },
-  { id: "active", label: "Active", emoji: "⚡" },
-];
-
-const activityTypeOptions = [
-  { id: "food", label: "Food", emoji: "🍽️" },
-  { id: "culture", label: "Culture", emoji: "🎨" },
-  { id: "activity", label: "Activity", emoji: "🏃" },
-];
-
-const foodLimitOptions = [
-  { id: "no-limit", label: "No limit", emoji: "✨" },
-  { id: "veg", label: "Vegetarian", emoji: "🥗" },
-  { id: "gluten", label: "Gluten-free", emoji: "🌾" },
-];
-
-const budgetOptions = [
-  { id: "free", label: "Free", emoji: "🆓" },
-  { id: "under-10", label: "<10€/person", emoji: "💰" },
-  { id: "no-limit", label: "No limit", emoji: "💎" },
-];
+import { ProfileModal, getUserProfile, type UserProfile } from "@/components/profile-modal";
 
 export default function EventPage() {
   const params = useParams();
   const router = useRouter();
-  const eventId = params.id as string;
+  const eventIdOrCode = params.id as string;
 
   const [sessionId, setSessionId] = useState<string>("");
-  const [step, setStep] = useState<"icon" | "preferences" | "complete">("icon");
-  const [selectedIcon, setSelectedIcon] = useState<{ emoji: string; name: string } | null>(null);
-  const [mood, setMood] = useState<string | null>(null);
-  const [activityType, setActivityType] = useState<string | null>(null);
-  const [foodLimit, setFoodLimit] = useState<string | null>(null);
-  const [budget, setBudget] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState<boolean>(false);
-  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+  const [hasJoined, setHasJoined] = useState<boolean>(false);
   const [showQRDialog, setShowQRDialog] = useState<boolean>(false);
+  const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
+  const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
+  // Try to get event by invite code first (if it looks like a code), otherwise by ID
+  const isLikelyInviteCode = eventIdOrCode.length <= 10 && /^[A-Z0-9]+$/i.test(eventIdOrCode);
+  
   const { data: eventData, refetch } = api.event.get.useQuery(
-    { id: eventId },
-    { enabled: !!eventId, refetchInterval: hasSubmitted ? 3000 : false },
+    isLikelyInviteCode 
+      ? { inviteCode: eventIdOrCode.toUpperCase() }
+      : { id: eventIdOrCode },
+    { enabled: !!eventIdOrCode, refetchInterval: 3000 },
   );
 
   const addPreferences = api.event.addPreferences.useMutation({
     onSuccess: () => {
-      setStep("complete");
-      setHasSubmitted(true);
+      setHasJoined(true);
       void refetch();
     },
   });
+
+  const autoJoinEvent = (profile: UserProfile, sid: string) => {
+    // Map preferences to API format
+    const activityLevelMap: Record<string, number> = {
+      "chill": 1,
+      "celebratory": 3,
+      "active": 5,
+    };
+
+    const moneyPreferenceMap: Record<string, "budget" | "moderate" | "premium"> = {
+      "no-limit": "premium",
+      "veg": "moderate",
+      "gluten": "moderate",
+    };
+
+    addPreferences.mutate({
+      groupId: eventData?.id ?? eventIdOrCode,
+      sessionId: sid,
+      userName: profile.name,
+      userIcon: "👤",
+      moneyPreference: moneyPreferenceMap[profile.foodPreference] ?? "moderate",
+      activityLevel: activityLevelMap[profile.activityPreference] ?? 3,
+    });
+
+    sessionStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
+  };
 
   useEffect(() => {
     let sid = sessionStorage.getItem("sessionId");
@@ -84,57 +77,58 @@ export default function EventPage() {
     }
     setSessionId(sid);
 
-    const creatorId = sessionStorage.getItem(`event_${eventId}_creator`);
+    const creatorId = sessionStorage.getItem(`event_${eventIdOrCode}_creator`);
     if (!creatorId) {
-      sessionStorage.setItem(`event_${eventId}_creator`, sid);
+      sessionStorage.setItem(`event_${eventIdOrCode}_creator`, sid);
       setIsCreator(true);
     } else if (creatorId === sid) {
       setIsCreator(true);
     }
 
-    // Check if already submitted
-    const submitted = sessionStorage.getItem(`event_${eventId}_submitted`);
-    if (submitted === "true") {
-      setHasSubmitted(true);
-      setStep("complete");
+    // Check if already joined
+    const joined = sessionStorage.getItem(`event_${eventIdOrCode}_joined`);
+    if (joined === "true") {
+      setHasJoined(true);
+    } else {
+      // Check for user profile and auto-join
+      const profile = getUserProfile();
+      if (profile) {
+        setUserProfile(profile);
+        // Auto-join using the sid we just set
+        autoJoinEvent(profile, sid);
+      } else {
+        // Show profile modal if no profile exists
+        setShowProfileModal(true);
+      }
     }
-  }, [eventId]);
+  }, [eventIdOrCode]);
 
-  const handleIconSelect = (icon: { emoji: string; name: string }) => {
-    setSelectedIcon(icon);
-    setStep("preferences");
-  };
 
-  const handleSubmitPreferences = () => {
-    if (!selectedIcon || !mood || !activityType || !foodLimit || !budget || !sessionId) return;
 
-    // Map budget to legacy moneyPreference format
-    const moneyPreferenceMap: Record<string, "budget" | "moderate" | "premium"> = {
-      "free": "budget",
-      "under-10": "moderate",
-      "no-limit": "premium",
-    };
-
-    addPreferences.mutate({
-      groupId: eventId,
-      sessionId,
-      userName: selectedIcon.name,
-      userIcon: selectedIcon.emoji,
-      moneyPreference: moneyPreferenceMap[budget] ?? "moderate",
-      activityLevel: mood === "active" ? 5 : mood === "celebratory" ? 3 : 1,
-    });
-
-    sessionStorage.setItem(`event_${eventId}_submitted`, "true");
+  const handleProfileSave = (profile: UserProfile) => {
+    setUserProfile(profile);
+    setShowProfileModal(false);
+    if (sessionId) {
+      autoJoinEvent(profile, sessionId);
+    }
   };
 
   const handleCopyLink = async () => {
     const url = window.location.href;
     await navigator.clipboard.writeText(url);
-    // Optional: Add toast notification
+    setShowInviteModal(false);
+  };
+
+  const handleCopyCode = async () => {
+    if (eventData?.inviteCode) {
+      await navigator.clipboard.writeText(eventData.inviteCode);
+    }
   };
 
   const handleGenerateEvent = () => {
-    router.push(`/event/${eventId}/results`);
+    if (eventData?.id) {
+      router.push(`/event/${eventData.id}/results`);
+    }
   };
 
   if (!eventData) {
@@ -145,59 +139,104 @@ export default function EventPage() {
     );
   }
 
-  const completedCount = eventData.preferences.length;
-  const myPreference = eventData.preferences.find(p => p.sessionId === sessionId);
+  const participants = eventData.preferences;
+  const participantCount = participants.length;
 
   return (
-    <main className="min-h-screen bg-white">
-      <div className="mx-auto max-w-2xl px-4 py-8">
+    <>
+      <ProfileModal
+        isOpen={showProfileModal}
+        onClose={() => {
+          // Don't allow closing without saving
+          if (!userProfile) return;
+          setShowProfileModal(false);
+        }}
+        onSave={handleProfileSave}
+        showAsModal={false}
+      />
+    <main className="min-h-screen bg-[#029DE2]">
+      <div className="mx-auto max-w-2xl px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="mb-1 text-2xl font-semibold text-slate-900">Event Planning</h1>
-          <p className="text-sm text-slate-600">
-            {completedCount} {completedCount === 1 ? "person" : "people"} answered
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-4xl font-bold text-white">Wolt Events</h1>
+          <p className="text-white/80">
+            {participantCount} {participantCount === 1 ? "person" : "people"}
           </p>
         </div>
 
-        {/* QR Code and Share Section */}
-        <div className="mb-8 rounded-2xl bg-slate-50 p-6 backdrop-blur">
-          <h2 className="mb-4 text-sm font-medium text-slate-600">Invite Others</h2>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowQRDialog(true)}
-                className="group relative overflow-hidden rounded-xl bg-white p-3 transition-all hover:scale-105 hover:shadow-xl"
-              >
-                <QRCodeSVG
-                  value={typeof window !== "undefined" ? window.location.href : ""}
-                  size={80}
-                  level="H"
-                  includeMargin={false}
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="text-xs font-medium text-white">Click to enlarge</span>
-                </div>
-              </button>
-              <div>
-                <p className="text-sm font-medium text-slate-900">Scan to join</p>
-                <p className="text-xs text-slate-600">Click QR to enlarge</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => void handleCopyLink()}
-              variant="outline"
-              className="border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
-            >
-              📋 Copy Link
-            </Button>
-          </div>
+        {/* Invite Section */}
+        <div className="mb-6">
+          <Button
+            onClick={() => setShowInviteModal(true)}
+            className="h-14 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90"
+          >
+            📨 Invite Friends
+          </Button>
         </div>
 
-        {/* QR Code Dialog */}
-        <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
-          <DialogContent className="border-slate-200 bg-white text-slate-900 sm:max-w-md">
+        {/* Invite Modal */}
+        <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
+          <DialogContent className="border-none bg-white text-slate-900 sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-center text-slate-900">Scan to Join Event</DialogTitle>
+              <DialogTitle className="text-center text-2xl font-semibold text-[#0F172B]">
+                Invite Friends
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center gap-6 py-6">
+              {/* Event Code Section */}
+              <div className="w-full rounded-xl border-2 border-[#029DE2] bg-[#EDF7FF] p-4">
+                <p className="mb-2 text-center text-xs font-medium uppercase tracking-wide text-[#62748E]">
+                  Event Code
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <code className="rounded-lg bg-white px-4 py-2 text-center text-2xl font-bold tracking-wider text-[#029DE2]">
+                    {eventData?.inviteCode ?? eventIdOrCode}
+                  </code>
+                </div>
+                <button
+                  onClick={() => void handleCopyCode()}
+                  className="mt-3 w-full rounded-lg bg-white px-4 py-2 text-sm font-medium text-[#029DE2] transition-colors hover:bg-[#029DE2] hover:text-white"
+                >
+                  📋 Copy Code
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="flex w-full items-center gap-3">
+                <div className="h-px flex-1 bg-[#CAD5E2]"></div>
+                <span className="text-xs text-[#62748E]">or</span>
+                <div className="h-px flex-1 bg-[#CAD5E2]"></div>
+              </div>
+
+              {/* QR Code Section */}
+              <div className="rounded-2xl bg-white p-6 shadow-lg">
+                <QRCodeSVG
+                  value={typeof window !== "undefined" ? window.location.href : ""}
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+              <p className="text-center text-sm text-[#62748E]">
+                Scan QR code or share the link
+              </p>
+              <Button
+                onClick={() => void handleCopyLink()}
+                className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#029DE2]/90"
+              >
+                📋 Copy Link
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* QR Code Dialog (enlarged) */}
+        <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+          <DialogContent className="border-none bg-white text-slate-900 sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-2xl font-semibold text-[#0F172B]">
+                Scan to Join Event
+              </DialogTitle>
             </DialogHeader>
             <div className="flex flex-col items-center gap-4 py-6">
               <div className="rounded-2xl bg-white p-6 shadow-lg">
@@ -208,37 +247,38 @@ export default function EventPage() {
                   includeMargin={true}
                 />
               </div>
-              <p className="text-center text-sm text-slate-600">
-                Share this QR code to invite others to the event
-              </p>
             </div>
           </DialogContent>
         </Dialog>
 
         {/* Participants List */}
-        {completedCount > 0 && (
-          <div className="mb-8 rounded-2xl bg-slate-50 p-6 backdrop-blur">
-            <h2 className="mb-4 text-sm font-medium text-slate-600">Participants</h2>
+        {participantCount > 0 && (
+          <div className="mb-6 rounded-2xl bg-white/10 p-6 backdrop-blur">
+            <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-white/80">
+              Participants
+            </h2>
             <div className="space-y-3">
-              {eventData.preferences.map((pref, idx) => (
+              {participants.map((participant, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between rounded-xl bg-white border border-slate-200 p-4"
+                  className="flex items-center justify-between rounded-xl bg-white/20 p-4 backdrop-blur"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl">
-                      {pref.userIcon}
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30 text-2xl backdrop-blur">
+                      👤
                     </div>
                     <div>
-                      <div className="font-medium text-slate-900">{pref.userName ?? "Anonymous"}</div>
-                      <div className="text-xs text-slate-600">
-                        {pref.moneyPreference} • Activity: {pref.activityLevel}/5
+                      <div className="font-medium text-white">
+                        {participant.userName ?? "Anonymous"}
+                      </div>
+                      <div className="text-xs text-white/70">
+                        Activity level: {participant.activityLevel}/5
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 rounded-full bg-green-500/20 px-3 py-1">
+                  <div className="flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 backdrop-blur">
                     <div className="h-2 w-2 rounded-full bg-green-400"></div>
-                    <span className="text-xs font-medium text-green-300">Complete</span>
+                    <span className="text-xs font-medium text-white">Joined</span>
                   </div>
                 </div>
               ))}
@@ -246,197 +286,38 @@ export default function EventPage() {
           </div>
         )}
 
-        {/* Icon Selection */}
-        {step === "icon" && !hasSubmitted && (
-          <div className="rounded-3xl bg-slate-50 p-8 backdrop-blur">
-            <h2 className="mb-2 text-center text-3xl font-semibold text-slate-900">
-              Choose your character
-            </h2>
-            <p className="mb-8 text-center text-slate-600">
-              Pick an icon to represent you
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              {userIcons.map((icon) => (
-                <button
-                  key={icon.emoji}
-                  onClick={() => handleIconSelect(icon)}
-                  className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-slate-200 bg-white p-6 transition-all hover:scale-105 hover:border-[#029DE2] hover:bg-slate-50"
-                >
-                  <span className="text-5xl">{icon.emoji}</span>
-                  <span className="text-sm font-medium text-slate-900">{icon.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Preferences Survey */}
-        {step === "preferences" && selectedIcon && !hasSubmitted && (
-          <div className="space-y-6 rounded-3xl bg-slate-50 p-8 backdrop-blur">
-            <div className="flex items-center gap-3">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white border-2 border-slate-200 text-4xl">
-                {selectedIcon.emoji}
-              </div>
-              <div>
-                <h2 className="text-2xl font-semibold text-slate-900">{selectedIcon.name}</h2>
-                <p className="text-sm text-slate-600">Set your preferences</p>
-              </div>
-            </div>
-
-            {/* 1. Mood */}
-            <div>
-              <h3 className="mb-3 text-lg font-medium text-slate-900">1. What is the mood?</h3>
-              <div className="grid grid-cols-3 gap-3">
-                {moodOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setMood(option.id)}
-                    className={`
-                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
-                      ${
-                        mood === option.id
-                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }
-                    `}
-                  >
-                    <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. Activity Type */}
-            <div>
-              <h3 className="mb-3 text-lg font-medium text-slate-900">2. Activity type?</h3>
-              <div className="grid grid-cols-3 gap-3">
-                {activityTypeOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setActivityType(option.id)}
-                    className={`
-                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
-                      ${
-                        activityType === option.id
-                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }
-                    `}
-                  >
-                    <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. Food Limits */}
-            <div>
-              <h3 className="mb-3 text-lg font-medium text-slate-900">3. Food limits?</h3>
-              <div className="grid grid-cols-3 gap-3">
-                {foodLimitOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setFoodLimit(option.id)}
-                    className={`
-                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
-                      ${
-                        foodLimit === option.id
-                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }
-                    `}
-                  >
-                    <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 4. Budget */}
-            <div>
-              <h3 className="mb-3 text-lg font-medium text-slate-900">4. Budget</h3>
-              <div className="grid grid-cols-3 gap-3">
-                {budgetOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setBudget(option.id)}
-                    className={`
-                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
-                      ${
-                        budget === option.id
-                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }
-                    `}
-                  >
-                    <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
+        {/* Creator Action Button */}
+        {isCreator && hasJoined && (
+          <div className="mt-8">
             <Button
-              onClick={handleSubmitPreferences}
-              disabled={!mood || !activityType || !foodLimit || !budget || addPreferences.isPending}
-              className="h-14 w-full rounded-xl bg-[#029DE2] text-lg font-semibold text-white transition-all hover:scale-105 hover:bg-[#029DE2]/90 disabled:opacity-40 disabled:hover:scale-100"
+              onClick={handleGenerateEvent}
+              disabled={participantCount === 0}
+              className="h-16 w-full rounded-xl bg-white text-lg font-bold text-[#029DE2] hover:scale-105 hover:bg-white/90 disabled:opacity-50 disabled:hover:scale-100"
             >
-              {addPreferences.isPending ? "Submitting..." : "Submit"}
+              🎉 Let&apos;s cook some events!
             </Button>
+            {participantCount === 0 && (
+              <p className="mt-2 text-center text-sm text-white/70">
+                Wait for at least one participant to join
+              </p>
+            )}
           </div>
         )}
 
-        {/* Complete State */}
-        {step === "complete" && hasSubmitted && (
-          <div className="rounded-3xl bg-slate-50 p-12 text-center backdrop-blur">
-            <div className="mb-4 text-6xl">
-              {myPreference?.userIcon ?? selectedIcon?.emoji ?? "✓"}
-            </div>
-            <h2 className="mb-3 text-2xl font-semibold text-slate-900">
-              Preferences Submitted!
-            </h2>
-            <p className="mb-6 text-slate-600">
-              {isCreator
-                ? "You can generate recommendations when ready"
-                : "Waiting for the event creator to generate options"}
+        {/* Waiting message for non-creators */}
+        {!isCreator && hasJoined && (
+          <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
+            <div className="mb-3 text-4xl">⏳</div>
+            <h3 className="mb-2 text-xl font-semibold text-white">
+              Waiting for the host
+            </h3>
+            <p className="text-white/80">
+              The event creator will generate activities when ready
             </p>
-            
-            {isCreator && (
-              <Button
-                onClick={handleGenerateEvent}
-                className="h-14 w-full max-w-xs rounded-xl bg-[#029DE2] text-lg font-semibold text-white transition-all hover:scale-105 hover:bg-[#029DE2]/90"
-              >
-                Generate Event Options
-              </Button>
-            )}
-            
-            {!isCreator && (
-              <Button
-                onClick={() => void refetch()}
-                variant="outline"
-                className="border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
-              >
-                Refresh
-              </Button>
-            )}
           </div>
         )}
-
-        {/* Dev Tools */}
-        <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-600">
-          <div className="mb-2 text-slate-500">Dev Tools:</div>
-          <div>Event ID: {eventId}</div>
-          <div>Session ID: {sessionId}</div>
-          <div>Is Creator: {isCreator ? "Yes" : "No"}</div>
-          <div>Step: {step}</div>
-          <div>Has Submitted: {hasSubmitted ? "Yes" : "No"}</div>
-          <div>Participants: {completedCount}</div>
-          <div>Status: {eventData.status}</div>
-        </div>
       </div>
     </main>
-  );
+  </>
+);
 }
