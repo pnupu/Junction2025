@@ -83,6 +83,7 @@ export default function EventPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [L, setL] = useState<LeafletModule | null>(null);
+  const [activeTab, setActiveTab] = useState<"participants" | "ideas">("participants");
 
   // Try to get event by invite code first (if it looks like a code), otherwise by ID
   const isLikelyInviteCode =
@@ -132,6 +133,64 @@ export default function EventPage() {
     onSuccess: () => {
       setHasJoined(true);
       void refetch();
+    },
+  });
+
+  // Get group ID from event data
+  const groupId = eventData?.id ?? eventIdOrCode;
+  const eventStatus = (eventData as { status?: string })?.status;
+
+  // Load recommendations from database if already generated
+  const recommendationsQuery = api.event.getRecommendations.useQuery(
+    { groupId },
+    {
+      enabled: !!groupId && eventStatus === "generated",
+      staleTime: 10000,
+      refetchInterval: 5000, // Poll every 5 seconds to update vote counts
+    },
+  );
+
+  // Get user's votes
+  const myVotesQuery = api.event.getMyVotes.useQuery(
+    { groupId, sessionId },
+    {
+      enabled: !!groupId && !!sessionId && eventStatus === "generated",
+      staleTime: 10000,
+    },
+  );
+
+  const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
+
+  // Update myVotes when query data changes
+  useEffect(() => {
+    if (myVotesQuery.data) {
+      setMyVotes(new Set(myVotesQuery.data));
+    }
+  }, [myVotesQuery.data]);
+
+  // Vote mutation
+  const voteMutation = api.event.vote.useMutation({
+    onSuccess: () => {
+      void myVotesQuery.refetch();
+      void recommendationsQuery.refetch();
+    },
+  });
+
+  const handleVote = (eventId: string) => {
+    if (!sessionId || !eventId) return;
+    voteMutation.mutate({
+      groupId,
+      eventId,
+      sessionId,
+    });
+  };
+
+  // Generate recommendations mutation
+  const generateRecommendations = api.event.generateRecommendations.useMutation({
+    onSuccess: () => {
+      void recommendationsQuery.refetch();
+      void refetch();
+      setActiveTab("ideas");
     },
   });
 
@@ -305,7 +364,7 @@ export default function EventPage() {
 
   const handleGenerateEvent = () => {
     if (eventData?.id) {
-      router.push(`/event/${eventData.id}/results`);
+      generateRecommendations.mutate({ groupId: eventData.id });
     }
   };
 
@@ -359,22 +418,6 @@ export default function EventPage() {
     return Array.from(locationMap.values());
   }, [participantLocations]);
 
-  // Check if recommendations are being generated or have been generated, and redirect
-  useEffect(() => {
-    if (eventData) {
-      const status = (eventData as { status?: string }).status;
-      const isGenerated =
-        (eventData as { isGenerated?: boolean }).isGenerated ??
-        status === "generated";
-      const isGenerating = status === "generating";
-
-
-      // Redirect to results page if generating or generated
-      if ((isGenerating || isGenerated) && eventData.id) {
-        router.push(`/event/${eventData.id}/results`);
-      }
-    }
-  }, [eventData, router]);
 
   if (!eventData) {
     return (
@@ -589,11 +632,25 @@ export default function EventPage() {
 
             {/* Tabs */}
             <div className="flex border-b border-slate-200">
-              <button className="flex-1 border-b-2 border-[#029DE2] px-3 py-4 text-base font-semibold text-[#029DE2]">
+              <button
+                onClick={() => setActiveTab("participants")}
+                className={`flex-1 px-3 py-4 text-base font-semibold transition-colors ${
+                  activeTab === "participants"
+                    ? "border-b-2 border-[#029DE2] text-[#029DE2]"
+                    : "text-[#0F172B]"
+                }`}
+              >
                 Participants ({participantCount})
               </button>
-              <button className="flex-1 px-3 py-4 text-base text-[#0F172B]">
-                Event ideas (0)
+              <button
+                onClick={() => setActiveTab("ideas")}
+                className={`flex-1 px-3 py-4 text-base font-semibold transition-colors ${
+                  activeTab === "ideas"
+                    ? "border-b-2 border-[#029DE2] text-[#029DE2]"
+                    : "text-[#0F172B]"
+                }`}
+              >
+                Event ideas ({recommendationsQuery.data?.recommendations.length ?? 0})
               </button>
             </div>
           </div>
@@ -674,12 +731,15 @@ export default function EventPage() {
             </DialogContent>
           </Dialog>
 
-          {/* Participants List */}
-          {participantCount > 0 && (
+          {/* Tab Content */}
+          {activeTab === "participants" && (
             <>
-              <h2 className="mb-4 text-sm font-medium tracking-wide text-white/80 uppercase">
-                Participants ({participantCount})
-              </h2>
+              {/* Participants List */}
+              {participantCount > 0 && (
+                <>
+                  <h2 className="mb-4 text-sm font-medium tracking-wide text-white/80 uppercase">
+                    Participants ({participantCount})
+                  </h2>
               <div className="space-y-3">
                 {participants.map((participant, idx) => {
                   const moodResponses = (
@@ -736,6 +796,170 @@ export default function EventPage() {
               </div>
             </>
           )}
+            </>
+          )}
+
+          {/* Event Ideas Tab */}
+          {activeTab === "ideas" && (
+            <div className="space-y-4">
+              {eventStatus === "generating" ? (
+                <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
+                  <div className="mb-3 text-4xl">🎨</div>
+                  <h3 className="mb-2 text-xl font-semibold text-white">
+                    Generating recommendations...
+                  </h3>
+                  <p className="text-white/80">Analyzing preferences</p>
+                </div>
+              ) : eventStatus === "generated" && recommendationsQuery.data ? (
+                <>
+                  {recommendationsQuery.data.recommendations.length > 0 ? (
+                    <>
+                      {/* Event Ideas List */}
+                      <div className="space-y-3">
+                        {recommendationsQuery.data.recommendations.map((rec, idx) => {
+                          // Get price level as € symbols
+                          const getPriceSymbols = (level: string) => {
+                            switch (level) {
+                              case "budget":
+                                return "€";
+                              case "moderate":
+                                return "€€";
+                              case "premium":
+                                return "€€€";
+                              default:
+                                return "€€";
+                            }
+                          };
+
+                          // Get participants who voted (show as avatars)
+                          // We'll show participant avatars based on vote count
+                          // For now, show generic avatars - can be enhanced to show actual participant info
+                          const voterCount = rec.voteCount ?? 0;
+
+                          return (
+                            <div
+                              key={rec.eventId ?? idx}
+                              className={`overflow-hidden rounded-2xl bg-white p-4 ${
+                                myVotes.has(rec.eventId)
+                                  ? "border-2 border-[#029DE2]"
+                                  : "border border-slate-200"
+                              }`}
+                            >
+                              {/* Number and Title Row */}
+                              <div className="mb-3 flex items-start gap-3">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#029DE2] text-sm font-bold text-white">
+                                  {idx + 1}
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="mb-1 text-base font-semibold text-[#0F172B]">
+                                    {rec.title}
+                                  </h3>
+                                  <p className="text-sm text-[#0F172B]/70 line-clamp-2">
+                                    {rec.description}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Price and Duration Row */}
+                              <div className="mb-3 flex items-center gap-4">
+                                <div className="flex items-center gap-1">
+                                  {getPriceSymbols(rec.priceLevel)
+                                    .split("")
+                                    .map((symbol, i) => (
+                                      <div
+                                        key={i}
+                                        className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow-100 text-xs font-semibold text-yellow-700"
+                                      >
+                                        {symbol}
+                                      </div>
+                                    ))}
+                                </div>
+                                <span className="text-sm text-[#0F172B]/60">
+                                  {rec.duration}
+                                </span>
+                              </div>
+
+                              {/* Participants/Voters Row */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1">
+                                  {voterCount > 0 ? (
+                                    <>
+                                      {Array.from({ length: Math.min(voterCount, 4) }).map(
+                                        (_, vIdx) => (
+                                          <div
+                                            key={vIdx}
+                                            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white"
+                                          >
+                                            MM
+                                          </div>
+                                        ),
+                                      )}
+                                      {voterCount > 4 && (
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white">
+                                          +{voterCount - 4}
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <div className="text-xs text-[#0F172B]/50">
+                                      No votes yet
+                                    </div>
+                                  )}
+                                </div>
+                                <button
+                                  onClick={() => rec.eventId && handleVote(rec.eventId)}
+                                  disabled={!rec.eventId || voteMutation.isPending}
+                                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                                    myVotes.has(rec.eventId)
+                                      ? "bg-[#029DE2] text-white"
+                                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                  } disabled:opacity-50`}
+                                >
+                                  {myVotes.has(rec.eventId) ? "Voted" : "Vote"}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Close Voting Button */}
+                      <Button
+                        className="mt-4 w-full rounded-xl bg-[#029DE2] text-white transition-all hover:bg-[#0287C3]"
+                        size="lg"
+                      >
+                        Close voting
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
+                      <div className="mb-3 text-4xl">✨</div>
+                      <h3 className="mb-2 text-xl font-semibold text-white">
+                        No recommendations yet
+                      </h3>
+                      <p className="text-white/80">
+                        {isCreator
+                          ? "Generate event recommendations to see ideas"
+                          : "Waiting for recommendations to be generated"}
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
+                  <div className="mb-3 text-4xl">⏳</div>
+                  <h3 className="mb-2 text-xl font-semibold text-white">
+                    {isCreator ? "Ready to generate?" : "Waiting for recommendations"}
+                  </h3>
+                  <p className="text-white/80">
+                    {isCreator
+                      ? "Generate event recommendations when ready"
+                      : "The event creator will generate activities when ready"}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mood Questions - Show after user has joined */}
           {hasJoined && eventData?.id && sessionId && !hasMoodResponses && (
@@ -750,8 +974,11 @@ export default function EventPage() {
             />
           )}
 
-          {/* Creator Action Button - Only visible to event creator */}
-          {isCreator && hasJoined ? (
+          {/* Creator Action Button - Only visible to event creator and when ideas haven't been generated */}
+          {isCreator &&
+          hasJoined &&
+          eventStatus !== "generated" &&
+          eventStatus !== "generating" ? (
             <div className="mt-8">
               <Button
                 onClick={handleGenerateEvent}

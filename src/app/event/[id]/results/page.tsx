@@ -13,12 +13,14 @@ import {
 import { api } from "@/trpc/react";
 
 type Recommendation = {
+  eventId?: string;
   title: string;
   description: string;
   type: string;
   priceLevel: string;
   duration: string;
   highlights: string[];
+  voteCount?: number;
 };
 
 type EventPreference = {
@@ -67,7 +69,7 @@ function isEventDetails(data: unknown): data is EventDetails {
 
 export default function EventResultsPage() {
   const params = useParams();
-  const eventId = params.id as string;
+  const groupId = params.id as string;
 
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [groupStats, setGroupStats] = useState<{
@@ -77,11 +79,13 @@ export default function EventResultsPage() {
   } | null>(null);
   const [showQRDialog, setShowQRDialog] = useState<boolean>(false);
   const [loadingDots, setLoadingDots] = useState(".");
+  const [sessionId, setSessionId] = useState<string>("");
+  const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
 
   const eventQuery = api.event.get.useQuery(
-    { id: eventId },
+    { id: groupId },
     {
-      enabled: !!eventId,
+      enabled: !!groupId,
       // Only poll when generating, otherwise rely on manual refetch
       refetchInterval: (query) => {
         const data = query.state.data as { status?: string } | undefined;
@@ -102,16 +106,92 @@ export default function EventResultsPage() {
   const rawEventData: unknown = eventQuery.data;
   const eventData = isEventDetails(rawEventData) ? rawEventData : undefined;
 
+  // Get sessionId from localStorage
+  useEffect(() => {
+    let sid = localStorage.getItem("sessionId");
+    if (!sid) {
+      sid = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem("sessionId", sid);
+    }
+    setSessionId(sid);
+  }, []);
+
+  // Load recommendations from database if already generated
+  const eventStatus = (eventData as { status?: string })?.status;
+  const recommendationsQuery = api.event.getRecommendations.useQuery(
+    { groupId },
+    {
+      enabled: !!groupId && eventStatus === "generated",
+      staleTime: 10000, // Reduced cache time to show updated vote counts
+      refetchInterval: 5000, // Poll every 5 seconds to update vote counts
+    },
+  );
+
+  // Get user's votes
+  const myVotesQuery = api.event.getMyVotes.useQuery(
+    { groupId, sessionId },
+    {
+      enabled: !!groupId && !!sessionId && eventStatus === "generated",
+      staleTime: 10000,
+    },
+  );
+
+  // Update myVotes when query data changes
+  useEffect(() => {
+    if (myVotesQuery.data) {
+      setMyVotes(new Set(myVotesQuery.data));
+    }
+  }, [myVotesQuery.data]);
+
   const generateRecommendations = api.event.generateRecommendations.useMutation(
     {
       onSuccess: (data) => {
         setRecommendations(data.recommendations as unknown as Recommendation[]);
         setGroupStats(data.groupStats);
+        // Invalidate recommendations query to refetch from DB
+        void recommendationsQuery.refetch();
       },
     },
   );
   const { mutate: runRecommendations, isPending: isGenerating } =
     generateRecommendations;
+
+  // Vote mutation
+  const voteMutation = api.event.vote.useMutation({
+    onSuccess: (data, variables) => {
+      // Update local vote count
+      setRecommendations((prev) =>
+        prev.map((rec) =>
+          rec.eventId === variables.eventId
+            ? { ...rec, voteCount: data.voteCount }
+            : rec,
+        ),
+      );
+      // Refetch my votes to update UI
+      void myVotesQuery.refetch();
+      // Refetch recommendations to get updated counts
+      void recommendationsQuery.refetch();
+    },
+  });
+
+  const handleVote = (eventId: string) => {
+    if (!sessionId || !eventId) return;
+    voteMutation.mutate({
+      groupId,
+      eventId,
+      sessionId,
+    });
+  };
+
+  // Load recommendations from database when available
+  useEffect(() => {
+    if (recommendationsQuery.data && eventStatus === "generated") {
+      setRecommendations(
+        recommendationsQuery.data.recommendations as unknown as Recommendation[],
+      );
+      setGroupStats(recommendationsQuery.data.groupStats);
+    }
+  }, [recommendationsQuery.data, eventStatus]);
 
   // Animate loading dots when generating
   useEffect(() => {
@@ -139,25 +219,30 @@ export default function EventResultsPage() {
     const isAlreadyGenerating = status === "generating";
 
     // Only start generation if not already generating/generated and we have no recommendations
+    // Also check if recommendations query has no data (meaning they don't exist in DB)
     if (
-      eventId &&
+      groupId &&
       !isGenerating &&
       recommendations.length === 0 &&
       !isAlreadyGenerated &&
-      !isAlreadyGenerating
+      !isAlreadyGenerating &&
+      !recommendationsQuery.isLoading &&
+      !recommendationsQuery.data
     ) {
-      runRecommendations({ groupId: eventId });
+      runRecommendations({ groupId });
     }
   }, [
-    eventId,
+    groupId,
     isGenerating,
     recommendations.length,
     runRecommendations,
     eventData,
+    recommendationsQuery.isLoading,
+    recommendationsQuery.data,
   ]);
 
   const handleCopyLink = () => {
-    const url = window.location.origin + `/event/${eventId}`;
+    const url = window.location.origin + `/event/${groupId}`;
     void navigator.clipboard.writeText(url);
   };
 
@@ -188,9 +273,9 @@ export default function EventResultsPage() {
   };
 
   // Show loading if generating or if status is "generating" but we don't have recommendations yet
-  const status = (eventData as { status?: string })?.status;
   const shouldShowLoading =
-    isGenerating || (status === "generating" && recommendations.length === 0);
+    isGenerating ||
+    (eventStatus === "generating" && recommendations.length === 0);
 
   if (shouldShowLoading) {
     return (
@@ -255,7 +340,7 @@ export default function EventResultsPage() {
                   <QRCodeSVG
                     value={
                       typeof window !== "undefined"
-                        ? window.location.origin + `/event/${eventId}`
+                        ? window.location.origin + `/event/${groupId}`
                         : ""
                     }
                     size={256}
@@ -349,6 +434,39 @@ export default function EventResultsPage() {
                   ))}
                 </div>
 
+                {/* Vote Section */}
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => rec.eventId && handleVote(rec.eventId)}
+                      disabled={!rec.eventId || voteMutation.isPending}
+                      className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all ${
+                        rec.eventId && myVotes.has(rec.eventId)
+                          ? "bg-[#029DE2] text-white"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      } disabled:opacity-50`}
+                    >
+                      <span className="text-xl">
+                        {rec.eventId && myVotes.has(rec.eventId) ? "✓" : "↑"}
+                      </span>
+                      <span className="font-medium">
+                        {rec.eventId && myVotes.has(rec.eventId)
+                          ? "Voted"
+                          : "Vote"}
+                      </span>
+                    </button>
+                    <div className="flex items-center gap-1 text-slate-600">
+                      <span className="text-lg">👥</span>
+                      <span className="font-semibold">
+                        {rec.voteCount ?? 0}
+                      </span>
+                      <span className="text-sm">
+                        {rec.voteCount === 1 ? "vote" : "votes"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Action Button */}
                 <Button
                   className="w-full rounded-xl bg-[#029DE2] text-white transition-all group-hover:scale-105 hover:bg-[#029DE2]/90"
@@ -385,7 +503,7 @@ export default function EventResultsPage() {
         {/* Dev Tools */}
         <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-600">
           <div className="mb-2 text-slate-500">Dev Tools:</div>
-          <div>Event ID: {eventId}</div>
+          <div>Group ID: {groupId}</div>
           <div>Recommendations: {recommendations.length}</div>
           <div>Status: Generated (Mock Data)</div>
           {groupStats && (

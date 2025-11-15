@@ -257,6 +257,235 @@ export const eventRouter = createTRPCRouter({
       return eventGroup;
     }),
 
+  // Get recommendations for an event group
+  getRecommendations: publicProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Fetch recommendations and event group in parallel
+      const [recommendations, eventGroup] = await Promise.all([
+        ctx.db.eventRecommendation.findMany({
+          where: {
+            groupId: input.groupId,
+            status: "generated",
+          },
+          include: {
+            event: true,
+          },
+          orderBy: {
+            matchScore: "desc",
+          },
+        }),
+        ctx.db.eventGroup.findUnique({
+          where: { id: input.groupId },
+          include: {
+            preferences: true,
+          },
+        }),
+      ]);
+
+      if (!eventGroup) {
+        throw new Error("Event group not found");
+      }
+
+      // Fetch votes for all events in parallel
+      const eventIds = recommendations
+        .filter((rec) => rec.event)
+        .map((rec) => rec.event!.id);
+
+      const votes = eventIds.length > 0
+        ? await ctx.db.eventGroupEvent.findMany({
+            where: {
+              groupId: input.groupId,
+              eventId: { in: eventIds },
+              status: "voted",
+            },
+          })
+        : [];
+
+      // Create a map of eventId -> vote count
+      const voteCounts = new Map<string, number>();
+      for (const vote of votes) {
+        voteCounts.set(vote.eventId, (voteCounts.get(vote.eventId) ?? 0) + 1);
+      }
+
+      // Fetch venue data for location information
+      const venueIds = recommendations
+        .filter((rec) => {
+          const features = rec.features as
+            | { highlights?: string[]; venueId?: string }
+            | null;
+          return features?.venueId;
+        })
+        .map((rec) => {
+          const features = rec.features as
+            | { highlights?: string[]; venueId?: string }
+            | null;
+          return features?.venueId;
+        })
+        .filter((id): id is string => !!id);
+
+      const venues =
+        venueIds.length > 0
+          ? await ctx.db.infrastructureVenue.findMany({
+              where: { id: { in: venueIds } },
+            })
+          : [];
+
+      const venueMap = new Map(venues.map((v) => [v.id, v]));
+
+      // Transform to match the format expected by the frontend
+      const transformed = recommendations
+        .filter((rec) => rec.event)
+        .map((rec) => {
+          const features = rec.features as
+            | { highlights?: string[]; venueId?: string }
+            | null;
+          const venue = features?.venueId
+            ? venueMap.get(features.venueId)
+            : undefined;
+          return {
+            eventId: rec.event!.id,
+            title: rec.event!.title,
+            description: rec.event!.description ?? "",
+            highlights: features?.highlights ?? rec.event!.tags ?? [],
+            matchScore: rec.matchScore,
+            reasoning: rec.reasoning ?? "",
+            type: "balanced" as const, // Could be derived from event data
+            priceLevel: (rec.event!.priceRange ?? "moderate") as
+              | "budget"
+              | "moderate"
+              | "premium",
+            duration: "90 min", // Could be derived from event data
+            voteCount: voteCounts.get(rec.event!.id) ?? 0,
+            venueId: features?.venueId,
+            latitude: venue?.latitude,
+            longitude: venue?.longitude,
+            address: venue?.address ?? rec.event!.customLocation,
+          };
+        });
+
+      const stats = computeGroupStats(eventGroup.preferences);
+
+      return {
+        recommendations: transformed,
+        groupStats: {
+          participantCount: stats.participantCount,
+          avgActivityLevel: Math.round(stats.avgActivityLevel * 10) / 10,
+          popularMoneyPreference: stats.popularMoneyPreference,
+          energyLabel: stats.energyLabel,
+        },
+      };
+    }),
+
+  // Vote for an event
+  vote: publicProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+        eventId: z.string(),
+        sessionId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Check if user already voted for this event
+      // We need to check all votes and parse JSON to find matching sessionId
+      const allVotes = await ctx.db.eventGroupEvent.findMany({
+        where: {
+          groupId: input.groupId,
+          eventId: input.eventId,
+          status: "voted",
+        },
+      });
+
+      // Find vote with matching sessionId
+      const existingVote = allVotes.find((vote) => {
+        if (!vote.notes) return false;
+        try {
+          const parsed = JSON.parse(vote.notes) as { sessionId?: string };
+          return parsed.sessionId === input.sessionId;
+        } catch {
+          // Fallback to string contains if JSON parsing fails
+          return vote.notes.includes(input.sessionId);
+        }
+      });
+
+      if (existingVote) {
+        // User already voted, remove vote (toggle off)
+        await ctx.db.eventGroupEvent.delete({
+          where: { id: existingVote.id },
+        });
+        
+        // Get updated vote count
+        const voteCount = await ctx.db.eventGroupEvent.count({
+          where: {
+            groupId: input.groupId,
+            eventId: input.eventId,
+            status: "voted",
+          },
+        });
+        
+        return { voted: false, voteCount };
+      }
+
+      // Create new vote
+      await ctx.db.eventGroupEvent.create({
+        data: {
+          groupId: input.groupId,
+          eventId: input.eventId,
+          status: "voted",
+          notes: JSON.stringify({ sessionId: input.sessionId }),
+        },
+      });
+
+      // Get updated vote count
+      const voteCount = await ctx.db.eventGroupEvent.count({
+        where: {
+          groupId: input.groupId,
+          eventId: input.eventId,
+          status: "voted",
+        },
+      });
+
+      return { voted: true, voteCount };
+    }),
+
+  // Get user's votes for a group
+  getMyVotes: publicProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+        sessionId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const allVotes = await ctx.db.eventGroupEvent.findMany({
+        where: {
+          groupId: input.groupId,
+          status: "voted",
+        },
+      });
+
+      // Filter votes by sessionId by parsing JSON
+      const myVotes = allVotes
+        .filter((vote) => {
+          if (!vote.notes) return false;
+          try {
+            const parsed = JSON.parse(vote.notes) as { sessionId?: string };
+            return parsed.sessionId === input.sessionId;
+          } catch {
+            // Fallback to string contains if JSON parsing fails
+            return vote.notes.includes(input.sessionId);
+          }
+        })
+        .map((vote) => vote.eventId);
+
+      return myVotes;
+    }),
+
   // Add or update preferences for an event
   addPreferences: publicProcedure
     .input(
