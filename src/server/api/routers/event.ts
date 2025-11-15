@@ -1,5 +1,10 @@
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { runAdvisorPipeline } from "@/server/agents/advisor-pipeline";
+import {
+  generateSummaryContext,
+  runAdvisorPipeline,
+} from "@/server/agents/advisor-pipeline";
+import { runMoodCheckAgent } from "@/server/agents/mood-check";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { generateShortCode } from "@/lib/generate-short-code";
 
@@ -32,6 +37,111 @@ export const eventRouter = createTRPCRouter({
       inviteCode: eventGroup.inviteCode,
     };
   }),
+
+  getMoodQuestions: publicProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+        sessionId: z.string(),
+        participantName: z.string().optional(),
+        answeredSignals: z.record(z.unknown()).optional(),
+        timeOfDayLabel: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const eventGroup = await ctx.db.eventGroup.findUnique({
+        where: { id: input.groupId },
+        include: {
+          preferences: true,
+        },
+      });
+
+      if (!eventGroup) {
+        throw new Error("Event not found");
+      }
+
+      const preference = eventGroup.preferences.find(
+        (pref) => pref.sessionId === input.sessionId,
+      );
+
+      if (!preference) {
+        throw new Error("Preference not found for this session");
+      }
+
+      const { summary, stats } = await generateSummaryContext(eventGroup);
+      const existingResponses =
+        (
+          preference as { moodResponses?: Record<string, unknown> | undefined }
+        ).moodResponses ?? {};
+
+      const mood = await runMoodCheckAgent({
+        participantName: input.participantName ?? preference.userName ?? undefined,
+        summary,
+        stats,
+        answeredSignals:
+          input.answeredSignals ?? existingResponses,
+        timeOfDayLabel: input.timeOfDayLabel,
+      });
+
+      const moodQuestionsData =
+        {
+          moodQuestions: mood.questions as Prisma.JsonValue,
+        } as Prisma.EventGroupPreferenceUpdateInput;
+
+      await ctx.db.eventGroupPreference.update({
+        where: { id: preference.id },
+        data: moodQuestionsData,
+      });
+
+      return mood;
+    }),
+
+  saveMoodResponses: publicProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+        sessionId: z.string(),
+        responses: z
+          .record(z.union([z.string(), z.number(), z.boolean()]))
+          .default({}),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const preference = await ctx.db.eventGroupPreference.findUnique({
+        where: {
+          groupId_sessionId: {
+            groupId: input.groupId,
+            sessionId: input.sessionId,
+          },
+        },
+      });
+
+      if (!preference) {
+        throw new Error("Preference not found for this session");
+      }
+
+      const existing =
+        (
+          preference as { moodResponses?: Record<string, unknown> | undefined }
+        ).moodResponses ?? {};
+
+      const mergedResponses = {
+        ...existing,
+        ...input.responses,
+      };
+
+      const moodResponsesData =
+        {
+          moodResponses: mergedResponses as Prisma.JsonValue,
+        } as Prisma.EventGroupPreferenceUpdateInput;
+
+      await ctx.db.eventGroupPreference.update({
+        where: { id: preference.id },
+        data: moodResponsesData,
+      });
+
+      return { success: true };
+    }),
 
   // Get event group by ID or invite code
   get: publicProcedure

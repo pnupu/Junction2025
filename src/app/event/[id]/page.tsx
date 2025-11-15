@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +43,8 @@ export default function EventPage() {
     },
   });
 
-  const autoJoinEvent = (profile: UserProfile, sid: string) => {
+  const autoJoinEvent = useCallback(
+    (profile: UserProfile, sid: string) => {
     // Map preferences to API format
     const activityLevelMap: Record<string, number> = {
       "chill": 1,
@@ -66,8 +67,10 @@ export default function EventPage() {
       activityLevel: activityLevelMap[profile.activityPreference] ?? 3,
     });
 
-    sessionStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
-  };
+      sessionStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
+    },
+    [addPreferences, eventData?.id, eventIdOrCode],
+  );
 
   useEffect(() => {
     let sid = sessionStorage.getItem("sessionId");
@@ -101,7 +104,7 @@ export default function EventPage() {
         setShowProfileModal(true);
       }
     }
-  }, [eventIdOrCode]);
+  }, [eventIdOrCode, autoJoinEvent]);
 
 
 

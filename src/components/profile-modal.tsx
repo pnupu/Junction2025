@@ -44,7 +44,7 @@ export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: Pr
           setName(profile.name);
           setActivityPreference(profile.activityPreference);
           setFoodPreference(profile.foodPreference);
-        } catch (e) {
+        } catch {
           // Invalid profile, ignore
         }
       }
@@ -196,7 +196,7 @@ export function getUserProfile(): UserProfile | null {
   
   try {
     return JSON.parse(profileStr) as UserProfile;
-  } catch (e) {
+  } catch {
     return null;
   }
 }

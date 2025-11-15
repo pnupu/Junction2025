@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,7 @@ export default function Home() {
     setHasProfile(!!profile);
   }, []);
 
-  const handleProfileSave = (profile: UserProfile) => {
+  const handleProfileSave = (_profile: UserProfile) => {
     setHasProfile(true);
     setShowProfileForm(false);
   };
@@ -47,10 +48,13 @@ export default function Home() {
         {/* Background page for desktop */}
         <main className="relative hidden min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12 md:flex">
           <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
-            <img
+            <Image
               src="/happy-times.png"
               alt=""
+              width={1600}
+              height={900}
               className="h-full w-full object-cover object-bottom"
+              priority
             />
           </div>
         </main>
@@ -71,10 +75,13 @@ export default function Home() {
       <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
         {/* Background image */}
         <div className="absolute bottom-0 left-1/2 h-[55vh] w-full -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
-          <img
+          <Image
             src="/happy-times.png"
             alt=""
+            width={1600}
+            height={900}
             className="h-full w-full object-cover object-bottom"
+            priority
           />
         </div>
 
@@ -123,10 +130,13 @@ export default function Home() {
     <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
       {/* Background image */}
       <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
-        <img
+        <Image
           src="/happy-times.png"
           alt=""
-          className="h-full w-full object-cover object-bottom overflow-visible"
+          width={1600}
+          height={900}
+          className="h-full w-full overflow-visible object-cover object-bottom"
+          priority
         />
       </div>
 
