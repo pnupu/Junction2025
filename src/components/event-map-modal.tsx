@@ -25,10 +25,9 @@ const Marker = dynamic(
   { ssr: false },
 );
 
-const Popup = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Popup),
-  { ssr: false },
-);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 export type ParticipantLocation = {
   userName: string;
@@ -53,7 +52,7 @@ export function EventMapModal({
   onToggleEnlarge,
 }: EventMapModalProps) {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [L, setL] = useState<(typeof import("leaflet")) | null>(null);
+  const [L, setL] = useState<typeof import("leaflet") | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -77,24 +76,27 @@ export function EventMapModal({
   if (!isOpen) return null;
 
   // Group participants by location
-  const locationMap = new Map<string, { 
-    latitude: number; 
-    longitude: number; 
-    count: number; 
-    names: string[];
-    initials: string;
-  }>();
-  
+  const locationMap = new Map<
+    string,
+    {
+      latitude: number;
+      longitude: number;
+      count: number;
+      names: string[];
+      initials: string;
+    }
+  >();
+
   participants.forEach((loc) => {
     // Round to 5 decimal places (~1 meter precision) to group nearby locations
     const key = `${loc.latitude.toFixed(5)},${loc.longitude.toFixed(5)}`;
     const existing = locationMap.get(key);
-    
+
     if (existing) {
       existing.count += 1;
       existing.names.push(loc.userName);
     } else {
-      locationMap.set(key, { 
+      locationMap.set(key, {
         latitude: loc.latitude,
         longitude: loc.longitude,
         count: 1,
@@ -103,7 +105,7 @@ export function EventMapModal({
       });
     }
   });
-  
+
   const groupedLocations = Array.from(locationMap.values());
 
   // Calculate center point from all participants
@@ -148,60 +150,63 @@ export function EventMapModal({
     });
   };
 
-  const mapContent = leafletLoaded && L ? (
-    <div className="relative h-full w-full">
-      <MapContainer
-        center={[centerLat, centerLng]}
-        zoom={13}
-        style={{
-          height: "100%",
-          width: "100%",
-          borderRadius: isEnlarged ? "0" : "12px",
-        }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {groupedLocations.map((location, idx) => (
-          <Marker
-            key={idx}
-            position={[location.latitude, location.longitude]}
-            icon={createCustomIcon(location.count > 1 ? String(location.count) : location.initials)}
-          >
-            <Popup>
-              {location.count > 1 ? (
-                <div>
-                  <strong>{location.count} participants</strong>
-                  <ul className="mt-1 list-disc pl-4">
-                    {location.names.map((name, i) => (
-                      <li key={i}>{name}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <strong>{location.names[0]}</strong>
-              )}
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-
-      {/* Enlarge/Shrink button */}
-      {onToggleEnlarge && (
-        <button
-          onClick={onToggleEnlarge}
-          className="absolute top-4 right-4 z-[1000] rounded-lg bg-white px-3 py-2 text-sm font-medium text-[#029DE2] shadow-lg transition-all hover:scale-105 hover:bg-[#029DE2] hover:text-white"
+  const mapContent =
+    leafletLoaded && L ? (
+      <div className="relative h-full w-full">
+        <MapContainer
+          center={[centerLat, centerLng]}
+          zoom={13}
+          style={{
+            height: "100%",
+            width: "100%",
+            borderRadius: isEnlarged ? "0" : "12px",
+          }}
         >
-          {isEnlarged ? "📉 Shrink" : "📈 Enlarge"}
-        </button>
-      )}
-    </div>
-  ) : (
-    <div className="flex h-full items-center justify-center text-[#62748E]">
-      Loading map...
-    </div>
-  );
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {groupedLocations.map((location, idx) => (
+            <Marker
+              key={idx}
+              position={[location.latitude, location.longitude]}
+              icon={createCustomIcon(
+                location.count > 1 ? String(location.count) : location.initials,
+              )}
+            >
+              <Popup>
+                {location.count > 1 ? (
+                  <div>
+                    <strong>{location.count} participants</strong>
+                    <ul className="mt-1 list-disc pl-4">
+                      {location.names.map((name, i) => (
+                        <li key={i}>{name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <strong>{location.names[0]}</strong>
+                )}
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+
+        {/* Enlarge/Shrink button */}
+        {onToggleEnlarge && (
+          <button
+            onClick={onToggleEnlarge}
+            className="absolute top-4 right-4 z-[1000] rounded-lg bg-white px-3 py-2 text-sm font-medium text-[#029DE2] shadow-lg transition-all hover:scale-105 hover:bg-[#029DE2] hover:text-white"
+          >
+            {isEnlarged ? "📉 Shrink" : "📈 Enlarge"}
+          </button>
+        )}
+      </div>
+    ) : (
+      <div className="flex h-full items-center justify-center text-[#62748E]">
+        Loading map...
+      </div>
+    );
 
   if (isEnlarged) {
     // Full screen modal

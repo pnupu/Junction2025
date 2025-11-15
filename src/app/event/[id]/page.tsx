@@ -52,7 +52,7 @@ export default function EventPage() {
   const [showMapModal, setShowMapModal] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [L, setL] = useState<(typeof import("leaflet")) | null>(null);
+  const [L, setL] = useState<typeof import("leaflet") | null>(null);
 
   // Try to get event by invite code first (if it looks like a code), otherwise by ID
   const isLikelyInviteCode =
@@ -72,70 +72,74 @@ export default function EventPage() {
     },
   });
 
-  const autoJoinEvent = useCallback(async (profile: UserProfile, sid: string) => {
-    if (!eventData?.id) {
-      console.error("Cannot join event: eventData not loaded");
-      return;
-    }
+  const autoJoinEvent = useCallback(
+    async (profile: UserProfile, sid: string) => {
+      if (!eventData?.id) {
+        console.error("Cannot join event: eventData not loaded");
+        return;
+      }
 
-    // Get location if not already in profile
-    let latitude = profile.latitude;
-    let longitude = profile.longitude;
+      // Get location if not already in profile
+      let latitude = profile.latitude;
+      let longitude = profile.longitude;
 
-    if (!latitude || !longitude) {
-      if ("geolocation" in navigator) {
-        try {
-          const position = await new Promise<GeolocationPosition>(
-            (resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                timeout: 5000,
-                enableHighAccuracy: false,
-              });
-            },
-          );
-          latitude = position.coords.latitude;
-          longitude = position.coords.longitude;
+      if (!latitude || !longitude) {
+        if ("geolocation" in navigator) {
+          try {
+            const position = await new Promise<GeolocationPosition>(
+              (resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  timeout: 5000,
+                  enableHighAccuracy: false,
+                });
+              },
+            );
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
 
-          // Update stored profile with location
-          const updatedProfile = { ...profile, latitude, longitude };
-          localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
-          setUserProfile(updatedProfile);
-        } catch (error) {
-          console.log("Location permission denied or unavailable", error);
-          // Continue without location
+            // Update stored profile with location
+            const updatedProfile = { ...profile, latitude, longitude };
+            localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+            setUserProfile(updatedProfile);
+          } catch (error) {
+            console.log("Location permission denied or unavailable", error);
+            // Continue without location
+          }
         }
       }
-    }
 
-    // Map preferences to API format
-    const activityLevelMap: Record<string, number> = {
-      chill: 1,
-      celebratory: 3,
-      active: 5,
-    };
+      // Map preferences to API format
+      const activityLevelMap: Record<string, number> = {
+        chill: 1,
+        celebratory: 3,
+        active: 5,
+      };
 
-    const moneyPreferenceMap: Record<
-      string,
-      "budget" | "moderate" | "premium"
-    > = {
-      "no-limit": "premium",
-      veg: "moderate",
-      gluten: "moderate",
-    };
+      const moneyPreferenceMap: Record<
+        string,
+        "budget" | "moderate" | "premium"
+      > = {
+        "no-limit": "premium",
+        veg: "moderate",
+        gluten: "moderate",
+      };
 
-    addPreferences.mutate({
-      groupId: eventData.id, // Use the actual database ID
-      sessionId: sid,
-      userName: profile.name,
-      userIcon: "👤",
-      moneyPreference: moneyPreferenceMap[profile.foodPreference] ?? "moderate",
-      activityLevel: activityLevelMap[profile.activityPreference] ?? 3,
-      latitude,
-      longitude,
-    });
+      addPreferences.mutate({
+        groupId: eventData.id, // Use the actual database ID
+        sessionId: sid,
+        userName: profile.name,
+        userIcon: "👤",
+        moneyPreference:
+          moneyPreferenceMap[profile.foodPreference] ?? "moderate",
+        activityLevel: activityLevelMap[profile.activityPreference] ?? 3,
+        latitude,
+        longitude,
+      });
 
-    localStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
-  }, [eventData, eventIdOrCode, addPreferences, setUserProfile]);
+      localStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
+    },
+    [eventData, eventIdOrCode, addPreferences, setUserProfile],
+  );
 
   useEffect(() => {
     let sid = localStorage.getItem("sessionId");
@@ -177,7 +181,14 @@ export default function EventPage() {
         void autoJoinEvent(userProfile, sessionId);
       }
     }
-  }, [eventData, userProfile, hasJoined, sessionId, eventIdOrCode, autoJoinEvent]);
+  }, [
+    eventData,
+    userProfile,
+    hasJoined,
+    sessionId,
+    eventIdOrCode,
+    autoJoinEvent,
+  ]);
 
   // Load Leaflet for inline map
   useEffect(() => {
@@ -225,8 +236,11 @@ export default function EventPage() {
     if (!eventData?.preferences) return [];
 
     type Preference = (typeof eventData.preferences)[number];
-    type PreferenceWithLocation = Preference & { latitude: number; longitude: number };
-    
+    type PreferenceWithLocation = Preference & {
+      latitude: number;
+      longitude: number;
+    };
+
     return eventData.preferences
       .filter(
         (p: Preference): p is PreferenceWithLocation =>
@@ -247,20 +261,23 @@ export default function EventPage() {
 
   // Group participants by location and count
   const groupedLocations = useMemo(() => {
-    const locationMap = new Map<string, ParticipantLocation & { count: number }>();
-    
+    const locationMap = new Map<
+      string,
+      ParticipantLocation & { count: number }
+    >();
+
     participantLocations.forEach((loc) => {
       // Round to 4 decimal places (~10 meter precision) to group nearby locations
       const key = `${loc.latitude.toFixed(4)},${loc.longitude.toFixed(4)}`;
       const existing = locationMap.get(key);
-      
+
       if (existing) {
         existing.count += 1;
       } else {
         locationMap.set(key, { ...loc, count: 1 });
       }
     });
-    
+
     return Array.from(locationMap.values());
   }, [participantLocations]);
 
@@ -297,17 +314,21 @@ export default function EventPage() {
         {/* Inline Map Preview - Full Width */}
         {participantLocations.length > 0 && leafletLoaded && L && (
           <div className="mb-6 overflow-hidden md:mx-auto md:max-w-3xl md:rounded-2xl md:px-6 md:pt-8">
-            <div className="overflow-hidden md:rounded-2xl bg-white/10 backdrop-blur">
+            <div className="overflow-hidden bg-white/10 backdrop-blur md:rounded-2xl">
               <button
                 onClick={() => setShowMapModal(true)}
                 className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90 md:h-80"
               >
                 <MapContainer
                   center={[
-                    participantLocations.reduce((sum, p) => sum + p.latitude, 0) /
-                      participantLocations.length,
-                    participantLocations.reduce((sum, p) => sum + p.longitude, 0) /
-                      participantLocations.length,
+                    participantLocations.reduce(
+                      (sum, p) => sum + p.latitude,
+                      0,
+                    ) / participantLocations.length,
+                    participantLocations.reduce(
+                      (sum, p) => sum + p.longitude,
+                      0,
+                    ) / participantLocations.length,
                   ]}
                   zoom={13}
                   style={{ height: "100%", width: "100%" }}
@@ -318,7 +339,7 @@ export default function EventPage() {
                   touchZoom={false}
                 >
                   <TileLayer
-                    attribution='&copy; OpenStreetMap'
+                    attribution="&copy; OpenStreetMap"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   {groupedLocations.map((location, idx) => (
@@ -455,7 +476,8 @@ export default function EventPage() {
           </Dialog>
 
           {/* Participants List */}
-          {participantCount > 0 && (<>
+          {participantCount > 0 && (
+            <>
               <h2 className="mb-4 text-sm font-medium tracking-wide text-white/80 uppercase">
                 Participants ({participantCount})
               </h2>
@@ -489,7 +511,8 @@ export default function EventPage() {
                     </div>
                   ),
                 )}
-              </div></>
+              </div>
+            </>
           )}
 
           {/* Creator Action Button */}
