@@ -76,6 +76,36 @@ export function EventMapModal({
 
   if (!isOpen) return null;
 
+  // Group participants by location
+  const locationMap = new Map<string, { 
+    latitude: number; 
+    longitude: number; 
+    count: number; 
+    names: string[];
+    initials: string;
+  }>();
+  
+  participants.forEach((loc) => {
+    // Round to 5 decimal places (~1 meter precision) to group nearby locations
+    const key = `${loc.latitude.toFixed(5)},${loc.longitude.toFixed(5)}`;
+    const existing = locationMap.get(key);
+    
+    if (existing) {
+      existing.count += 1;
+      existing.names.push(loc.userName);
+    } else {
+      locationMap.set(key, { 
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        count: 1,
+        names: [loc.userName],
+        initials: loc.initials,
+      });
+    }
+  });
+  
+  const groupedLocations = Array.from(locationMap.values());
+
   // Calculate center point from all participants
   const centerLat =
     participants.length > 0
@@ -88,8 +118,8 @@ export function EventMapModal({
         participants.length
       : 24.9354;
 
-  // Create custom marker icons with initials
-  const createCustomIcon = (initials: string) => {
+  // Create custom marker icons with initials or count
+  const createCustomIcon = (display: string) => {
     if (!L) return undefined;
 
     return L.divIcon({
@@ -109,7 +139,7 @@ export function EventMapModal({
           font-size: 14px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         ">
-          ${initials}
+          ${display}
         </div>
       `,
       iconSize: [40, 40],
@@ -133,14 +163,25 @@ export function EventMapModal({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {participants.map((participant, idx) => (
+        {groupedLocations.map((location, idx) => (
           <Marker
             key={idx}
-            position={[participant.latitude, participant.longitude]}
-            icon={createCustomIcon(participant.initials)}
+            position={[location.latitude, location.longitude]}
+            icon={createCustomIcon(location.count > 1 ? String(location.count) : location.initials)}
           >
             <Popup>
-              <strong>{participant.userName}</strong>
+              {location.count > 1 ? (
+                <div>
+                  <strong>{location.count} participants</strong>
+                  <ul className="mt-1 list-disc pl-4">
+                    {location.names.map((name, i) => (
+                      <li key={i}>{name}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <strong>{location.names[0]}</strong>
+              )}
             </Popup>
           </Marker>
         ))}

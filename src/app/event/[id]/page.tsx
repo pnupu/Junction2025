@@ -98,7 +98,7 @@ export default function EventPage() {
 
           // Update stored profile with location
           const updatedProfile = { ...profile, latitude, longitude };
-          sessionStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+          localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
           setUserProfile(updatedProfile);
         } catch (error) {
           console.log("Location permission denied or unavailable", error);
@@ -134,27 +134,27 @@ export default function EventPage() {
       longitude,
     });
 
-    sessionStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
+    localStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
   }, [eventData, eventIdOrCode, addPreferences, setUserProfile]);
 
   useEffect(() => {
-    let sid = sessionStorage.getItem("sessionId");
+    let sid = localStorage.getItem("sessionId");
     if (!sid) {
       sid = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      sessionStorage.setItem("sessionId", sid);
+      localStorage.setItem("sessionId", sid);
     }
     setSessionId(sid);
 
-    const creatorId = sessionStorage.getItem(`event_${eventIdOrCode}_creator`);
+    const creatorId = localStorage.getItem(`event_${eventIdOrCode}_creator`);
     if (!creatorId) {
-      sessionStorage.setItem(`event_${eventIdOrCode}_creator`, sid);
+      localStorage.setItem(`event_${eventIdOrCode}_creator`, sid);
       setIsCreator(true);
     } else if (creatorId === sid) {
       setIsCreator(true);
     }
 
     // Check if already joined
-    const joined = sessionStorage.getItem(`event_${eventIdOrCode}_joined`);
+    const joined = localStorage.getItem(`event_${eventIdOrCode}_joined`);
     if (joined === "true") {
       setHasJoined(true);
     }
@@ -172,7 +172,7 @@ export default function EventPage() {
   // Auto-join when eventData is loaded and we have a profile but haven't joined yet
   useEffect(() => {
     if (eventData && userProfile && !hasJoined) {
-      const joined = sessionStorage.getItem(`event_${eventIdOrCode}_joined`);
+      const joined = localStorage.getItem(`event_${eventIdOrCode}_joined`);
       if (joined !== "true" && sessionId) {
         void autoJoinEvent(userProfile, sessionId);
       }
@@ -245,6 +245,25 @@ export default function EventPage() {
       }));
   }, [eventData]);
 
+  // Group participants by location and count
+  const groupedLocations = useMemo(() => {
+    const locationMap = new Map<string, ParticipantLocation & { count: number }>();
+    
+    participantLocations.forEach((loc) => {
+      // Round to 4 decimal places (~10 meter precision) to group nearby locations
+      const key = `${loc.latitude.toFixed(4)},${loc.longitude.toFixed(4)}`;
+      const existing = locationMap.get(key);
+      
+      if (existing) {
+        existing.count += 1;
+      } else {
+        locationMap.set(key, { ...loc, count: 1 });
+      }
+    });
+    
+    return Array.from(locationMap.values());
+  }, [participantLocations]);
+
   if (!eventData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -275,21 +294,13 @@ export default function EventPage() {
         isEnlarged={true}
       />
       <main className="min-h-screen bg-[#029DE2]">
-        <div className="mx-auto max-w-2xl px-6 py-8">
-          {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="mb-2 text-4xl font-bold text-white">Wolt Events</h1>
-            <p className="text-white/80">
-              {participantCount} {participantCount === 1 ? "person" : "people"}
-            </p>
-          </div>
-
-          {/* Inline Map Preview */}
-          {participantLocations.length > 0 && leafletLoaded && L && (
-            <div className="mb-6 overflow-hidden rounded-2xl bg-white/10 backdrop-blur">
+        {/* Inline Map Preview - Full Width */}
+        {participantLocations.length > 0 && leafletLoaded && L && (
+          <div className="mb-6 overflow-hidden md:mx-auto md:max-w-3xl md:rounded-2xl md:px-6 md:pt-8">
+            <div className="overflow-hidden md:rounded-2xl bg-white/10 backdrop-blur">
               <button
                 onClick={() => setShowMapModal(true)}
-                className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90"
+                className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90 md:h-80"
               >
                 <MapContainer
                   center={[
@@ -310,10 +321,10 @@ export default function EventPage() {
                     attribution='&copy; OpenStreetMap'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-                  {participantLocations.map((participant, idx) => (
+                  {groupedLocations.map((location, idx) => (
                     <Marker
                       key={idx}
-                      position={[participant.latitude, participant.longitude]}
+                      position={[location.latitude, location.longitude]}
                       icon={L.divIcon({
                         className: "custom-marker",
                         html: `
@@ -331,7 +342,7 @@ export default function EventPage() {
                             font-size: 12px;
                             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
                           ">
-                            ${participant.initials}
+                            ${location.count > 1 ? location.count : location.initials}
                           </div>
                         `,
                         iconSize: [32, 32],
@@ -347,8 +358,11 @@ export default function EventPage() {
                 </div>
               </button>
             </div>
-          )}
+          </div>
+        )}
 
+        {/* Content Container - Max Width on Desktop */}
+        <div className="mx-auto max-w-[500px] px-6 py-8">
           {/* Invite Section */}
           <div className="mb-6">
             <Button
@@ -441,10 +455,9 @@ export default function EventPage() {
           </Dialog>
 
           {/* Participants List */}
-          {participantCount > 0 && (
-            <div className="mb-6 rounded-2xl bg-white/10 p-6 backdrop-blur">
+          {participantCount > 0 && (<>
               <h2 className="mb-4 text-sm font-medium tracking-wide text-white/80 uppercase">
-                Participants
+                Participants ({participantCount})
               </h2>
               <div className="space-y-3">
                 {participants.map(
@@ -476,8 +489,7 @@ export default function EventPage() {
                     </div>
                   ),
                 )}
-              </div>
-            </div>
+              </div></>
           )}
 
           {/* Creator Action Button */}
