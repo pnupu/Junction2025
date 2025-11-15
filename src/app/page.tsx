@@ -137,7 +137,7 @@ export default function Home() {
           <h1
             className={`mt-32 text-center text-5xl leading-none font-bold ${hasProfile ? "text-[#029DE2]" : "text-white"}`}
           >
-            Let's do something together
+            Let&apos;s do something together
           </h1>
         ) : (
           <Image

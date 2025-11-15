@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import {
-  runAdvisorPipeline,
+  generateSummaryContext,
   computeGroupStats,
   type PreferenceSummary,
 } from "@/server/agents/advisor-pipeline";
@@ -347,30 +347,26 @@ export const eventRouter = createTRPCRouter({
         },
       });
 
-      // Step 1: Filter InfrastructureVenue based on location and preferences
+      // Step 1: Parallelize independent operations
       const userIds = eventGroup.preferences
         .map((p) => p.userId)
         .filter((id): id is string => id != null);
 
-      // Get user preferences for all participants
-      const userPreferencesList =
+      // Get user preferences and compute stats in parallel (both are independent)
+      const [userPreferencesList, stats] = await Promise.all([
         userIds.length > 0
-          ? await ctx.db.userPreference.findMany({
+          ? ctx.db.userPreference.findMany({
               where: { userId: { in: userIds } },
             })
-          : [];
+          : Promise.resolve([]),
+        Promise.resolve(computeGroupStats(eventGroup.preferences)),
+      ]);
 
       // Use the first user's preferences as primary (could be enhanced to aggregate)
       const primaryUserPreferences = userPreferencesList[0] ?? null;
 
-      const filteredVenues = await filterInfrastructureVenues(ctx.db, {
-        preferences: eventGroup.preferences,
-        userPreferences: primaryUserPreferences,
-        maxDistanceMeters: 10000,
-        city: eventGroup.city ?? undefined,
-      });
-
-      // Step 2: Get mood responses from all participants
+      // Step 2: Filter venues (mood responses extraction is synchronous, so do it here)
+      // Get mood responses from all participants
       const allMoodResponses: Record<string, unknown> = {};
       for (const pref of eventGroup.preferences) {
         const responses = (
@@ -384,11 +380,15 @@ export const eventRouter = createTRPCRouter({
         }
       }
 
-      // Step 3: Generate summary and stats
-      const stats = computeGroupStats(eventGroup.preferences);
-      const { summary } = await runAdvisorPipeline({
-        eventGroup,
+      const filteredVenues = await filterInfrastructureVenues(ctx.db, {
+        preferences: eventGroup.preferences,
+        userPreferences: primaryUserPreferences,
+        maxDistanceMeters: 10000,
+        city: eventGroup.city ?? undefined,
       });
+
+      // Step 3: Generate summary (this requires stats, so it must come after)
+      const { summary } = await generateSummaryContext(eventGroup);
 
       // Step 4: Generate event recommendations
       const { recommendations, debugNotes } =

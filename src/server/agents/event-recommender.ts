@@ -267,44 +267,51 @@ export async function saveEventRecommendations(
   // Create Event records for each recommendation if they don't exist
   // Then create EventRecommendation records linking to the group
 
-  for (const rec of recommendations) {
-    // Find or create Event for this venue
-    const venue = await db.infrastructureVenue.findUnique({
-      where: { id: rec.venueId },
-    });
+  // Fetch all venues in parallel
+  const venueIds = recommendations.map((rec) => rec.venueId);
+  const venues = await db.infrastructureVenue.findMany({
+    where: { id: { in: venueIds } },
+  });
+  const venueMap = new Map(venues.map((v) => [v.id, v]));
 
-    if (!venue) {
-      console.warn(`Venue ${rec.venueId} not found, skipping recommendation`);
-      continue;
-    }
+  // Process all recommendations in parallel
+  await Promise.all(
+    recommendations.map(async (rec) => {
+      const venue = venueMap.get(rec.venueId);
 
-    // Create Event (using cuid for ID)
-    const event = await db.event.create({
-      data: {
-        title: rec.title,
-        description: rec.description,
-        venueId: null, // InfrastructureVenue is separate from Venue model
-        customLocation: venue.address ?? undefined,
-        tags: rec.highlights,
-        priceRange: "moderate", // Could be enhanced
-        isActive: true,
-      },
-    });
+      if (!venue) {
+        console.warn(`Venue ${rec.venueId} not found, skipping recommendation`);
+        return;
+      }
 
-    // Create EventRecommendation
-    await db.eventRecommendation.create({
-      data: {
-        eventId: event.id,
-        groupId: eventGroupId,
-        matchScore: rec.matchScore,
-        reasoning: rec.reasoning,
-        modelVersion: env.OPENAI_MODEL,
-        features: {
-          highlights: rec.highlights,
-          venueId: rec.venueId,
+      // Create Event (using cuid for ID)
+      const event = await db.event.create({
+        data: {
+          title: rec.title,
+          description: rec.description,
+          venueId: null, // InfrastructureVenue is separate from Venue model
+          customLocation: venue.address ?? undefined,
+          tags: rec.highlights,
+          priceRange: "moderate", // Could be enhanced
+          isActive: true,
         },
-        status: "generated",
-      },
-    });
-  }
+      });
+
+      // Create EventRecommendation
+      await db.eventRecommendation.create({
+        data: {
+          eventId: event.id,
+          groupId: eventGroupId,
+          matchScore: rec.matchScore,
+          reasoning: rec.reasoning,
+          modelVersion: env.OPENAI_MODEL,
+          features: {
+            highlights: rec.highlights,
+            venueId: rec.venueId,
+          },
+          status: "generated",
+        },
+      });
+    }),
+  );
 }
