@@ -3,9 +3,7 @@ import type { EventGroup, EventGroupPreference } from "@prisma/client";
 import OpenAI from "openai";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import type {
-  ResponseCreateParamsNonStreaming,
-} from "openai/resources/responses/responses";
+import type { ResponseCreateParamsNonStreaming } from "openai/resources/responses/responses";
 import { env } from "@/env";
 import type { FilteredVenue } from "@/server/agents/venue-filter";
 import {
@@ -40,15 +38,13 @@ const zodToJsonSchemaTyped = zodToJsonSchema as (
   options?: { name?: string; target?: string },
 ) => JsonSchema;
 
-function sanitizeSchemaForOpenAI(
-  schema: JsonSchema,
-): JsonSchema {
+function sanitizeSchemaForOpenAI(schema: JsonSchema): JsonSchema {
   const sanitized = { ...schema };
-  
+
   if (sanitized.type === "object" || sanitized.properties) {
     sanitized.type = "object";
     sanitized.additionalProperties = false;
-    
+
     if (sanitized.properties && typeof sanitized.properties === "object") {
       const props = sanitized.properties as Record<string, JsonSchema>;
       sanitized.properties = Object.fromEntries(
@@ -57,25 +53,29 @@ function sanitizeSchemaForOpenAI(
           sanitizeSchemaForOpenAI(value),
         ]),
       );
-      
+
       if (!sanitized.required || !Array.isArray(sanitized.required)) {
         sanitized.required = Object.keys(props);
       }
     }
   }
-  
+
   if (sanitized.type === "array" || sanitized.items) {
     sanitized.type = "array";
     if (sanitized.items && typeof sanitized.items === "object") {
       sanitized.items = sanitizeSchemaForOpenAI(sanitized.items as JsonSchema);
     }
   }
-  
+
   return sanitized;
 }
 
-const rawRecommendationsSchema = zodToJsonSchemaTyped(recommendationsResponseSchema);
-const recommendationsJsonSchema = sanitizeSchemaForOpenAI(rawRecommendationsSchema);
+const rawRecommendationsSchema = zodToJsonSchemaTyped(
+  recommendationsResponseSchema,
+);
+const recommendationsJsonSchema = sanitizeSchemaForOpenAI(
+  rawRecommendationsSchema,
+);
 
 export type EventRecommendationInput = {
   eventGroup: EventGroup & { preferences: EventGroupPreference[] };
@@ -225,12 +225,9 @@ function generateFallbackRecommendations(
     const distanceText = venue.distanceMeters
       ? `${(venue.distanceMeters / 1000).toFixed(1)}km away`
       : "Location available";
-    
-    const highlights: string[] = [
-      venue.type,
-      distanceText,
-    ];
-    
+
+    const highlights: string[] = [venue.type, distanceText];
+
     if (venue.woltPartnerTier) {
       highlights.push(`Wolt ${venue.woltPartnerTier} partner`);
     }
@@ -240,7 +237,8 @@ function generateFallbackRecommendations(
       matchScore: venue.matchScore,
       reasoning: `Matches group's ${stats.energyLabel} energy and ${stats.popularMoneyPreference} budget preference. ${venue.description ?? "Great option for the group."}`,
       title: venue.name,
-      description: venue.description ?? `A ${venue.type} venue perfect for your group.`,
+      description:
+        venue.description ?? `A ${venue.type} venue perfect for your group.`,
       highlights,
     };
   });
@@ -310,4 +308,3 @@ export async function saveEventRecommendations(
     });
   }
 }
-

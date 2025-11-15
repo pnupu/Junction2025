@@ -1,4 +1,9 @@
-import type { InfrastructureVenue, EventGroupPreference, UserPreference, Prisma } from "@prisma/client";
+import type {
+  InfrastructureVenue,
+  EventGroupPreference,
+  UserPreference,
+  Prisma,
+} from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
 import { calculateDistance } from "@/lib/utils";
 
@@ -174,4 +179,3 @@ export async function filterInfrastructureVenues(
   // Return top 50 venues
   return filtered.slice(0, 50);
 }
-

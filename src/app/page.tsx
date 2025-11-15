@@ -150,7 +150,7 @@ export default function Home() {
                   Create Event
                 </Button>
               </Link>
-              
+
               {/* OR Divider */}
               <div className="flex items-center gap-4">
                 <div className="h-px flex-1 bg-white/30"></div>
@@ -165,13 +165,13 @@ export default function Home() {
                   value={eventCode}
                   onChange={(e) => setEventCode(e.target.value.toUpperCase())}
                   placeholder="Enter event code"
-                  className="h-12 rounded-xl border-0 bg-black/10 text-center text-base text-white uppercase placeholder:text-white/50 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-inner"
+                  className="h-12 rounded-xl border-0 bg-black/10 text-center text-base text-white uppercase shadow-inner placeholder:text-white/50 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 <Button
                   onClick={handleJoinEvent}
                   disabled={!eventCode.trim()}
                   variant="outline"
-                  className="h-12 w-full rounded-xl border-2 border-white bg-transparent text-base font-semibold text-white hover:bg-white/10 disabled:opacity-50 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-12 w-full rounded-xl border-2 border-white bg-transparent text-base font-semibold text-white hover:bg-white/10 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
                 >
                   Join with Code
                 </Button>

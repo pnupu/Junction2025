@@ -86,12 +86,12 @@ export default function EventResultsPage() {
       refetchInterval: (query) => {
         const data = query.state.data as { status?: string } | undefined;
         const status = data?.status;
-        
+
         // Poll frequently when generating
         if (status === "generating") {
           return 2000; // 2 seconds
         }
-        
+
         // No polling when generated (data won't change)
         return false;
       },
@@ -117,7 +117,7 @@ export default function EventResultsPage() {
   useEffect(() => {
     const status = (eventData as { status?: string })?.status;
     const isCurrentlyGenerating = isGenerating || status === "generating";
-    
+
     if (isCurrentlyGenerating) {
       const interval = setInterval(() => {
         setLoadingDots((prev) => {
@@ -137,7 +137,7 @@ export default function EventResultsPage() {
     const status = (eventData as { status?: string })?.status;
     const isAlreadyGenerated = status === "generated";
     const isAlreadyGenerating = status === "generating";
-    
+
     // Only start generation if not already generating/generated and we have no recommendations
     if (
       eventId &&
@@ -148,7 +148,13 @@ export default function EventResultsPage() {
     ) {
       runRecommendations({ groupId: eventId });
     }
-  }, [eventId, isGenerating, recommendations.length, runRecommendations, eventData]);
+  }, [
+    eventId,
+    isGenerating,
+    recommendations.length,
+    runRecommendations,
+    eventData,
+  ]);
 
   const handleCopyLink = () => {
     const url = window.location.origin + `/event/${eventId}`;

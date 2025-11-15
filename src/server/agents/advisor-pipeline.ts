@@ -1,9 +1,7 @@
 import type { EventGroup, EventGroupPreference } from "@prisma/client";
 import OpenAI from "openai";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import type {
-  ResponseCreateParamsNonStreaming,
-} from "openai/resources/responses/responses";
+import type { ResponseCreateParamsNonStreaming } from "openai/resources/responses/responses";
 import { z } from "zod";
 
 import { env } from "@/env";
@@ -114,7 +112,8 @@ export async function runAdvisorPipeline({
 }: {
   eventGroup: EventGroup & { preferences: EventGroupPreference[] };
 }) {
-  const { summary, stats, moodSignals } = await generateSummaryContext(eventGroup);
+  const { summary, stats, moodSignals } =
+    await generateSummaryContext(eventGroup);
   const plan = await runPlannerAgent({
     summary,
     stats,
@@ -158,12 +157,18 @@ function sanitizeSchemaForOpenAI(
   // 3. All properties must be in required array
   // 4. Cannot have $ref with type keyword
   // 5. "uri" format is not valid, remove it
-  
+
   // If schema has $ref at root, resolve it
   if (schema.$ref && !schema.properties) {
-    const resolved = resolveRef(schema.$ref as string, defs ?? schema.$defs as Record<string, JsonSchema> | undefined);
+    const resolved = resolveRef(
+      schema.$ref as string,
+      defs ?? (schema.$defs as Record<string, JsonSchema> | undefined),
+    );
     if (resolved) {
-      return sanitizeSchemaForOpenAI(resolved, defs ?? schema.$defs as Record<string, JsonSchema> | undefined);
+      return sanitizeSchemaForOpenAI(
+        resolved,
+        defs ?? (schema.$defs as Record<string, JsonSchema> | undefined),
+      );
     }
     // If we can't resolve, create a basic object schema
     return {
@@ -173,26 +178,27 @@ function sanitizeSchemaForOpenAI(
       additionalProperties: false,
     };
   }
-  
+
   // Extract $defs if present for reference resolution
-  const schemaDefs = (schema.$defs as Record<string, JsonSchema> | undefined) ?? defs;
-  
+  const schemaDefs =
+    (schema.$defs as Record<string, JsonSchema> | undefined) ?? defs;
+
   // Recursively sanitize nested schemas first
   const sanitized = { ...schema };
-  
+
   // Remove "uri" format (OpenAI doesn't accept it)
   if (sanitized.format === "uri") {
     delete sanitized.format;
   }
-  
+
   // Handle objects
   if (sanitized.type === "object" || sanitized.properties) {
     // Always set type to object if properties exist
     sanitized.type = "object";
-    
+
     // OpenAI requires additionalProperties: false
     sanitized.additionalProperties = false;
-    
+
     // Recursively process properties
     if (sanitized.properties && typeof sanitized.properties === "object") {
       const props = sanitized.properties as Record<string, JsonSchema>;
@@ -208,26 +214,23 @@ function sanitizeSchemaForOpenAI(
           return [key, sanitizeSchemaForOpenAI(value, schemaDefs)];
         }),
       );
-      
+
       // Ensure all properties are in required array
       if (!sanitized.required || !Array.isArray(sanitized.required)) {
         sanitized.required = Object.keys(props);
       } else {
         // Merge existing required with all property keys
         const existingRequired = sanitized.required as string[];
-        const allKeys = new Set([
-          ...existingRequired,
-          ...Object.keys(props),
-        ]);
+        const allKeys = new Set([...existingRequired, ...Object.keys(props)]);
         sanitized.required = Array.from(allKeys);
       }
     }
   }
-  
+
   // Handle arrays
   if (sanitized.type === "array" || sanitized.items) {
     sanitized.type = "array";
-    
+
     // Recursively process items
     if (sanitized.items && typeof sanitized.items === "object") {
       const items = sanitized.items as JsonSchema;
@@ -244,20 +247,20 @@ function sanitizeSchemaForOpenAI(
       }
     }
   }
-  
+
   // Remove $ref if it exists alongside other properties (invalid)
   if (sanitized.$ref && sanitized.type) {
     delete sanitized.$ref;
   }
-  
+
   // Remove $defs since we've resolved all references
   delete sanitized.$defs;
-  
+
   // Always ensure root has type: "object" if it has properties
   if (sanitized.properties && !sanitized.type) {
     sanitized.type = "object";
   }
-  
+
   return sanitized;
 }
 
@@ -783,14 +786,14 @@ function createIdeaFromVenue({
   };
 }
 
-function extractMoodSignals(
-  preferences: EventGroupPreference[],
-): MoodSignals {
+function extractMoodSignals(preferences: EventGroupPreference[]): MoodSignals {
   const signals: MoodSignals = {};
   for (const pref of preferences) {
-    const responses = (pref as {
-      moodResponses?: Record<string, unknown>;
-    }).moodResponses;
+    const responses = (
+      pref as {
+        moodResponses?: Record<string, unknown>;
+      }
+    ).moodResponses;
     if (!responses || typeof responses !== "object") continue;
 
     for (const key of Object.keys(responses)) {
@@ -804,10 +807,7 @@ function extractMoodSignals(
   return signals;
 }
 
-function describeTimeWindow(
-  targetTime?: string | null,
-  timeSignal?: string,
-) {
+function describeTimeWindow(targetTime?: string | null, timeSignal?: string) {
   if (timeSignal) {
     switch (timeSignal) {
       case "<1h":
@@ -893,4 +893,3 @@ function resolveEnergyFromSignals(
   }
   return fallback;
 }
-

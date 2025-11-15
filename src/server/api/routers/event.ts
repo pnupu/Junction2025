@@ -77,7 +77,7 @@ export const eventRouter = createTRPCRouter({
       // Step 1: Filter InfrastructureVenue based on location and preferences
       // Get user preferences if available (for logged-in users) - parallelize with venue filtering
       const userId = preference.userId;
-      
+
       // Run venue filtering and user preferences fetch in parallel
       const [userPreferences, filteredVenues] = await Promise.all([
         userId
@@ -92,7 +92,7 @@ export const eventRouter = createTRPCRouter({
           city: eventGroup.city ?? undefined,
         }),
       ]);
-      
+
       // Re-filter venues with user preferences if available (for better matching)
       const finalFilteredVenues = userPreferences
         ? await filterInfrastructureVenues(ctx.db, {
@@ -107,9 +107,8 @@ export const eventRouter = createTRPCRouter({
       // This avoids expensive AI calls on every question fetch
       const stats = computeGroupStats(eventGroup.preferences);
       const existingResponses =
-        (
-          preference as { moodResponses?: Record<string, unknown> | undefined }
-        ).moodResponses ?? {};
+        (preference as { moodResponses?: Record<string, unknown> | undefined })
+          .moodResponses ?? {};
 
       // Build a lightweight summary from stats for the mood agent
       // This avoids the expensive AI call to generateSummaryContext
@@ -131,19 +130,19 @@ export const eventRouter = createTRPCRouter({
 
       // Step 2: Generate mood questions with filtered venues context
       const mood = await runMoodCheckAgent({
-        participantName: input.participantName ?? preference.userName ?? undefined,
+        participantName:
+          input.participantName ?? preference.userName ?? undefined,
         summary: lightweightSummary,
         stats,
-        answeredSignals:
-          input.answeredSignals ?? existingResponses,
+        answeredSignals: input.answeredSignals ?? existingResponses,
         timeOfDayLabel: input.timeOfDayLabel,
-        filteredVenues: finalFilteredVenues.length > 0 ? finalFilteredVenues : undefined,
+        filteredVenues:
+          finalFilteredVenues.length > 0 ? finalFilteredVenues : undefined,
       });
 
-      const moodQuestionsData =
-        {
-          moodQuestions: mood.questions as Prisma.JsonValue,
-        } as Prisma.EventGroupPreferenceUpdateInput;
+      const moodQuestionsData = {
+        moodQuestions: mood.questions as Prisma.JsonValue,
+      } as Prisma.EventGroupPreferenceUpdateInput;
 
       await ctx.db.eventGroupPreference.update({
         where: { id: preference.id },
@@ -178,9 +177,8 @@ export const eventRouter = createTRPCRouter({
       }
 
       const existing =
-        (
-          preference as { moodResponses?: Record<string, unknown> | undefined }
-        ).moodResponses ?? {};
+        (preference as { moodResponses?: Record<string, unknown> | undefined })
+          .moodResponses ?? {};
 
       const mergedResponses = {
         ...existing,
@@ -192,20 +190,31 @@ export const eventRouter = createTRPCRouter({
       const currentEnergy = mergedResponses.currentEnergy;
       if (currentEnergy && typeof currentEnergy === "string") {
         const energyLower = currentEnergy.toLowerCase();
-        if (energyLower.includes("high") || energyLower.includes("hype") || energyLower.includes("😃")) {
+        if (
+          energyLower.includes("high") ||
+          energyLower.includes("hype") ||
+          energyLower.includes("😃")
+        ) {
           updatedActivityLevel = 5;
-        } else if (energyLower.includes("medium") || energyLower.includes("balanced") || energyLower.includes("😐")) {
+        } else if (
+          energyLower.includes("medium") ||
+          energyLower.includes("balanced") ||
+          energyLower.includes("😐")
+        ) {
           updatedActivityLevel = 3;
-        } else if (energyLower.includes("low") || energyLower.includes("chill") || energyLower.includes("😴")) {
+        } else if (
+          energyLower.includes("low") ||
+          energyLower.includes("chill") ||
+          energyLower.includes("😴")
+        ) {
           updatedActivityLevel = 1;
         }
       }
 
-      const moodResponsesData =
-        {
-          moodResponses: mergedResponses as Prisma.JsonValue,
-          activityLevel: updatedActivityLevel,
-        } as Prisma.EventGroupPreferenceUpdateInput;
+      const moodResponsesData = {
+        moodResponses: mergedResponses as Prisma.JsonValue,
+        activityLevel: updatedActivityLevel,
+      } as Prisma.EventGroupPreferenceUpdateInput;
 
       await ctx.db.eventGroupPreference.update({
         where: { id: preference.id },
@@ -342,14 +351,15 @@ export const eventRouter = createTRPCRouter({
       const userIds = eventGroup.preferences
         .map((p) => p.userId)
         .filter((id): id is string => id != null);
-      
+
       // Get user preferences for all participants
-      const userPreferencesList = userIds.length > 0
-        ? await ctx.db.userPreference.findMany({
-            where: { userId: { in: userIds } },
-          })
-        : [];
-      
+      const userPreferencesList =
+        userIds.length > 0
+          ? await ctx.db.userPreference.findMany({
+              where: { userId: { in: userIds } },
+            })
+          : [];
+
       // Use the first user's preferences as primary (could be enhanced to aggregate)
       const primaryUserPreferences = userPreferencesList[0] ?? null;
 
@@ -363,9 +373,11 @@ export const eventRouter = createTRPCRouter({
       // Step 2: Get mood responses from all participants
       const allMoodResponses: Record<string, unknown> = {};
       for (const pref of eventGroup.preferences) {
-        const responses = (pref as {
-          moodResponses?: Record<string, unknown>;
-        }).moodResponses;
+        const responses = (
+          pref as {
+            moodResponses?: Record<string, unknown>;
+          }
+        ).moodResponses;
         if (responses && typeof responses === "object") {
           // Merge responses (later responses override earlier ones)
           Object.assign(allMoodResponses, responses);
@@ -379,16 +391,14 @@ export const eventRouter = createTRPCRouter({
       });
 
       // Step 4: Generate event recommendations
-      const { recommendations, debugNotes } = await generateEventRecommendations(
-        ctx.db,
-        {
+      const { recommendations, debugNotes } =
+        await generateEventRecommendations(ctx.db, {
           eventGroup,
           filteredVenues,
           summary,
           stats,
           moodResponses: allMoodResponses,
-        },
-      );
+        });
 
       // Step 5: Save recommendations to database
       await saveEventRecommendations(ctx.db, input.groupId, recommendations);

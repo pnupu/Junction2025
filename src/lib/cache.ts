@@ -18,7 +18,7 @@ export class SimpleCache<T> {
 
   get(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       return null;
     }
@@ -80,8 +80,10 @@ export const moodQuestionsCache = new SimpleCache<{
 
 // Cleanup expired entries every 5 minutes
 if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    moodQuestionsCache.cleanup();
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      moodQuestionsCache.cleanup();
+    },
+    5 * 60 * 1000,
+  );
 }
-

@@ -85,7 +85,9 @@ export function EventMapModal({
 }: EventMapModalProps) {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [L, setL] = useState<LeafletModule | null>(null);
-  const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
+  const [selectedParticipant, setSelectedParticipant] = useState<string | null>(
+    null,
+  );
   const [mapInstance, setMapInstance] = useState<MapInstance | null>(null);
 
   useEffect(() => {
@@ -93,7 +95,8 @@ export function EventMapModal({
       // Load Leaflet CSS and library
       void import("leaflet").then((leafletModule) => {
         // Handle both default export and named exports
-        const leaflet = (leafletModule.default ?? leafletModule) as LeafletModule;
+        const leaflet = (leafletModule.default ??
+          leafletModule) as LeafletModule;
         setL(leaflet);
         setLeafletLoaded(true);
 
@@ -167,7 +170,7 @@ export function EventMapModal({
             position: absolute;
             width: 40px;
             height: 40px;
-            background: ${isHighlighted ? '#FFD700' : '#029DE2'};
+            background: ${isHighlighted ? "#FFD700" : "#029DE2"};
             border-radius: 50%;
             animation: pulse 2s ease-in-out infinite;
             opacity: 0.6;
@@ -176,7 +179,7 @@ export function EventMapModal({
             position: relative;
             width: 40px;
             height: 40px;
-            background: ${isHighlighted ? '#FFD700' : '#029DE2'};
+            background: ${isHighlighted ? "#FFD700" : "#029DE2"};
             border: 3px solid white;
             border-radius: 50%;
             display: flex;
@@ -212,19 +215,15 @@ export function EventMapModal({
 
   const handleParticipantClick = (userName: string) => {
     setSelectedParticipant(userName === selectedParticipant ? null : userName);
-    
+
     // Find the participant's location
     const participant = participants.find((p) => p.userName === userName);
     if (participant && mapInstance) {
       // Center and zoom to the participant
-      mapInstance.setView(
-        [participant.latitude, participant.longitude],
-        15,
-        {
-          animate: true,
-          duration: 0.5,
-        },
-      );
+      mapInstance.setView([participant.latitude, participant.longitude], 15, {
+        animate: true,
+        duration: 0.5,
+      });
     }
   };
 
@@ -250,14 +249,17 @@ export function EventMapModal({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {groupedLocations.map((location, idx) => {
-            const isHighlighted = location.count === 1 && location.names[0] === selectedParticipant;
+            const isHighlighted =
+              location.count === 1 && location.names[0] === selectedParticipant;
             return (
               <Marker
                 key={idx}
                 position={[location.latitude, location.longitude]}
                 // @ts-expect-error - Leaflet divIcon return type doesn't match react-leaflet's expected type, but works at runtime
                 icon={createCustomIcon(
-                  location.count > 1 ? String(location.count) : location.initials,
+                  location.count > 1
+                    ? String(location.count)
+                    : location.initials,
                   isHighlighted,
                 )}
               >
@@ -303,7 +305,7 @@ export function EventMapModal({
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
             <h2 className="text-2xl font-semibold text-[#0F172B]">
-              {eventName ? `${eventName}'s Event` : 'Participant Locations'}
+              {eventName ? `${eventName}'s Event` : "Participant Locations"}
             </h2>
             <button
               onClick={onClose}
@@ -312,19 +314,19 @@ export function EventMapModal({
               ✕
             </button>
           </div>
-          <div className="flex-1 relative">
+          <div className="relative flex-1">
             {mapContent}
             {/* Participant list at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur border-t border-slate-200 px-6 py-4">
-              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+            <div className="absolute right-0 bottom-0 left-0 z-[1000] border-t border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
+              <div className="flex max-h-24 flex-wrap gap-2 overflow-y-auto">
                 {participants.map((participant, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleParticipantClick(participant.userName)}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all ${
                       selectedParticipant === participant.userName
-                        ? 'bg-[#FFD700] text-white shadow-lg scale-105'
-                        : 'bg-[#029DE2] text-white hover:bg-[#0287C3] hover:scale-105'
+                        ? "scale-105 bg-[#FFD700] text-white shadow-lg"
+                        : "bg-[#029DE2] text-white hover:scale-105 hover:bg-[#0287C3]"
                     }`}
                   >
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/30 text-xs font-bold">

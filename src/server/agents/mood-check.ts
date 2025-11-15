@@ -1,9 +1,7 @@
 import OpenAI from "openai";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import type {
-  ResponseCreateParamsNonStreaming,
-} from "openai/resources/responses/responses";
+import type { ResponseCreateParamsNonStreaming } from "openai/resources/responses/responses";
 
 import { env } from "@/env";
 import {
@@ -65,12 +63,18 @@ function sanitizeSchemaForOpenAI(
   // 3. All properties must be in required array
   // 4. Cannot have $ref with type keyword
   // 5. "uri" format is not valid, remove it
-  
+
   // If schema has $ref at root, resolve it
   if (schema.$ref && !schema.properties) {
-    const resolved = resolveRef(schema.$ref as string, defs ?? schema.$defs as Record<string, JsonSchema> | undefined);
+    const resolved = resolveRef(
+      schema.$ref as string,
+      defs ?? (schema.$defs as Record<string, JsonSchema> | undefined),
+    );
     if (resolved) {
-      return sanitizeSchemaForOpenAI(resolved, defs ?? schema.$defs as Record<string, JsonSchema> | undefined);
+      return sanitizeSchemaForOpenAI(
+        resolved,
+        defs ?? (schema.$defs as Record<string, JsonSchema> | undefined),
+      );
     }
     // If we can't resolve, create a basic object schema
     return {
@@ -80,26 +84,27 @@ function sanitizeSchemaForOpenAI(
       additionalProperties: false,
     };
   }
-  
+
   // Extract $defs if present for reference resolution
-  const schemaDefs = (schema.$defs as Record<string, JsonSchema> | undefined) ?? defs;
-  
+  const schemaDefs =
+    (schema.$defs as Record<string, JsonSchema> | undefined) ?? defs;
+
   // Recursively sanitize nested schemas first
   const sanitized = { ...schema };
-  
+
   // Remove "uri" format (OpenAI doesn't accept it)
   if (sanitized.format === "uri") {
     delete sanitized.format;
   }
-  
+
   // Handle objects
   if (sanitized.type === "object" || sanitized.properties) {
     // Always set type to object if properties exist
     sanitized.type = "object";
-    
+
     // OpenAI requires additionalProperties: false
     sanitized.additionalProperties = false;
-    
+
     // Recursively process properties
     if (sanitized.properties && typeof sanitized.properties === "object") {
       const props = sanitized.properties as Record<string, JsonSchema>;
@@ -115,26 +120,23 @@ function sanitizeSchemaForOpenAI(
           return [key, sanitizeSchemaForOpenAI(value, schemaDefs)];
         }),
       );
-      
+
       // Ensure all properties are in required array
       if (!sanitized.required || !Array.isArray(sanitized.required)) {
         sanitized.required = Object.keys(props);
       } else {
         // Merge existing required with all property keys
         const existingRequired = sanitized.required as string[];
-        const allKeys = new Set([
-          ...existingRequired,
-          ...Object.keys(props),
-        ]);
+        const allKeys = new Set([...existingRequired, ...Object.keys(props)]);
         sanitized.required = Array.from(allKeys);
       }
     }
   }
-  
+
   // Handle arrays
   if (sanitized.type === "array" || sanitized.items) {
     sanitized.type = "array";
-    
+
     // Recursively process items
     if (sanitized.items && typeof sanitized.items === "object") {
       const items = sanitized.items as JsonSchema;
@@ -151,20 +153,20 @@ function sanitizeSchemaForOpenAI(
       }
     }
   }
-  
+
   // Remove $ref if it exists alongside other properties (invalid)
   if (sanitized.$ref && sanitized.type) {
     delete sanitized.$ref;
   }
-  
+
   // Remove $defs since we've resolved all references
   delete sanitized.$defs;
-  
+
   // Always ensure root has type: "object" if it has properties
   if (sanitized.properties && !sanitized.type) {
     sanitized.type = "object";
   }
-  
+
   return sanitized;
 }
 
@@ -189,19 +191,19 @@ function generateCacheKey(input: MoodAgentInput): string {
   // 1. Venue IDs (sorted for consistency)
   // 2. Stats (participant count, energy, budget)
   // 3. Summary keywords
-  
+
   const venueIds = input.filteredVenues
     ? input.filteredVenues
         .map((v) => v.id)
         .sort()
         .join(",")
     : "no-venues";
-  
+
   const statsKey = `${input.stats.participantCount}-${input.stats.energyLabel}-${input.stats.popularMoneyPreference}`;
   const keywordsKey = input.summary.vibeKeywords.slice(0, 4).sort().join(",");
-  
+
   const keyString = `${venueIds}|${statsKey}|${keywordsKey}`;
-  
+
   // Create SHA-256 hash for shorter, consistent key
   return createHash("sha256").update(keyString).digest("hex").slice(0, 16);
 }
@@ -212,7 +214,7 @@ export async function runMoodCheckAgent(
   // Check cache first
   const cacheKey = generateCacheKey(input);
   const cached = moodQuestionsCache.get(cacheKey);
-  
+
   if (cached) {
     return {
       questions: cached.questions as MoodQuestion[],
@@ -227,10 +229,10 @@ export async function runMoodCheckAgent(
       followUp: undefined,
       debugNotes: ["fallback-mode"],
     };
-    
+
     // Cache fallback too
     moodQuestionsCache.set(cacheKey, fallback);
-    
+
     return fallback;
   }
 
@@ -276,7 +278,10 @@ export async function runMoodCheckAgent(
     // Safety check: Ensure all questions have options
     const validatedQuestions = parsed.questions.map((q) => {
       // Ensure scale and choice questions have options
-      if ((q.type === "scale" || q.type === "choice") && (!q.options || q.options.length === 0)) {
+      if (
+        (q.type === "scale" || q.type === "choice") &&
+        (!q.options || q.options.length === 0)
+      ) {
         // If no options provided, add default options based on type
         if (q.type === "scale") {
           q.options = ["Low", "Medium", "High"];
@@ -307,35 +312,39 @@ export async function runMoodCheckAgent(
       followUp: undefined,
       debugNotes: ["mood-agent-fallback"],
     };
-    
+
     // Cache fallback too
     moodQuestionsCache.set(cacheKey, fallback);
-    
+
     return fallback;
   }
 }
 
 function buildPromptPayload(input: MoodAgentInput) {
   const { stats, summary } = input;
-  
+
   // Build venue context and analyze venue characteristics
-  let venueContext: Array<{
-    name: string;
-    type: string;
-    description: string;
-    distanceKm?: string;
-  }> | undefined;
-  
-  let venueAnalysis: {
-    venueTypes: string[];
-    keyCharacteristics: string[];
-    differentiatingFactors: string[];
-  } | undefined;
+  let venueContext:
+    | Array<{
+        name: string;
+        type: string;
+        description: string;
+        distanceKm?: string;
+      }>
+    | undefined;
+
+  let venueAnalysis:
+    | {
+        venueTypes: string[];
+        keyCharacteristics: string[];
+        differentiatingFactors: string[];
+      }
+    | undefined;
 
   if (input.filteredVenues && input.filteredVenues.length > 0) {
     // Limit to top 12 venues to reduce context size and speed up processing
     const topVenues = input.filteredVenues.slice(0, 12);
-    
+
     venueContext = topVenues.map((venue) => ({
       name: venue.name,
       type: venue.type,
@@ -361,15 +370,34 @@ function buildPromptPayload(input: MoodAgentInput) {
       // Extract keywords from description
       if (venue.description) {
         const desc = venue.description.toLowerCase();
-        
+
         // Look for activity-related keywords
         const activityKeywords = [
-          "active", "competitive", "sport", "game", "play", "challenge",
-          "relax", "chill", "casual", "social", "party", "dance",
-          "outdoor", "indoor", "adventure", "experience", "workshop",
-          "class", "lesson", "tour", "walk", "hike", "bike"
+          "active",
+          "competitive",
+          "sport",
+          "game",
+          "play",
+          "challenge",
+          "relax",
+          "chill",
+          "casual",
+          "social",
+          "party",
+          "dance",
+          "outdoor",
+          "indoor",
+          "adventure",
+          "experience",
+          "workshop",
+          "class",
+          "lesson",
+          "tour",
+          "walk",
+          "hike",
+          "bike",
         ];
-        
+
         activityKeywords.forEach((keyword) => {
           if (desc.includes(keyword)) {
             keywords.add(keyword);
@@ -378,10 +406,20 @@ function buildPromptPayload(input: MoodAgentInput) {
 
         // Look for atmosphere keywords
         const atmosphereKeywords = [
-          "cozy", "intimate", "lively", "energetic", "quiet", "loud",
-          "romantic", "family", "group", "solo", "date", "friends"
+          "cozy",
+          "intimate",
+          "lively",
+          "energetic",
+          "quiet",
+          "loud",
+          "romantic",
+          "family",
+          "group",
+          "solo",
+          "date",
+          "friends",
         ];
-        
+
         atmosphereKeywords.forEach((keyword) => {
           if (desc.includes(keyword)) {
             characteristics.add(keyword);
@@ -392,13 +430,13 @@ function buildPromptPayload(input: MoodAgentInput) {
 
     // Identify differentiating factors
     const differentiatingFactors: string[] = [];
-    
+
     // Check if there's a mix of indoor/outdoor
-    const hasIndoor = Array.from(keywords).some((k) => 
-      ["indoor", "inside"].includes(k)
+    const hasIndoor = Array.from(keywords).some((k) =>
+      ["indoor", "inside"].includes(k),
     );
-    const hasOutdoor = Array.from(keywords).some((k) => 
-      ["outdoor", "outside", "park", "nature"].includes(k)
+    const hasOutdoor = Array.from(keywords).some((k) =>
+      ["outdoor", "outside", "park", "nature"].includes(k),
     );
     if (hasIndoor && hasOutdoor) {
       differentiatingFactors.push("indoor vs outdoor preference");
@@ -406,10 +444,10 @@ function buildPromptPayload(input: MoodAgentInput) {
 
     // Check for activity level variety
     const hasActive = Array.from(keywords).some((k) =>
-      ["active", "competitive", "sport", "challenge"].includes(k)
+      ["active", "competitive", "sport", "challenge"].includes(k),
     );
     const hasRelaxed = Array.from(keywords).some((k) =>
-      ["relax", "chill", "casual", "cozy"].includes(k)
+      ["relax", "chill", "casual", "cozy"].includes(k),
     );
     if (hasActive && hasRelaxed) {
       differentiatingFactors.push("activity intensity preference");
@@ -417,10 +455,10 @@ function buildPromptPayload(input: MoodAgentInput) {
 
     // Check for social vs solo activities
     const hasSocial = Array.from(keywords).some((k) =>
-      ["social", "party", "group", "friends"].includes(k)
+      ["social", "party", "group", "friends"].includes(k),
     );
     const hasSolo = Array.from(keywords).some((k) =>
-      ["solo", "quiet", "intimate"].includes(k)
+      ["solo", "quiet", "intimate"].includes(k),
     );
     if (hasSocial && hasSolo) {
       differentiatingFactors.push("social atmosphere preference");
@@ -461,22 +499,27 @@ function buildPromptPayload(input: MoodAgentInput) {
     availableVenues: venueContext?.slice(0, 10), // Limit to 10 venues in payload
     venueCount: input.filteredVenues?.length ?? 0,
     venueAnalysis,
-      request: {
-        answeredSignals: input.answeredSignals ?? {},
-        instructions: [
-          "Keep tone playful and short.",
-          "Return 1-3 questions that help narrow down which venues would be best for this group.",
-          "CRITICAL: ALL questions MUST be multiple choice. Use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Always provide an options array with at least 2 choices. For preference questions (choosing between options), use 'choice' type with descriptive option labels, NOT binary yes/no.",
-          "VARIETY IS CRITICAL: Each question must be completely different from the others. Use different vocabulary, different question structures, and cover different aspects. Avoid repeating similar words or phrases across questions.",
-          "Question structure variety: Mix scales and multiple choice formats. Don't use the same 'X or Y' pattern for multiple questions. For preference questions, use 'choice' type with descriptive options (e.g., ['More active', 'Laid-back']), not binary yes/no.",
-          "Vocabulary variety: If one question uses 'cozy', don't use 'cozy' again. If one uses 'energetic', use different energy-related terms in other questions.",
-          venueAnalysis && venueAnalysis.differentiatingFactors.length > 0
-            ? `Venues differ by: ${venueAnalysis.differentiatingFactors.slice(0, 3).join(", ")}. Types: ${venueAnalysis.venueTypes.slice(0, 4).join(", ")}. Create questions that distinguish between options. Cover different aspects.`
-            : venueContext
-              ? `Available venues: ${venueContext.slice(0, 8).map(v => `${v.name} (${v.type})`).join(", ")}. Create questions to match group to venues. Cover different aspects.`
-              : "Generate general mood questions covering different aspects.",
-        ],
-      },
+    request: {
+      answeredSignals: input.answeredSignals ?? {},
+      instructions: [
+        "Keep tone playful and short.",
+        "Return 1-3 questions that help narrow down which venues would be best for this group.",
+        "CRITICAL: ALL questions MUST be multiple choice. Use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Always provide an options array with at least 2 choices. For preference questions (choosing between options), use 'choice' type with descriptive option labels, NOT binary yes/no.",
+        "VARIETY IS CRITICAL: Each question must be completely different from the others. Use different vocabulary, different question structures, and cover different aspects. Avoid repeating similar words or phrases across questions.",
+        "Question structure variety: Mix scales and multiple choice formats. Don't use the same 'X or Y' pattern for multiple questions. For preference questions, use 'choice' type with descriptive options (e.g., ['More active', 'Laid-back']), not binary yes/no.",
+        "Vocabulary variety: If one question uses 'cozy', don't use 'cozy' again. If one uses 'energetic', use different energy-related terms in other questions.",
+        venueAnalysis && venueAnalysis.differentiatingFactors.length > 0
+          ? `Venues differ by: ${venueAnalysis.differentiatingFactors.slice(0, 3).join(", ")}. Types: ${venueAnalysis.venueTypes.slice(0, 4).join(", ")}. Create questions that distinguish between options. Cover different aspects.`
+          : venueContext
+            ? `Available venues: ${venueContext
+                .slice(0, 8)
+                .map((v) => `${v.name} (${v.type})`)
+                .join(
+                  ", ",
+                )}. Create questions to match group to venues. Cover different aspects.`
+            : "Generate general mood questions covering different aspects.",
+      ],
+    },
   };
 }
 
@@ -490,7 +533,7 @@ function deriveTimeOfDayLabel(date = new Date()) {
 
 function buildFallbackQuestions(input: MoodAgentInput): MoodQuestion[] {
   const questions: MoodQuestion[] = [];
-  
+
   // Analyze venues if available to generate better fallback questions
   const hasVenues = input.filteredVenues && input.filteredVenues.length > 0;
   let venueCharacteristics: {
@@ -508,11 +551,26 @@ function buildFallbackQuestions(input: MoodAgentInput): MoodQuestion[] {
       .join(" ");
 
     venueCharacteristics = {
-      hasIndoor: allDescriptions.includes("indoor") || allDescriptions.includes("inside"),
-      hasOutdoor: allDescriptions.includes("outdoor") || allDescriptions.includes("park") || allDescriptions.includes("nature"),
-      hasActive: allDescriptions.includes("active") || allDescriptions.includes("competitive") || allDescriptions.includes("sport"),
-      hasRelaxed: allDescriptions.includes("relax") || allDescriptions.includes("chill") || allDescriptions.includes("cozy"),
-      hasFood: allDescriptions.includes("restaurant") || allDescriptions.includes("dining") || allDescriptions.includes("food") || allDescriptions.includes("cafe"),
+      hasIndoor:
+        allDescriptions.includes("indoor") ||
+        allDescriptions.includes("inside"),
+      hasOutdoor:
+        allDescriptions.includes("outdoor") ||
+        allDescriptions.includes("park") ||
+        allDescriptions.includes("nature"),
+      hasActive:
+        allDescriptions.includes("active") ||
+        allDescriptions.includes("competitive") ||
+        allDescriptions.includes("sport"),
+      hasRelaxed:
+        allDescriptions.includes("relax") ||
+        allDescriptions.includes("chill") ||
+        allDescriptions.includes("cozy"),
+      hasFood:
+        allDescriptions.includes("restaurant") ||
+        allDescriptions.includes("dining") ||
+        allDescriptions.includes("food") ||
+        allDescriptions.includes("cafe"),
     };
   }
 
@@ -540,7 +598,11 @@ function buildFallbackQuestions(input: MoodAgentInput): MoodQuestion[] {
   });
 
   // Third question: activity level OR food (whichever is more relevant, different structure)
-  if (venueCharacteristics.hasActive && venueCharacteristics.hasRelaxed && !venueCharacteristics.hasFood) {
+  if (
+    venueCharacteristics.hasActive &&
+    venueCharacteristics.hasRelaxed &&
+    !venueCharacteristics.hasFood
+  ) {
     questions.push({
       id: "activityPace",
       prompt: "What's your move tonight? 🎯",
@@ -556,8 +618,9 @@ function buildFallbackQuestions(input: MoodAgentInput): MoodQuestion[] {
       type: "choice",
       signalKey: "hungerLevel",
       options: ["Light bites", "Full meal", "Already ate"],
-      suggestedResponse:
-        summaryMatchesFoodFocus(input.summary) ? "Full meal" : "Light bites",
+      suggestedResponse: summaryMatchesFoodFocus(input.summary)
+        ? "Full meal"
+        : "Light bites",
       reason: "Decides if we pair dining with the plan.",
     });
   } else {
@@ -606,4 +669,3 @@ function summaryMatchesFoodFocus(summary: PreferenceSummary) {
     ),
   );
 }
-

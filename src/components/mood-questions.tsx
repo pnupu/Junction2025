@@ -52,10 +52,10 @@ export function MoodQuestions({
       // Clear current answers
       setAnswers({});
       setIsSubmitting(false);
-      
+
       // Refetch questions after saving (backend will read updated responses from DB)
       await refetch();
-      
+
       // Optionally complete if callback provided
       if (onComplete) {
         onComplete();
@@ -149,9 +149,7 @@ export function MoodQuestions({
       <h2 className="mb-4 text-lg font-semibold text-white">
         Quick mood check 🎯
       </h2>
-      {followUp && (
-        <p className="mb-4 text-sm text-white/80">{followUp}</p>
-      )}
+      {followUp && <p className="mb-4 text-sm text-white/80">{followUp}</p>}
       <div className="space-y-6">
         {currentQuestions.map((question) => (
           <QuestionInput
@@ -192,11 +190,14 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
       const scaleMatch = scaleRegex.exec(prompt);
       const min = scaleMatch ? parseInt(scaleMatch[1] ?? "1") : 1;
       const max = scaleMatch ? parseInt(scaleMatch[2] ?? "5") : 5;
-      const scaleNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+      const scaleNumbers = Array.from(
+        { length: max - min + 1 },
+        (_, i) => min + i,
+      );
 
       // For larger scales (7+), use a more compact layout
       const isLargeScale = scaleNumbers.length > 6;
-      
+
       return (
         <div>
           <label className="mb-3 block text-sm font-medium text-white">
@@ -212,7 +213,7 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
                   onClick={() => onChange(num)}
                   className={`rounded-lg text-sm font-medium transition-all ${
                     isLargeScale
-                      ? "flex-1 min-w-0 px-1.5 py-2"
+                      ? "min-w-0 flex-1 px-1.5 py-2"
                       : "flex-1 px-3 py-2.5"
                   } ${
                     isSelected
@@ -287,7 +288,5 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
     );
   }
 
-
   return null;
 }
-

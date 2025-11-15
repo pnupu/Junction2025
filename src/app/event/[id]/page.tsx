@@ -93,22 +93,25 @@ export default function EventPage() {
       refetchInterval: (query) => {
         const data = query.state.data as { status?: string } | undefined;
         const status = data?.status;
-        
+
         // Poll frequently when generating recommendations
         if (status === "generating") {
           return 2000; // 2 seconds
         }
-        
+
         // Poll less frequently when collecting preferences (people might be joining)
-        if (status === "collecting_preferences" || status === "ready_to_generate") {
+        if (
+          status === "collecting_preferences" ||
+          status === "ready_to_generate"
+        ) {
           return 5000; // 5 seconds
         }
-        
+
         // Poll very infrequently when generated (just in case)
         if (status === "generated") {
           return 30000; // 30 seconds
         }
-        
+
         // Default: no polling (will refetch on window focus or manual refetch)
         return false;
       },
@@ -349,7 +352,7 @@ export default function EventPage() {
         (eventData as { isGenerated?: boolean }).isGenerated ??
         status === "generated";
       const isGenerating = status === "generating";
-      
+
       // Redirect to results page if generating or generated
       if ((isGenerating || isGenerated) && eventData.id) {
         router.push(`/event/${eventData.id}/results`);
@@ -367,8 +370,7 @@ export default function EventPage() {
 
   // Sort participants by createdAt to ensure consistent ordering
   const participants = [...(eventData.preferences ?? [])].sort(
-    (a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
   const participantCount = participants.length;
 
@@ -385,7 +387,7 @@ export default function EventPage() {
         .moodResponses ?? {},
     ).length > 0;
 
-    console.log("currentUserPreference", currentUserPreference);
+  console.log("currentUserPreference", currentUserPreference);
 
   return (
     <>
@@ -416,45 +418,45 @@ export default function EventPage() {
                 className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90 md:h-80"
               >
                 {/* Title with shadow overlay */}
-                <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/70 via-black/40 to-transparent px-6 py-6 pb-12">
+                <div className="absolute top-0 right-0 left-0 z-10 bg-gradient-to-b from-black/70 via-black/40 to-transparent px-6 py-6 pb-12">
                   <h1 className="text-2xl font-bold text-white drop-shadow-lg">
                     {userProfile?.name ?? "Your"}&apos;s Event
                   </h1>
                 </div>
-                <div className="relative h-full w-full z-1">
-                <MapContainer
-                  center={[
-                    participantLocations.reduce(
-                      (sum, p) => sum + p.latitude,
-                      0,
-                    ) / participantLocations.length,
-                    participantLocations.reduce(
-                      (sum, p) => sum + p.longitude,
-                      0,
-                    ) / participantLocations.length,
-                  ]}
-                  zoom={13}
-                  style={{ height: "100%", width: "100%" }}
-                  zoomControl={false}
-                  dragging={false}
-                  scrollWheelZoom={false}
-                  doubleClickZoom={false}
-                  touchZoom={false}
-                >
-                  <TileLayer
-                    attribution="&copy; OpenStreetMap"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  {groupedLocations.map((location, idx) => (
-                    <Marker
-                      key={idx}
-                      position={[location.latitude, location.longitude]}
-                      // @ts-expect-error - Leaflet divIcon return type doesn't match react-leaflet's expected type, but works at runtime
-                      icon={
-                        L
-                          ? L.divIcon({
-                              className: "custom-marker",
-                              html: `
+                <div className="relative z-1 h-full w-full">
+                  <MapContainer
+                    center={[
+                      participantLocations.reduce(
+                        (sum, p) => sum + p.latitude,
+                        0,
+                      ) / participantLocations.length,
+                      participantLocations.reduce(
+                        (sum, p) => sum + p.longitude,
+                        0,
+                      ) / participantLocations.length,
+                    ]}
+                    zoom={13}
+                    style={{ height: "100%", width: "100%" }}
+                    zoomControl={false}
+                    dragging={false}
+                    scrollWheelZoom={false}
+                    doubleClickZoom={false}
+                    touchZoom={false}
+                  >
+                    <TileLayer
+                      attribution="&copy; OpenStreetMap"
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    {groupedLocations.map((location, idx) => (
+                      <Marker
+                        key={idx}
+                        position={[location.latitude, location.longitude]}
+                        // @ts-expect-error - Leaflet divIcon return type doesn't match react-leaflet's expected type, but works at runtime
+                        icon={
+                          L
+                            ? L.divIcon({
+                                className: "custom-marker",
+                                html: `
                           <div style="position: relative; width: 32px; height: 32px;">
                             <div style="
                               position: absolute;
@@ -497,14 +499,14 @@ export default function EventPage() {
                             }
                           </style>
                         `,
-                              iconSize: [32, 32],
-                              iconAnchor: [16, 32],
-                            })
-                          : undefined
-                      }
-                    />
-                  ))}
-                </MapContainer>
+                                iconSize: [32, 32],
+                                iconAnchor: [16, 32],
+                              })
+                            : undefined
+                        }
+                      />
+                    ))}
+                  </MapContainer>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all hover:bg-black/10">
                   <div className="rounded-lg bg-white/90 px-4 py-2 text-sm font-semibold text-[#029DE2] shadow-lg backdrop-blur">
@@ -617,9 +619,9 @@ export default function EventPage() {
               </h2>
               <div className="space-y-3">
                 {participants.map((participant, idx) => {
-                  const moodResponses =
-                    (participant as { moodResponses?: Record<string, unknown> })
-                      .moodResponses;
+                  const moodResponses = (
+                    participant as { moodResponses?: Record<string, unknown> }
+                  ).moodResponses;
                   const currentEnergy =
                     moodResponses &&
                     typeof moodResponses === "object" &&
@@ -657,7 +659,7 @@ export default function EventPage() {
                         </div>
                       </div>
                       <div
-                        className={`h-3 w-3 rounded-full animate-ping opacity-75 ${
+                        className={`h-3 w-3 animate-ping rounded-full opacity-75 ${
                           hasAnsweredMoodQuestions
                             ? "bg-green-400"
                             : "bg-yellow-400"
@@ -671,20 +673,17 @@ export default function EventPage() {
           )}
 
           {/* Mood Questions - Show after user has joined */}
-          {hasJoined &&
-            eventData?.id &&
-            sessionId &&
-            !hasMoodResponses && (
-              <MoodQuestions
-                key={`mood-${eventData.id}-${sessionId}`}
-                groupId={eventData.id}
-                sessionId={sessionId}
-                participantName={userProfile?.name}
-                onComplete={() => {
-                  void refetch();
-                }}
-              />
-            )}
+          {hasJoined && eventData?.id && sessionId && !hasMoodResponses && (
+            <MoodQuestions
+              key={`mood-${eventData.id}-${sessionId}`}
+              groupId={eventData.id}
+              sessionId={sessionId}
+              participantName={userProfile?.name}
+              onComplete={() => {
+                void refetch();
+              }}
+            />
+          )}
 
           {/* Creator Action Button - Only visible to event creator */}
           {isCreator && hasJoined ? (
