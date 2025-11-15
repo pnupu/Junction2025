@@ -27,6 +27,8 @@ export default function Home() {
   const handleProfileSave = (_profile: UserProfile) => {
     setHasProfile(true);
     setShowProfileForm(false);
+    // Notify other components that profile was updated
+    window.dispatchEvent(new Event("profileUpdated"));
   };
 
   const handleJoinEvent = () => {

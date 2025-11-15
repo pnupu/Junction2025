@@ -76,6 +76,8 @@ export const eventRouter = createTRPCRouter({
         userIcon: z.string(),
         moneyPreference: z.enum(["budget", "moderate", "premium"]),
         activityLevel: z.number().min(1).max(5),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -93,12 +95,16 @@ export const eventRouter = createTRPCRouter({
           userIcon: input.userIcon,
           moneyPreference: input.moneyPreference,
           activityLevel: input.activityLevel,
+          latitude: input.latitude,
+          longitude: input.longitude,
         },
         update: {
           userName: input.userName,
           userIcon: input.userIcon,
           moneyPreference: input.moneyPreference,
           activityLevel: input.activityLevel,
+          latitude: input.latitude,
+          longitude: input.longitude,
         },
       });
 

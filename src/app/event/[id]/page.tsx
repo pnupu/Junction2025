@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,27 @@ import {
   getUserProfile,
   type UserProfile,
 } from "@/components/profile-modal";
+import {
+  EventMapModal,
+  type ParticipantLocation,
+} from "@/components/event-map-modal";
+import dynamic from "next/dynamic";
+
+// Dynamically import React Leaflet components for inline map
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
+
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false },
+);
 
 export default function EventPage() {
   const params = useParams();
@@ -28,7 +49,10 @@ export default function EventPage() {
   const [showQRDialog, setShowQRDialog] = useState<boolean>(false);
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
+  const [showMapModal, setShowMapModal] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [L, setL] = useState<typeof import("leaflet") | null>(null);
 
   // Try to get event by invite code first (if it looks like a code), otherwise by ID
   const isLikelyInviteCode =
@@ -48,10 +72,39 @@ export default function EventPage() {
     },
   });
 
-  const autoJoinEvent = (profile: UserProfile, sid: string) => {
+  const autoJoinEvent = async (profile: UserProfile, sid: string) => {
     if (!eventData?.id) {
       console.error("Cannot join event: eventData not loaded");
       return;
+    }
+
+    // Get location if not already in profile
+    let latitude = profile.latitude;
+    let longitude = profile.longitude;
+
+    if (!latitude || !longitude) {
+      if ("geolocation" in navigator) {
+        try {
+          const position = await new Promise<GeolocationPosition>(
+            (resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                timeout: 5000,
+                enableHighAccuracy: false,
+              });
+            },
+          );
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+
+          // Update stored profile with location
+          const updatedProfile = { ...profile, latitude, longitude };
+          sessionStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+          setUserProfile(updatedProfile);
+        } catch (error) {
+          console.log("Location permission denied or unavailable", error);
+          // Continue without location
+        }
+      }
     }
 
     // Map preferences to API format
@@ -77,6 +130,8 @@ export default function EventPage() {
       userIcon: "👤",
       moneyPreference: moneyPreferenceMap[profile.foodPreference] ?? "moderate",
       activityLevel: activityLevelMap[profile.activityPreference] ?? 3,
+      latitude,
+      longitude,
     });
 
     sessionStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
@@ -124,6 +179,22 @@ export default function EventPage() {
     }
   }, [eventData, userProfile, hasJoined, sessionId, eventIdOrCode, autoJoinEvent]);
 
+  // Load Leaflet for inline map
+  useEffect(() => {
+    import("leaflet").then((leaflet) => {
+      setL(leaflet);
+      setLeafletLoaded(true);
+
+      // Fix default marker icon issue
+      delete (leaflet.Icon.Default.prototype as any)._getIconUrl;
+      leaflet.Icon.Default.mergeOptions({
+        iconRetinaUrl: "/leaflet/marker-icon-2x.png",
+        iconUrl: "/leaflet/marker-icon.png",
+        shadowUrl: "/leaflet/marker-shadow.png",
+      });
+    });
+  }, []);
+
   const handleProfileSave = (profile: UserProfile) => {
     setUserProfile(profile);
     setShowProfileModal(false);
@@ -148,6 +219,41 @@ export default function EventPage() {
     }
   };
 
+  // Filter participants with location data and create ParticipantLocation objects
+  const participantLocations: ParticipantLocation[] = useMemo(() => {
+    if (!eventData?.preferences) return [];
+    
+    const participants = eventData.preferences;
+    return participants
+      .filter(
+        (
+          p: {
+            latitude?: number | null;
+            longitude?: number | null;
+            userName?: string | null;
+          },
+        ): p is typeof p & { latitude: number; longitude: number } =>
+          p.latitude != null && p.longitude != null,
+      )
+      .map(
+        (p: {
+          latitude: number;
+          longitude: number;
+          userName?: string | null;
+        }) => ({
+          userName: p.userName ?? "Anonymous",
+          latitude: p.latitude,
+          longitude: p.longitude,
+          initials: (p.userName ?? "A")
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2),
+        }),
+      );
+  }, [eventData?.preferences]);
+
   if (!eventData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -171,6 +277,12 @@ export default function EventPage() {
         onSave={handleProfileSave}
         showAsModal={false}
       />
+      <EventMapModal
+        isOpen={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        participants={participantLocations}
+        isEnlarged={true}
+      />
       <main className="min-h-screen bg-[#029DE2]">
         <div className="mx-auto max-w-2xl px-6 py-8">
           {/* Header */}
@@ -180,6 +292,71 @@ export default function EventPage() {
               {participantCount} {participantCount === 1 ? "person" : "people"}
             </p>
           </div>
+
+          {/* Inline Map Preview */}
+          {participantLocations.length > 0 && leafletLoaded && L && (
+            <div className="mb-6 overflow-hidden rounded-2xl bg-white/10 backdrop-blur">
+              <button
+                onClick={() => setShowMapModal(true)}
+                className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90"
+              >
+                <MapContainer
+                  center={[
+                    participantLocations.reduce((sum, p) => sum + p.latitude, 0) /
+                      participantLocations.length,
+                    participantLocations.reduce((sum, p) => sum + p.longitude, 0) /
+                      participantLocations.length,
+                  ]}
+                  zoom={13}
+                  style={{ height: "100%", width: "100%" }}
+                  zoomControl={false}
+                  dragging={false}
+                  scrollWheelZoom={false}
+                  doubleClickZoom={false}
+                  touchZoom={false}
+                >
+                  <TileLayer
+                    attribution='&copy; OpenStreetMap'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {participantLocations.map((participant, idx) => (
+                    <Marker
+                      key={idx}
+                      position={[participant.latitude, participant.longitude]}
+                      icon={L.divIcon({
+                        className: "custom-marker",
+                        html: `
+                          <div style="
+                            width: 32px;
+                            height: 32px;
+                            background: #029DE2;
+                            border: 2px solid white;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            font-weight: bold;
+                            font-size: 12px;
+                            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                          ">
+                            ${participant.initials}
+                          </div>
+                        `,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                      })}
+                    />
+                  ))}
+                </MapContainer>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all hover:bg-black/10">
+                  <div className="rounded-lg bg-white/90 px-4 py-2 text-sm font-semibold text-[#029DE2] shadow-lg backdrop-blur">
+                    🗺️ Click to expand map
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
 
           {/* Invite Section */}
           <div className="mb-6">
@@ -304,12 +481,7 @@ export default function EventPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 backdrop-blur">
-                        <div className="h-2 w-2 rounded-full bg-green-400"></div>
-                        <span className="text-xs font-medium text-white">
-                          Joined
-                        </span>
-                      </div>
+                      <div className="h-3 w-3 rounded-full bg-green-400"></div>
                     </div>
                   ),
                 )}

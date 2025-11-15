@@ -8,6 +8,8 @@ export type UserProfile = {
   name: string;
   activityPreference: "chill" | "celebratory" | "active";
   foodPreference: "no-limit" | "veg" | "gluten";
+  latitude?: number;
+  longitude?: number;
 };
 
 const activityOptions = [
@@ -60,13 +62,47 @@ export function ProfileModal({
     }
   }, [isOpen]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name || !activityPreference || !foodPreference) return;
+
+    // Always request fresh location permission
+    let latitude: number | undefined;
+    let longitude: number | undefined;
+
+    if ("geolocation" in navigator) {
+      try {
+        const position = await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              timeout: 5000,
+              enableHighAccuracy: false,
+            });
+          },
+        );
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+      } catch (error) {
+        console.log("Location permission denied or unavailable", error);
+        // Continue without location - try to preserve old location if it exists
+        const existingProfile = sessionStorage.getItem("userProfile");
+        if (existingProfile) {
+          try {
+            const oldProfile = JSON.parse(existingProfile) as UserProfile;
+            latitude = oldProfile.latitude;
+            longitude = oldProfile.longitude;
+          } catch (_e) {
+            // Ignore
+          }
+        }
+      }
+    }
 
     const profile: UserProfile = {
       name,
       activityPreference,
       foodPreference,
+      latitude,
+      longitude,
     };
 
     sessionStorage.setItem("userProfile", JSON.stringify(profile));

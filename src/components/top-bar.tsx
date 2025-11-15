@@ -15,11 +15,24 @@ export function TopBar() {
   useEffect(() => {
     const profile = getUserProfile();
     setUserName(profile?.name ?? null);
+
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      const updatedProfile = getUserProfile();
+      setUserName(updatedProfile?.name ?? null);
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
   }, []);
 
   const handleProfileSave = (profile: UserProfile) => {
     setUserName(profile.name);
     setShowProfileModal(false);
+    // Notify other components that profile was updated
+    window.dispatchEvent(new Event("profileUpdated"));
   };
 
   return (
