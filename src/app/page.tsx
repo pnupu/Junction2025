@@ -12,6 +12,7 @@ import {
   type UserProfile,
 } from "@/components/profile-modal";
 import { Loader } from "@/components/ui/loader";
+import { TopBar } from "@/components/top-bar";
 
 export default function Home() {
   const router = useRouter();
@@ -79,6 +80,9 @@ export default function Home() {
 
   // Main landing page
   return (
+    <>
+    
+    <TopBar />
     <main
       className={`relative flex min-h-screen flex-col items-center justify-start px-6 py-12 ${hasProfile ? "bg-white" : "bg-[#029DE2]"}`}
     >
@@ -155,5 +159,6 @@ export default function Home() {
         </div>
       </div>
     </main>
+    </>
   );
 }

@@ -255,7 +255,12 @@ export default function EventPage() {
       }
 
       // Map preferences to API format
+      // Support both new and legacy fields
       const activityLevelMap: Record<string, number> = {
+        little: 1,
+        moderate: 3,
+        very: 5,
+        // Legacy mappings
         chill: 1,
         celebratory: 3,
         active: 5,
@@ -265,10 +270,33 @@ export default function EventPage() {
         string,
         "budget" | "moderate" | "premium"
       > = {
+        none: "premium",
+        "vegan-vege": "moderate",
+        "gluten-free": "moderate",
+        // Legacy mappings
         "no-limit": "premium",
         veg: "moderate",
         gluten: "moderate",
       };
+
+      // Use new fields if available, fall back to legacy fields
+      let healthConsciousness: "little" | "moderate" | "very" = "moderate";
+      if ("healthConsciousness" in profile && profile.healthConsciousness) {
+        healthConsciousness = profile.healthConsciousness;
+      } else if (profile.activityPreference) {
+        healthConsciousness = 
+          profile.activityPreference === "chill" ? "little" : 
+          profile.activityPreference === "celebratory" ? "moderate" : "very";
+      }
+      
+      let dietaryRestrictions: "none" | "vegan-vege" | "gluten-free" = "none";
+      if ("dietaryRestrictions" in profile && profile.dietaryRestrictions) {
+        dietaryRestrictions = profile.dietaryRestrictions;
+      } else if (profile.foodPreference) {
+        dietaryRestrictions = 
+          profile.foodPreference === "no-limit" ? "none" : 
+          profile.foodPreference === "veg" ? "vegan-vege" : "gluten-free";
+      }
 
       addPreferences.mutate({
         groupId: eventData.id, // Use the actual database ID
@@ -276,8 +304,8 @@ export default function EventPage() {
         userName: profile.name,
         userIcon: "👤",
         moneyPreference:
-          moneyPreferenceMap[profile.foodPreference] ?? "moderate",
-        activityLevel: activityLevelMap[profile.activityPreference] ?? 3,
+          moneyPreferenceMap[dietaryRestrictions] ?? "moderate",
+        activityLevel: activityLevelMap[healthConsciousness] ?? 3,
         latitude,
         longitude,
       });
