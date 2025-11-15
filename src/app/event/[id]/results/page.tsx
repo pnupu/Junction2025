@@ -84,29 +84,29 @@ export default function EventResultsPage() {
 
   if (generateRecommendations.isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
           <div className="mb-4 text-6xl">🎨</div>
-          <h2 className="mb-2 text-2xl font-semibold text-white">
+          <h2 className="mb-2 text-2xl font-semibold text-slate-900">
             Generating recommendations...
           </h2>
-          <p className="text-slate-400">Analyzing preferences</p>
+          <p className="text-slate-600">Analyzing preferences</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <main className="min-h-screen bg-white">
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="mb-1 text-3xl font-semibold text-white">
+              <h1 className="mb-1 text-3xl font-semibold text-slate-900">
                 Your Event Options
               </h1>
-              <p className="text-slate-400">
+              <p className="text-slate-600">
                 {eventData?.city && `${eventData.city} • `}
                 {groupStats?.participantCount}{" "}
                 {groupStats?.participantCount === 1 ? "participant" : "participants"}
@@ -116,14 +116,14 @@ export default function EventResultsPage() {
               <Button
                 onClick={() => setShowQRDialog(true)}
                 variant="outline"
-                className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
+                className="border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
               >
                 📄 QR Code
               </Button>
               <Button
                 onClick={handleCopyLink}
                 variant="outline"
-                className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
+                className="border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
               >
                 📋 Share
               </Button>
@@ -132,12 +132,12 @@ export default function EventResultsPage() {
 
           {/* QR Code Dialog */}
           <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
-            <DialogContent className="border-slate-700 bg-slate-900 text-white sm:max-w-md">
+            <DialogContent className="border-slate-200 bg-white text-slate-900 sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-center text-white">Invite More People</DialogTitle>
+                <DialogTitle className="text-center text-slate-900">Invite More People</DialogTitle>
               </DialogHeader>
               <div className="flex flex-col items-center gap-4 py-6">
-                <div className="rounded-2xl bg-white p-6">
+                <div className="rounded-2xl bg-white p-6 shadow-lg">
                   <QRCodeSVG
                     value={typeof window !== "undefined" ? window.location.origin + `/event/${eventId}` : ""}
                     size={256}
@@ -145,7 +145,7 @@ export default function EventResultsPage() {
                     includeMargin={true}
                   />
                 </div>
-                <p className="text-center text-sm text-slate-400">
+                <p className="text-center text-sm text-slate-600">
                   Scan to join and add preferences to this event
                 </p>
               </div>
@@ -154,13 +154,13 @@ export default function EventResultsPage() {
 
           {/* Group Stats */}
           {groupStats && (
-            <div className="grid grid-cols-3 gap-4 rounded-2xl bg-slate-900/50 p-6 backdrop-blur">
+            <div className="grid grid-cols-3 gap-4 rounded-2xl bg-slate-50 p-6 backdrop-blur">
               <div className="text-center">
                 <div className="mb-1 text-3xl">👥</div>
-                <div className="text-2xl font-semibold text-white">
+                <div className="text-2xl font-semibold text-slate-900">
                   {groupStats.participantCount}
                 </div>
-                <div className="text-xs text-slate-400">Participants</div>
+                <div className="text-xs text-slate-600">Participants</div>
               </div>
               <div className="text-center">
                 <div className="mb-1 text-3xl">
@@ -170,17 +170,17 @@ export default function EventResultsPage() {
                       ? "⚖️"
                       : "🧘"}
                 </div>
-                <div className="text-2xl font-semibold text-white">
+                <div className="text-2xl font-semibold text-slate-900">
                   {groupStats.avgActivityLevel.toFixed(1)}
                 </div>
-                <div className="text-xs text-slate-400">Avg Activity</div>
+                <div className="text-xs text-slate-600">Avg Activity</div>
               </div>
               <div className="text-center">
                 <div className="mb-1 text-3xl">{getPriceLevelEmoji(groupStats.popularMoneyPreference)}</div>
-                <div className="text-2xl font-semibold capitalize text-white">
+                <div className="text-2xl font-semibold capitalize text-slate-900">
                   {groupStats.popularMoneyPreference}
                 </div>
-                <div className="text-xs text-slate-400">Budget</div>
+                <div className="text-xs text-slate-600">Budget</div>
               </div>
             </div>
           )}
@@ -188,26 +188,26 @@ export default function EventResultsPage() {
 
         {/* Recommendations */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-slate-900">
             Recommended for your group
           </h2>
           {recommendations.map((rec, idx) => (
             <div
               key={idx}
-              className="group overflow-hidden rounded-3xl bg-slate-900/50 backdrop-blur transition-all hover:scale-[1.02]"
+              className="group overflow-hidden rounded-3xl bg-slate-50 backdrop-blur transition-all hover:scale-[1.02]"
             >
               <div className="p-8">
                 <div className="mb-4 flex items-start justify-between">
                   <div className="flex-1">
                     <div className="mb-2 flex items-center gap-3">
                       <span className="text-4xl">{getTypeEmoji(rec.type)}</span>
-                      <h3 className="text-2xl font-semibold text-white">{rec.title}</h3>
+                      <h3 className="text-2xl font-semibold text-slate-900">{rec.title}</h3>
                     </div>
-                    <p className="mb-4 text-slate-300">{rec.description}</p>
+                    <p className="mb-4 text-slate-700">{rec.description}</p>
                   </div>
                   <div className="ml-4 flex flex-col items-end gap-2">
                     <span className="text-3xl">{getPriceLevelEmoji(rec.priceLevel)}</span>
-                    <span className="text-sm text-slate-400">{rec.duration}</span>
+                    <span className="text-sm text-slate-600">{rec.duration}</span>
                   </div>
                 </div>
 
@@ -216,7 +216,7 @@ export default function EventResultsPage() {
                   {rec.highlights.map((highlight, hIdx) => (
                     <span
                       key={hIdx}
-                      className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300"
+                      className="rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-700"
                     >
                       {highlight}
                     </span>
@@ -225,7 +225,7 @@ export default function EventResultsPage() {
 
                 {/* Action Button */}
                 <Button
-                  className="w-full rounded-full bg-white text-slate-950 transition-all hover:bg-white/90 group-hover:scale-105"
+                  className="w-full rounded-xl bg-[#029DE2] text-white transition-all hover:bg-[#029DE2]/90 group-hover:scale-105"
                   size="lg"
                 >
                   Select This Option
@@ -237,17 +237,17 @@ export default function EventResultsPage() {
 
         {/* Participants Preview */}
         {eventData?.preferences && eventData.preferences.length > 0 && (
-          <div className="mt-8 rounded-2xl bg-slate-900/50 p-6 backdrop-blur">
-            <h3 className="mb-4 text-sm font-medium text-slate-400">
+          <div className="mt-8 rounded-2xl bg-slate-50 p-6 backdrop-blur">
+            <h3 className="mb-4 text-sm font-medium text-slate-600">
               Based on preferences from:
             </h3>
             <div className="flex gap-3">
               {eventData.preferences.map((pref, idx) => (
                 <div key={idx} className="flex flex-col items-center gap-1">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-2xl">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-slate-200 text-2xl">
                     {pref.userIcon}
                   </div>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-slate-600">
                     {pref.activityLevel}/5
                   </span>
                 </div>
@@ -257,7 +257,7 @@ export default function EventResultsPage() {
         )}
 
         {/* Dev Tools */}
-        <div className="mt-8 rounded-lg border border-slate-700 bg-slate-900/50 p-4 font-mono text-xs text-slate-400">
+        <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-600">
           <div className="mb-2 text-slate-500">Dev Tools:</div>
           <div>Event ID: {eventId}</div>
           <div>Recommendations: {recommendations.length}</div>

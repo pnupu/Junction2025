@@ -139,8 +139,8 @@ export default function EventPage() {
 
   if (!eventData) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-        <div className="text-white">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-slate-900">Loading...</div>
       </div>
     );
   }
@@ -149,19 +149,19 @@ export default function EventPage() {
   const myPreference = eventData.preferences.find(p => p.sessionId === sessionId);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <main className="min-h-screen bg-white">
       <div className="mx-auto max-w-2xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="mb-1 text-2xl font-semibold text-white">Event Planning</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="mb-1 text-2xl font-semibold text-slate-900">Event Planning</h1>
+          <p className="text-sm text-slate-600">
             {completedCount} {completedCount === 1 ? "person" : "people"} answered
           </p>
         </div>
 
         {/* QR Code and Share Section */}
-        <div className="mb-8 rounded-2xl bg-slate-900/50 p-6 backdrop-blur">
-          <h2 className="mb-4 text-sm font-medium text-slate-400">Invite Others</h2>
+        <div className="mb-8 rounded-2xl bg-slate-50 p-6 backdrop-blur">
+          <h2 className="mb-4 text-sm font-medium text-slate-600">Invite Others</h2>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -179,14 +179,14 @@ export default function EventPage() {
                 </div>
               </button>
               <div>
-                <p className="text-sm font-medium text-white">Scan to join</p>
-                <p className="text-xs text-slate-400">Click QR to enlarge</p>
+                <p className="text-sm font-medium text-slate-900">Scan to join</p>
+                <p className="text-xs text-slate-600">Click QR to enlarge</p>
               </div>
             </div>
             <Button
               onClick={() => void handleCopyLink()}
               variant="outline"
-              className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
+              className="border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
             >
               📋 Copy Link
             </Button>
@@ -195,12 +195,12 @@ export default function EventPage() {
 
         {/* QR Code Dialog */}
         <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
-          <DialogContent className="border-slate-700 bg-slate-900 text-white sm:max-w-md">
+          <DialogContent className="border-slate-200 bg-white text-slate-900 sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-center text-white">Scan to Join Event</DialogTitle>
+              <DialogTitle className="text-center text-slate-900">Scan to Join Event</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col items-center gap-4 py-6">
-              <div className="rounded-2xl bg-white p-6">
+              <div className="rounded-2xl bg-white p-6 shadow-lg">
                 <QRCodeSVG
                   value={typeof window !== "undefined" ? window.location.href : ""}
                   size={256}
@@ -208,7 +208,7 @@ export default function EventPage() {
                   includeMargin={true}
                 />
               </div>
-              <p className="text-center text-sm text-slate-400">
+              <p className="text-center text-sm text-slate-600">
                 Share this QR code to invite others to the event
               </p>
             </div>
@@ -217,21 +217,21 @@ export default function EventPage() {
 
         {/* Participants List */}
         {completedCount > 0 && (
-          <div className="mb-8 rounded-2xl bg-slate-900/50 p-6 backdrop-blur">
-            <h2 className="mb-4 text-sm font-medium text-slate-400">Participants</h2>
+          <div className="mb-8 rounded-2xl bg-slate-50 p-6 backdrop-blur">
+            <h2 className="mb-4 text-sm font-medium text-slate-600">Participants</h2>
             <div className="space-y-3">
               {eventData.preferences.map((pref, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between rounded-xl bg-slate-800/50 p-4"
+                  className="flex items-center justify-between rounded-xl bg-white border border-slate-200 p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-700 text-2xl">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl">
                       {pref.userIcon}
                     </div>
                     <div>
-                      <div className="font-medium text-white">{pref.userName ?? "Anonymous"}</div>
-                      <div className="text-xs text-slate-400">
+                      <div className="font-medium text-slate-900">{pref.userName ?? "Anonymous"}</div>
+                      <div className="text-xs text-slate-600">
                         {pref.moneyPreference} • Activity: {pref.activityLevel}/5
                       </div>
                     </div>
@@ -248,11 +248,11 @@ export default function EventPage() {
 
         {/* Icon Selection */}
         {step === "icon" && !hasSubmitted && (
-          <div className="rounded-3xl bg-slate-900/50 p-8 backdrop-blur">
-            <h2 className="mb-2 text-center text-3xl font-semibold text-white">
+          <div className="rounded-3xl bg-slate-50 p-8 backdrop-blur">
+            <h2 className="mb-2 text-center text-3xl font-semibold text-slate-900">
               Choose your character
             </h2>
-            <p className="mb-8 text-center text-slate-400">
+            <p className="mb-8 text-center text-slate-600">
               Pick an icon to represent you
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -260,10 +260,10 @@ export default function EventPage() {
                 <button
                   key={icon.emoji}
                   onClick={() => handleIconSelect(icon)}
-                  className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-slate-700 bg-slate-800/50 p-6 transition-all hover:scale-105 hover:border-white hover:bg-slate-700"
+                  className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-slate-200 bg-white p-6 transition-all hover:scale-105 hover:border-[#029DE2] hover:bg-slate-50"
                 >
                   <span className="text-5xl">{icon.emoji}</span>
-                  <span className="text-sm font-medium text-white">{icon.name}</span>
+                  <span className="text-sm font-medium text-slate-900">{icon.name}</span>
                 </button>
               ))}
             </div>
@@ -272,36 +272,36 @@ export default function EventPage() {
 
         {/* Preferences Survey */}
         {step === "preferences" && selectedIcon && !hasSubmitted && (
-          <div className="space-y-6 rounded-3xl bg-slate-900/50 p-8 backdrop-blur">
+          <div className="space-y-6 rounded-3xl bg-slate-50 p-8 backdrop-blur">
             <div className="flex items-center gap-3">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-800 text-4xl">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white border-2 border-slate-200 text-4xl">
                 {selectedIcon.emoji}
               </div>
               <div>
-                <h2 className="text-2xl font-semibold text-white">{selectedIcon.name}</h2>
-                <p className="text-sm text-slate-400">Set your preferences</p>
+                <h2 className="text-2xl font-semibold text-slate-900">{selectedIcon.name}</h2>
+                <p className="text-sm text-slate-600">Set your preferences</p>
               </div>
             </div>
 
             {/* 1. Mood */}
             <div>
-              <h3 className="mb-3 text-lg font-medium text-white">1. What is the mood?</h3>
+              <h3 className="mb-3 text-lg font-medium text-slate-900">1. What is the mood?</h3>
               <div className="grid grid-cols-3 gap-3">
                 {moodOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setMood(option.id)}
                     className={`
-                      flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
+                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
                       ${
                         mood === option.id
-                          ? "scale-105 border-white bg-white/10"
-                          : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
+                          : "border-slate-200 bg-white hover:border-slate-300"
                       }
                     `}
                   >
                     <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-white">{option.label}</span>
+                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
                   </button>
                 ))}
               </div>
@@ -309,23 +309,23 @@ export default function EventPage() {
 
             {/* 2. Activity Type */}
             <div>
-              <h3 className="mb-3 text-lg font-medium text-white">2. Activity type?</h3>
+              <h3 className="mb-3 text-lg font-medium text-slate-900">2. Activity type?</h3>
               <div className="grid grid-cols-3 gap-3">
                 {activityTypeOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setActivityType(option.id)}
                     className={`
-                      flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
+                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
                       ${
                         activityType === option.id
-                          ? "scale-105 border-white bg-white/10"
-                          : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
+                          : "border-slate-200 bg-white hover:border-slate-300"
                       }
                     `}
                   >
                     <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-white">{option.label}</span>
+                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
                   </button>
                 ))}
               </div>
@@ -333,23 +333,23 @@ export default function EventPage() {
 
             {/* 3. Food Limits */}
             <div>
-              <h3 className="mb-3 text-lg font-medium text-white">3. Food limits?</h3>
+              <h3 className="mb-3 text-lg font-medium text-slate-900">3. Food limits?</h3>
               <div className="grid grid-cols-3 gap-3">
                 {foodLimitOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setFoodLimit(option.id)}
                     className={`
-                      flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
+                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
                       ${
                         foodLimit === option.id
-                          ? "scale-105 border-white bg-white/10"
-                          : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
+                          : "border-slate-200 bg-white hover:border-slate-300"
                       }
                     `}
                   >
                     <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-white">{option.label}</span>
+                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
                   </button>
                 ))}
               </div>
@@ -357,23 +357,23 @@ export default function EventPage() {
 
             {/* 4. Budget */}
             <div>
-              <h3 className="mb-3 text-lg font-medium text-white">4. Budget</h3>
+              <h3 className="mb-3 text-lg font-medium text-slate-900">4. Budget</h3>
               <div className="grid grid-cols-3 gap-3">
                 {budgetOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setBudget(option.id)}
                     className={`
-                      flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
+                      flex flex-col items-center justify-center rounded-xl border-2 p-6 transition-all
                       ${
                         budget === option.id
-                          ? "scale-105 border-white bg-white/10"
-                          : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+                          ? "scale-105 border-[#029DE2] bg-[#029DE2]/10"
+                          : "border-slate-200 bg-white hover:border-slate-300"
                       }
                     `}
                   >
                     <span className="mb-2 text-3xl">{option.emoji}</span>
-                    <span className="text-sm font-medium text-white">{option.label}</span>
+                    <span className="text-sm font-medium text-slate-900">{option.label}</span>
                   </button>
                 ))}
               </div>
@@ -382,7 +382,7 @@ export default function EventPage() {
             <Button
               onClick={handleSubmitPreferences}
               disabled={!mood || !activityType || !foodLimit || !budget || addPreferences.isPending}
-              className="h-14 w-full rounded-full bg-white text-lg font-semibold text-slate-950 transition-all hover:scale-105 hover:bg-white/90 disabled:opacity-40 disabled:hover:scale-100"
+              className="h-14 w-full rounded-xl bg-[#029DE2] text-lg font-semibold text-white transition-all hover:scale-105 hover:bg-[#029DE2]/90 disabled:opacity-40 disabled:hover:scale-100"
             >
               {addPreferences.isPending ? "Submitting..." : "Submit"}
             </Button>
@@ -391,14 +391,14 @@ export default function EventPage() {
 
         {/* Complete State */}
         {step === "complete" && hasSubmitted && (
-          <div className="rounded-3xl bg-slate-900/50 p-12 text-center backdrop-blur">
+          <div className="rounded-3xl bg-slate-50 p-12 text-center backdrop-blur">
             <div className="mb-4 text-6xl">
               {myPreference?.userIcon ?? selectedIcon?.emoji ?? "✓"}
             </div>
-            <h2 className="mb-3 text-2xl font-semibold text-white">
+            <h2 className="mb-3 text-2xl font-semibold text-slate-900">
               Preferences Submitted!
             </h2>
-            <p className="mb-6 text-slate-400">
+            <p className="mb-6 text-slate-600">
               {isCreator
                 ? "You can generate recommendations when ready"
                 : "Waiting for the event creator to generate options"}
@@ -407,7 +407,7 @@ export default function EventPage() {
             {isCreator && (
               <Button
                 onClick={handleGenerateEvent}
-                className="h-14 w-full max-w-xs rounded-full bg-white text-lg font-semibold text-slate-950 transition-all hover:scale-105 hover:bg-white/90"
+                className="h-14 w-full max-w-xs rounded-xl bg-[#029DE2] text-lg font-semibold text-white transition-all hover:scale-105 hover:bg-[#029DE2]/90"
               >
                 Generate Event Options
               </Button>
@@ -417,7 +417,7 @@ export default function EventPage() {
               <Button
                 onClick={() => void refetch()}
                 variant="outline"
-                className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
+                className="border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
               >
                 Refresh
               </Button>
@@ -426,7 +426,7 @@ export default function EventPage() {
         )}
 
         {/* Dev Tools */}
-        <div className="mt-8 rounded-lg border border-slate-700 bg-slate-900/50 p-4 font-mono text-xs text-slate-400">
+        <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-600">
           <div className="mb-2 text-slate-500">Dev Tools:</div>
           <div>Event ID: {eventId}</div>
           <div>Session ID: {sessionId}</div>

@@ -1,27 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  /* shadcn/ui CSS Variables */
+  /* Wolt Theme Variables */
+  --wolt-blue: 194 98% 45%; /* #029DE2 */
+  --wolt-white: 0 0% 100%; /* #FFFFFF */
+  
+  /* shadcn/ui CSS Variables - Wolt Theme */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
+  --primary: 194 98% 45%; /* Wolt Blue */
+  --primary-foreground: 0 0% 100%; /* White text on Wolt Blue */
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
   --muted: 210 40% 96.1%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --accent: 194 98% 45%; /* Wolt Blue for accents */
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
-  --radius: 0.5rem;
+  --ring: 194 98% 45%; /* Wolt Blue ring */
+  --radius: 0.75rem; /* 12px for Wolt style buttons */
 }
 
 .dark {
@@ -49,6 +53,10 @@
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  
+  /* Wolt Brand Colors */
+  --color-wolt-blue: hsl(194 98% 45%);
+  --color-wolt-white: hsl(0 0% 100%);
   
   /* Tailwind color tokens using CSS variables */
   --color-background: hsl(var(--background));
