@@ -1071,13 +1071,7 @@ export default function EventPage() {
           {/* Waiting message for non-creators */}
           {!isCreator && hasJoined && (
             <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
-              <div className="mb-3 text-4xl">⏳</div>
-              <h3 className="mb-2 text-xl font-semibold text-white">
-                Waiting for the host
-              </h3>
-              <p className="text-white/80">
-                The event creator will generate activities when ready
-              </p>
+       {/*This should be empty */}
             </div>
           )}
 
