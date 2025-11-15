@@ -27,6 +27,7 @@ import {
   type ParticipantLocation,
 } from "@/components/event-map-modal";
 import { MoodQuestions } from "@/components/mood-questions";
+import { GenerateUsersButton } from "@/components/ui/generate-users-button";
 import dynamic from "next/dynamic";
 
 // Type for Leaflet module (only what we need)
@@ -90,7 +91,7 @@ export default function EventPage() {
     eventIdOrCode.length <= 10 && /^[A-Z0-9]+$/i.test(eventIdOrCode);
 
   // Smart polling: only poll when something is actively happening
-  const { data: eventData, refetch } = api.event.get.useQuery(
+  const { data: eventData, refetch, isLoading } = api.event.get.useQuery(
     isLikelyInviteCode
       ? { inviteCode: eventIdOrCode.toUpperCase() }
       : { id: eventIdOrCode },
@@ -438,16 +439,9 @@ export default function EventPage() {
     }
   }, [eventData, router]);
 
-  if (!eventData) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="text-slate-900">Loading...</div>
-      </div>
-    );
-  }
-
+ 
   // Sort participants by createdAt to ensure consistent ordering
-  const participants = [...(eventData.preferences ?? [])].sort(
+  const participants = [...(eventData?.preferences ?? [])].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
   const participantCount = participants.length;
@@ -1019,13 +1013,20 @@ export default function EventPage() {
           {/* Waiting message for non-creators */}
           {!isCreator && hasJoined && (
             <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
-              <div className="mb-3 text-4xl">⏳</div>
-              <h3 className="mb-2 text-xl font-semibold text-white">
-                Waiting for the host
-              </h3>
-              <p className="text-white/80">
-                The event creator will generate activities when ready
-              </p>
+           
+            </div>
+          )}
+
+          {/* Generate Demo Users Button */}
+          {isCreator && hasJoined && (
+            <div className="mt-6">
+              <GenerateUsersButton
+                onGenerateUsers={(count) => {
+                  console.log(`Generated ${count} demo users`);
+                  // TODO: Implement actual demo user generation
+                  void refetch();
+                }}
+              />
             </div>
           )}
         </div>
