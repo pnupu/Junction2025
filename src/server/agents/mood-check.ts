@@ -10,6 +10,9 @@ import {
   type GroupStatsExtended,
   type PreferenceSummary,
 } from "@/server/agents/advisor-pipeline";
+import type { FilteredVenue } from "@/server/agents/venue-filter";
+import { moodQuestionsCache } from "@/lib/cache";
+import { createHash } from "crypto";
 
 const openaiClient =
   env.OPENAI_API_KEY && env.OPENAI_API_KEY.length > 0
@@ -19,7 +22,7 @@ const openaiClient =
 const questionSchema = z.object({
   id: z.string(),
   prompt: z.string(),
-  type: z.enum(["scale", "choice", "binary", "text"]),
+  type: z.enum(["scale", "choice"]),
   signalKey: z.string(),
   options: z.array(z.string()).optional(),
   suggestedResponse: z.string().optional(),
@@ -175,17 +178,60 @@ export type MoodAgentInput = {
   stats: GroupStatsExtended;
   answeredSignals?: Record<string, unknown>;
   timeOfDayLabel?: string;
+  filteredVenues?: FilteredVenue[]; // Venues to narrow down with questions
 };
+
+/**
+ * Generate a cache key from the input
+ */
+function generateCacheKey(input: MoodAgentInput): string {
+  // Create a hash from:
+  // 1. Venue IDs (sorted for consistency)
+  // 2. Stats (participant count, energy, budget)
+  // 3. Summary keywords
+  
+  const venueIds = input.filteredVenues
+    ? input.filteredVenues
+        .map((v) => v.id)
+        .sort()
+        .join(",")
+    : "no-venues";
+  
+  const statsKey = `${input.stats.participantCount}-${input.stats.energyLabel}-${input.stats.popularMoneyPreference}`;
+  const keywordsKey = input.summary.vibeKeywords.slice(0, 4).sort().join(",");
+  
+  const keyString = `${venueIds}|${statsKey}|${keywordsKey}`;
+  
+  // Create SHA-256 hash for shorter, consistent key
+  return createHash("sha256").update(keyString).digest("hex").slice(0, 16);
+}
 
 export async function runMoodCheckAgent(
   input: MoodAgentInput,
 ): Promise<MoodAgentResponse> {
-  if (!openaiClient || !env.OPENAI_MODEL) {
+  // Check cache first
+  const cacheKey = generateCacheKey(input);
+  const cached = moodQuestionsCache.get(cacheKey);
+  
+  if (cached) {
     return {
+      questions: cached.questions as MoodQuestion[],
+      followUp: cached.followUp,
+      debugNotes: cached.debugNotes ?? ["cached"],
+    };
+  }
+
+  if (!openaiClient || !env.OPENAI_MODEL) {
+    const fallback = {
       questions: buildFallbackQuestions(input),
       followUp: undefined,
       debugNotes: ["fallback-mode"],
     };
+    
+    // Cache fallback too
+    moodQuestionsCache.set(cacheKey, fallback);
+    
+    return fallback;
   }
 
   const client = openaiClient;
@@ -193,7 +239,7 @@ export async function runMoodCheckAgent(
   try {
     const request: ResponseCreateParamsNonStreaming = {
       model: env.OPENAI_MODEL,
-      temperature: 0.5,
+      temperature: 0.3, // Lower temperature for faster, more deterministic responses
       text: {
         format: {
           type: "json_schema",
@@ -206,7 +252,7 @@ export async function runMoodCheckAgent(
         {
           role: "system",
           content:
-            "You are Wolt Advisor's Mood Agent. Ask up to 3 concise questions to capture the group's current vibe. Prefer slider, emoji, or short-choice formats. Only ask what is still uncertain.",
+            "Wolt Advisor Mood Agent. Generate 1-3 concise questions to match groups to venues. ALL questions MUST be multiple choice - use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Provide options array for all questions. For preference questions (e.g., 'active or laid-back'), use 'choice' type with descriptive options like ['More active', 'Laid-back']. Use slider/emoji/short-choice formats. Analyze venue differences and create natural questions. NEVER mention venue names/types. Each question must be DISTINCTLY different - varied vocabulary, different structures. Cover different aspects (atmosphere, time, hunger, social).",
         },
         {
           role: "user",
@@ -227,54 +273,211 @@ export async function runMoodCheckAgent(
     const moodPayload: unknown = JSON.parse(raw);
     const parsed = moodAgentResponseSchema.parse(moodPayload);
 
-    return parsed;
+    // Safety check: Ensure all questions have options
+    const validatedQuestions = parsed.questions.map((q) => {
+      // Ensure scale and choice questions have options
+      if ((q.type === "scale" || q.type === "choice") && (!q.options || q.options.length === 0)) {
+        // If no options provided, add default options based on type
+        if (q.type === "scale") {
+          q.options = ["Low", "Medium", "High"];
+        } else {
+          q.options = ["Option 1", "Option 2"];
+        }
+      }
+      return q;
+    });
+
+    const result = {
+      ...parsed,
+      questions: validatedQuestions,
+    };
+
+    // Cache the result
+    moodQuestionsCache.set(cacheKey, {
+      questions: result.questions,
+      followUp: result.followUp,
+      debugNotes: result.debugNotes,
+    });
+
+    return result;
   } catch (error) {
     console.warn("[MoodAgent] Failed, using fallback", error);
-    return {
+    const fallback = {
       questions: buildFallbackQuestions(input),
       followUp: undefined,
       debugNotes: ["mood-agent-fallback"],
     };
+    
+    // Cache fallback too
+    moodQuestionsCache.set(cacheKey, fallback);
+    
+    return fallback;
   }
 }
 
 function buildPromptPayload(input: MoodAgentInput) {
   const { stats, summary } = input;
+  
+  // Build venue context and analyze venue characteristics
+  let venueContext: Array<{
+    name: string;
+    type: string;
+    description: string;
+    distanceKm?: string;
+  }> | undefined;
+  
+  let venueAnalysis: {
+    venueTypes: string[];
+    keyCharacteristics: string[];
+    differentiatingFactors: string[];
+  } | undefined;
+
+  if (input.filteredVenues && input.filteredVenues.length > 0) {
+    // Limit to top 12 venues to reduce context size and speed up processing
+    const topVenues = input.filteredVenues.slice(0, 12);
+    
+    venueContext = topVenues.map((venue) => ({
+      name: venue.name,
+      type: venue.type,
+      // Truncate description to first 100 chars to reduce token count
+      description: venue.description ? venue.description.slice(0, 100) : "",
+      distanceKm: venue.distanceMeters
+        ? (venue.distanceMeters / 1000).toFixed(1)
+        : undefined,
+    }));
+
+    // Analyze venue characteristics to help generate better questions
+    const venueTypes = new Set<string>();
+    const characteristics = new Set<string>();
+    const keywords = new Set<string>();
+
+    for (const venue of topVenues) {
+      // Extract venue type (normalize)
+      const normalizedType = venue.type
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase());
+      venueTypes.add(normalizedType);
+
+      // Extract keywords from description
+      if (venue.description) {
+        const desc = venue.description.toLowerCase();
+        
+        // Look for activity-related keywords
+        const activityKeywords = [
+          "active", "competitive", "sport", "game", "play", "challenge",
+          "relax", "chill", "casual", "social", "party", "dance",
+          "outdoor", "indoor", "adventure", "experience", "workshop",
+          "class", "lesson", "tour", "walk", "hike", "bike"
+        ];
+        
+        activityKeywords.forEach((keyword) => {
+          if (desc.includes(keyword)) {
+            keywords.add(keyword);
+          }
+        });
+
+        // Look for atmosphere keywords
+        const atmosphereKeywords = [
+          "cozy", "intimate", "lively", "energetic", "quiet", "loud",
+          "romantic", "family", "group", "solo", "date", "friends"
+        ];
+        
+        atmosphereKeywords.forEach((keyword) => {
+          if (desc.includes(keyword)) {
+            characteristics.add(keyword);
+          }
+        });
+      }
+    }
+
+    // Identify differentiating factors
+    const differentiatingFactors: string[] = [];
+    
+    // Check if there's a mix of indoor/outdoor
+    const hasIndoor = Array.from(keywords).some((k) => 
+      ["indoor", "inside"].includes(k)
+    );
+    const hasOutdoor = Array.from(keywords).some((k) => 
+      ["outdoor", "outside", "park", "nature"].includes(k)
+    );
+    if (hasIndoor && hasOutdoor) {
+      differentiatingFactors.push("indoor vs outdoor preference");
+    }
+
+    // Check for activity level variety
+    const hasActive = Array.from(keywords).some((k) =>
+      ["active", "competitive", "sport", "challenge"].includes(k)
+    );
+    const hasRelaxed = Array.from(keywords).some((k) =>
+      ["relax", "chill", "casual", "cozy"].includes(k)
+    );
+    if (hasActive && hasRelaxed) {
+      differentiatingFactors.push("activity intensity preference");
+    }
+
+    // Check for social vs solo activities
+    const hasSocial = Array.from(keywords).some((k) =>
+      ["social", "party", "group", "friends"].includes(k)
+    );
+    const hasSolo = Array.from(keywords).some((k) =>
+      ["solo", "quiet", "intimate"].includes(k)
+    );
+    if (hasSocial && hasSolo) {
+      differentiatingFactors.push("social atmosphere preference");
+    }
+
+    // Check venue type diversity
+    if (venueTypes.size > 3) {
+      differentiatingFactors.push("venue type variety");
+    }
+
+    venueAnalysis = {
+      venueTypes: Array.from(venueTypes).slice(0, 6), // Reduced from 10
+      keyCharacteristics: Array.from(characteristics).slice(0, 5), // Reduced from 8
+      differentiatingFactors: differentiatingFactors.slice(0, 3), // Limit to top 3
+    };
+  }
+
   return {
     participantName: input.participantName,
-    summary,
+    // Simplified summary - only essential fields to reduce token count
+    summary: {
+      headline: summary.headline,
+      summary: summary.summary.slice(0, 150), // Truncate summary text
+      vibeKeywords: summary.vibeKeywords.slice(0, 4), // Limit keywords
+      budgetTier: summary.budgetTier,
+      energyLevel: summary.energyLevel,
+      timeWindow: summary.timeWindow,
+      hungerLevel: summary.hungerLevel,
+      callToAction: summary.callToAction,
+    },
     stats: {
       participantCount: stats.participantCount,
-      avgActivityLevel: stats.avgActivityLevel,
       energyLabel: stats.energyLabel,
       popularMoneyPreference: stats.popularMoneyPreference,
     },
     answeredSignals: input.answeredSignals ?? {},
     timeOfDayLabel: input.timeOfDayLabel ?? deriveTimeOfDayLabel(),
-    request: {
-      missingSignals: determineMissingSignals(input),
-      instructions: [
-        "Keep tone playful and short.",
-        "Return 1-3 questions targeting the missing signals.",
-        "If confidence is already high for a signal, skip asking about it.",
-      ],
-    },
+    availableVenues: venueContext?.slice(0, 10), // Limit to 10 venues in payload
+    venueCount: input.filteredVenues?.length ?? 0,
+    venueAnalysis,
+      request: {
+        answeredSignals: input.answeredSignals ?? {},
+        instructions: [
+          "Keep tone playful and short.",
+          "Return 1-3 questions that help narrow down which venues would be best for this group.",
+          "CRITICAL: ALL questions MUST be multiple choice. Use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Always provide an options array with at least 2 choices. For preference questions (choosing between options), use 'choice' type with descriptive option labels, NOT binary yes/no.",
+          "VARIETY IS CRITICAL: Each question must be completely different from the others. Use different vocabulary, different question structures, and cover different aspects. Avoid repeating similar words or phrases across questions.",
+          "Question structure variety: Mix scales and multiple choice formats. Don't use the same 'X or Y' pattern for multiple questions. For preference questions, use 'choice' type with descriptive options (e.g., ['More active', 'Laid-back']), not binary yes/no.",
+          "Vocabulary variety: If one question uses 'cozy', don't use 'cozy' again. If one uses 'energetic', use different energy-related terms in other questions.",
+          venueAnalysis && venueAnalysis.differentiatingFactors.length > 0
+            ? `Venues differ by: ${venueAnalysis.differentiatingFactors.slice(0, 3).join(", ")}. Types: ${venueAnalysis.venueTypes.slice(0, 4).join(", ")}. Create questions that distinguish between options. Cover different aspects.`
+            : venueContext
+              ? `Available venues: ${venueContext.slice(0, 8).map(v => `${v.name} (${v.type})`).join(", ")}. Create questions to match group to venues. Cover different aspects.`
+              : "Generate general mood questions covering different aspects.",
+        ],
+      },
   };
-}
-
-function determineMissingSignals(input: MoodAgentInput) {
-  const missing: string[] = [];
-  const answered = input.answeredSignals ?? {};
-  if (!answered.currentEnergy) missing.push("currentEnergy");
-  if (!answered.timeAvailable) missing.push("timeAvailable");
-  if (!answered.hungerLevel) missing.push("hungerLevel");
-  if (!answered.indoorOutdoorPreference) missing.push("indoorOutdoorPreference");
-
-  if (missing.length === 0) {
-    missing.push("wildcardPreference");
-  }
-
-  return missing;
 }
 
 function deriveTimeOfDayLabel(date = new Date()) {
@@ -287,43 +490,113 @@ function deriveTimeOfDayLabel(date = new Date()) {
 
 function buildFallbackQuestions(input: MoodAgentInput): MoodQuestion[] {
   const questions: MoodQuestion[] = [];
+  
+  // Analyze venues if available to generate better fallback questions
+  const hasVenues = input.filteredVenues && input.filteredVenues.length > 0;
+  let venueCharacteristics: {
+    hasIndoor?: boolean;
+    hasOutdoor?: boolean;
+    hasActive?: boolean;
+    hasRelaxed?: boolean;
+    hasFood?: boolean;
+  } = {};
 
-  questions.push({
-    id: "currentEnergy",
-    prompt: "What's your energy level right now? 🔋",
-    type: "scale",
-    signalKey: "currentEnergy",
-    options: ["Chill", "Balanced", "Hype"],
-    suggestedResponse:
-      input.stats.energyLabel === "high"
-        ? "Hype"
-        : input.stats.energyLabel === "low"
-          ? "Chill"
-          : "Balanced",
-    reason: "Need live energy reading to match venue pacing.",
-  });
+  if (hasVenues && input.filteredVenues) {
+    const topVenues = input.filteredVenues.slice(0, 10);
+    const allDescriptions = topVenues
+      .map((v) => v.description?.toLowerCase() ?? "")
+      .join(" ");
 
+    venueCharacteristics = {
+      hasIndoor: allDescriptions.includes("indoor") || allDescriptions.includes("inside"),
+      hasOutdoor: allDescriptions.includes("outdoor") || allDescriptions.includes("park") || allDescriptions.includes("nature"),
+      hasActive: allDescriptions.includes("active") || allDescriptions.includes("competitive") || allDescriptions.includes("sport"),
+      hasRelaxed: allDescriptions.includes("relax") || allDescriptions.includes("chill") || allDescriptions.includes("cozy"),
+      hasFood: allDescriptions.includes("restaurant") || allDescriptions.includes("dining") || allDescriptions.includes("food") || allDescriptions.includes("cafe"),
+    };
+  }
+
+  // Generate venue-aware questions with variety
+  // First question: atmosphere/indoor-outdoor (if applicable)
+  if (venueCharacteristics.hasIndoor && venueCharacteristics.hasOutdoor) {
+    questions.push({
+      id: "atmospherePreference",
+      prompt: "What's the weather vibe you're feeling? 🌤️",
+      type: "choice",
+      signalKey: "indoorOutdoorPreference",
+      options: ["Stay inside", "Get some air", "No preference"],
+      reason: "Helps match indoor vs outdoor venues naturally.",
+    });
+  }
+
+  // Second question: time commitment (always useful, different phrasing)
   questions.push({
     id: "timeAvailable",
-    prompt: "How much time do you want to spend tonight?",
-    type: "choice",
+    prompt: "How long are you thinking? ⏰",
+    type: "scale",
     signalKey: "timeAvailable",
-    options: ["<1h", "1-2h", "2h+"],
+    options: ["Quick", "Moderate", "All evening"],
     reason: "Helps filter availability slots.",
   });
 
-  questions.push({
-    id: "hungerLevel",
-    prompt: "Hunger check? 🍽️",
-    type: "choice",
-    signalKey: "hungerLevel",
-    options: ["Snacks", "Proper meal", "Stuffed already"],
-    suggestedResponse:
-      summaryMatchesFoodFocus(input.summary) ? "Proper meal" : "Snacks",
-    reason: "Decides if we pair dining with the plan.",
-  });
+  // Third question: activity level OR food (whichever is more relevant, different structure)
+  if (venueCharacteristics.hasActive && venueCharacteristics.hasRelaxed && !venueCharacteristics.hasFood) {
+    questions.push({
+      id: "activityPace",
+      prompt: "What's your move tonight? 🎯",
+      type: "choice",
+      signalKey: "activityPace",
+      options: ["Low-key", "Mix it up", "Go all out"],
+      reason: "Helps differentiate between active and relaxed venues.",
+    });
+  } else if (venueCharacteristics.hasFood) {
+    questions.push({
+      id: "hungerLevel",
+      prompt: "Food situation? 🍽️",
+      type: "choice",
+      signalKey: "hungerLevel",
+      options: ["Light bites", "Full meal", "Already ate"],
+      suggestedResponse:
+        summaryMatchesFoodFocus(input.summary) ? "Full meal" : "Light bites",
+      reason: "Decides if we pair dining with the plan.",
+    });
+  } else {
+    // Fallback: energy level with different phrasing
+    questions.push({
+      id: "currentEnergy",
+      prompt: "What's the vibe? 🔋",
+      type: "scale",
+      signalKey: "currentEnergy",
+      options: ["Mellow", "Moderate", "Pumped"],
+      suggestedResponse:
+        input.stats.energyLabel === "high"
+          ? "Pumped"
+          : input.stats.energyLabel === "low"
+            ? "Mellow"
+            : "Moderate",
+      reason: "Need live energy reading to match venue pacing.",
+    });
+  }
 
-  return questions;
+  // Ensure we have at least 2 questions
+  if (questions.length < 2) {
+    questions.push({
+      id: "currentEnergy",
+      prompt: "What's your energy level right now? 🔋",
+      type: "scale",
+      signalKey: "currentEnergy",
+      options: ["Chill", "Balanced", "Hype"],
+      suggestedResponse:
+        input.stats.energyLabel === "high"
+          ? "Hype"
+          : input.stats.energyLabel === "low"
+            ? "Chill"
+            : "Balanced",
+      reason: "Need live energy reading to match venue pacing.",
+    });
+  }
+
+  return questions.slice(0, 3); // Max 3 questions
 }
 
 function summaryMatchesFoodFocus(summary: PreferenceSummary) {

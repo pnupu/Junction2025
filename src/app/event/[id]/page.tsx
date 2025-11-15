@@ -82,15 +82,40 @@ export default function EventPage() {
   const isLikelyInviteCode =
     eventIdOrCode.length <= 10 && /^[A-Z0-9]+$/i.test(eventIdOrCode);
 
+  // Smart polling: only poll when something is actively happening
   const { data: eventData, refetch } = api.event.get.useQuery(
     isLikelyInviteCode
       ? { inviteCode: eventIdOrCode.toUpperCase() }
       : { id: eventIdOrCode },
     {
       enabled: !!eventIdOrCode,
-      refetchInterval: 2000, // Refetch every 2 seconds for real-time updates
+      // Conditional polling based on event status
+      refetchInterval: (query) => {
+        const data = query.state.data as { status?: string } | undefined;
+        const status = data?.status;
+        
+        // Poll frequently when generating recommendations
+        if (status === "generating") {
+          return 2000; // 2 seconds
+        }
+        
+        // Poll less frequently when collecting preferences (people might be joining)
+        if (status === "collecting_preferences" || status === "ready_to_generate") {
+          return 5000; // 5 seconds
+        }
+        
+        // Poll very infrequently when generated (just in case)
+        if (status === "generated") {
+          return 30000; // 30 seconds
+        }
+        
+        // Default: no polling (will refetch on window focus or manual refetch)
+        return false;
+      },
       refetchOnWindowFocus: true,
       refetchOnMount: true,
+      // Stale time: data is fresh for 1 second (prevents unnecessary refetches)
+      staleTime: 1000,
     },
   );
 

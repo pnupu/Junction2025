@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
@@ -19,38 +19,47 @@ export function MoodQuestions({
   participantName,
   onComplete,
 }: MoodQuestionsProps) {
-  const [currentQuestions, setCurrentQuestions] = useState<MoodQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [followUp, setFollowUp] = useState<string | undefined>();
-  const [shouldFetchMore, setShouldFetchMore] = useState(false);
-  const hasFetchedInitialRef = React.useRef(false);
   const [loadingDots, setLoadingDots] = useState(".");
 
-  const getMoodQuestions = api.event.getMoodQuestions.useMutation({
-    onSuccess: (data) => {
-      setCurrentQuestions(data.questions);
-      setFollowUp(data.followUp);
-      setIsLoading(false);
+  // Use query instead of mutation - enables better polling/refetching
+  const {
+    data: moodData,
+    isLoading,
+    refetch,
+  } = api.event.getMoodQuestions.useQuery(
+    {
+      groupId,
+      sessionId,
+      participantName,
+      answeredSignals: undefined, // Always read from DB
     },
-    onError: (error) => {
-      console.error("Failed to get mood questions:", error);
-      setIsLoading(false);
+    {
+      // Only fetch when we have the required data
+      enabled: !!groupId && !!sessionId,
+      // Refetch when answers are saved (via refetch call)
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     },
-  });
+  );
+
+  const currentQuestions = moodData?.questions ?? [];
+  const followUp = moodData?.followUp;
 
   const saveMoodResponses = api.event.saveMoodResponses.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       // Clear current answers
       setAnswers({});
       setIsSubmitting(false);
-      // Optionally fetch more questions or complete
+      
+      // Refetch questions after saving (backend will read updated responses from DB)
+      await refetch();
+      
+      // Optionally complete if callback provided
       if (onComplete) {
         onComplete();
-      } else {
-        // Fetch next batch of questions (backend will read from DB)
-        setShouldFetchMore(true);
       }
     },
     onError: (error) => {
@@ -58,50 +67,6 @@ export function MoodQuestions({
       setIsSubmitting(false);
     },
   });
-
-  const fetchQuestions = useCallback(
-    (useCurrentAnswers = false) => {
-      // Prevent duplicate fetches
-      if (isLoading || getMoodQuestions.isPending) {
-        return;
-      }
-      setIsLoading(true);
-      getMoodQuestions.mutate({
-        groupId,
-        sessionId,
-        participantName,
-        // Only pass answeredSignals if we want to use current form state
-        // Otherwise, backend will read from database
-        answeredSignals: useCurrentAnswers ? answers : undefined,
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [groupId, sessionId, participantName, isLoading],
-  );
-
-  useEffect(() => {
-    // Fetch initial questions when component mounts (only once)
-    // Use ref to prevent double fetching even if component remounts
-    if (
-      !hasFetchedInitialRef.current &&
-      currentQuestions.length === 0 &&
-      !isLoading &&
-      !getMoodQuestions.isPending
-    ) {
-      hasFetchedInitialRef.current = true;
-      fetchQuestions(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Fetch more questions after saving (backend reads from DB)
-  useEffect(() => {
-    if (shouldFetchMore) {
-      setShouldFetchMore(false);
-      fetchQuestions(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldFetchMore]);
 
   // Animate loading dots
   useEffect(() => {
@@ -230,12 +195,15 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
       const max = scaleMatch ? parseInt(scaleMatch[2] ?? "5") : 5;
       const scaleNumbers = Array.from({ length: max - min + 1 }, (_, i) => min + i);
 
+      // For larger scales (7+), use a more compact layout
+      const isLargeScale = scaleNumbers.length > 6;
+      
       return (
         <div>
           <label className="mb-3 block text-sm font-medium text-white">
             {prompt}
           </label>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {scaleNumbers.map((num) => {
               const isSelected = value === num || value === String(num);
               return (
@@ -243,7 +211,11 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
                   key={num}
                   type="button"
                   onClick={() => onChange(num)}
-                  className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                  className={`rounded-lg text-sm font-medium transition-all ${
+                    isLargeScale
+                      ? "flex-1 min-w-0 px-1.5 py-2"
+                      : "flex-1 px-3 py-2.5"
+                  } ${
                     isSelected
                       ? "bg-white text-[#029DE2] shadow-md"
                       : "bg-white/20 text-white hover:bg-white/30"

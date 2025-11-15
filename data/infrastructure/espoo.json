@@ -4,9 +4,9 @@
     "name": "Tapiola Bowling & Bar",
     "city": "Espoo",
     "type": "bowling_alley",
-    "address": "Itätuulenkuja 9, 02100 Espoo",
-    "latitude": 60.1742,
-    "longitude": 24.805,
+    "address": "Kauppamiehentie 6, 02100 Espoo",
+    "latitude": 60.1771891,
+    "longitude": 24.8024555,
     "description": "Modern eight-lane bowling lounge with neon lighting, craft drinks, and Wolt-integrated snack ordering.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://wolt.com",
@@ -17,7 +17,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "bowling",
-      "vibeTags": ["retro", "competitive", "indoors"],
+      "vibeTags": [
+        "retro",
+        "competitive",
+        "indoors"
+      ],
       "neighborhood": "Tapiola",
       "distanceHintsKm": {
         "otaniemi": 1.8,
@@ -36,10 +40,20 @@
       },
       "budgetLevel": "moderate",
       "questionsMapping": {
-        "energyLevels": ["medium", "high"],
-        "timeSlotsMinutes": [60, 90],
-        "budgetTiers": ["moderate"],
-        "noveltyPreference": ["familiar"]
+        "energyLevels": [
+          "medium",
+          "high"
+        ],
+        "timeSlotsMinutes": [
+          60,
+          90
+        ],
+        "budgetTiers": [
+          "moderate"
+        ],
+        "noveltyPreference": [
+          "familiar"
+        ]
       },
       "availability": [
         {
@@ -83,10 +97,19 @@
         "link": "https://wolt.com/fi/experiences/tapiola-bowling",
         "qrPayload": "wolt://advisor/book?venue=espoo-tapiola-bowling&slot=2024-11-16T19:00:00%2B02:00"
       },
-      "addOns": ["Lane-side snack tray", "Shoe rental included", "Optional arcade tokens"],
+      "addOns": [
+        "Lane-side snack tray",
+        "Shoe rental included",
+        "Optional arcade tokens"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["high_energy_group", "rainy_day"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "high_energy_group",
+          "rainy_day"
+        ],
         "dataFreshnessHours": 4
       },
       "demoTalkingPoints": [
@@ -101,8 +124,8 @@
     "city": "Espoo",
     "type": "museum",
     "address": "Ahertajantie 5, 02100 Espoo",
-    "latitude": 60.1766,
-    "longitude": 24.8031,
+    "latitude": 60.1788939,
+    "longitude": 24.7943157,
     "description": "Late-opening access to EMMA, the Finnish Toy Museum and Design Shop under one roof.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://emmamuseum.fi/",
@@ -113,7 +136,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "culture",
-      "vibeTags": ["indoor", "design", "low_energy"],
+      "vibeTags": [
+        "indoor",
+        "design",
+        "low_energy"
+      ],
       "neighborhood": "Tapiola",
       "distanceHintsKm": {
         "otaniemi": 1.5,
@@ -132,11 +159,23 @@
       },
       "budgetLevel": "budget",
       "questionsMapping": {
-        "energyLevels": ["low", "medium"],
-        "timeSlotsMinutes": [60, 90],
-        "budgetTiers": ["budget"],
-        "noveltyPreference": ["explorer"],
-        "hasVisitedBefore": ["either"]
+        "energyLevels": [
+          "low",
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          60,
+          90
+        ],
+        "budgetTiers": [
+          "budget"
+        ],
+        "noveltyPreference": [
+          "explorer"
+        ],
+        "hasVisitedBefore": [
+          "either"
+        ]
       },
       "availability": [
         {
@@ -169,10 +208,18 @@
         "link": "https://wolt.com/fi/experiences/weegee",
         "qrPayload": "wolt://advisor/book?venue=espoo-weegee-museum&slot=2024-11-16T17:30:00%2B02:00"
       },
-      "addOns": ["Guided highlights tour", "Design Museum store credit"],
+      "addOns": [
+        "Guided highlights tour",
+        "Design Museum store credit"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["rainy_day", "culture_break"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "rainy_day",
+          "culture_break"
+        ],
         "dataFreshnessHours": 6
       },
       "demoTalkingPoints": [
@@ -186,9 +233,9 @@
     "name": "Tapiola Tennis Park",
     "city": "Espoo",
     "type": "tennis_court",
-    "address": "Urheilupuistontie 2, 02200 Espoo",
-    "latitude": 60.1755,
-    "longitude": 24.8052,
+    "address": "Tuulikuja 1, 02100 Espoo",
+    "latitude": 60.1724916,
+    "longitude": 24.8012323,
     "description": "Four outdoor clay courts adjacent to Tapiola Sports Park with evening lighting.",
     "sourceName": "Espoo Sports Facilities Dataset",
     "sourceUrl": "https://www.espoo.fi/fi/avoin-data/urheilupaikat",
@@ -199,7 +246,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "tennis",
-      "vibeTags": ["outdoor", "competitive", "twilight"],
+      "vibeTags": [
+        "outdoor",
+        "competitive",
+        "twilight"
+      ],
       "neighborhood": "Tapiola Sports Park",
       "distanceHintsKm": {
         "otaniemi": 2.2,
@@ -218,11 +269,21 @@
       },
       "budgetLevel": "moderate",
       "questionsMapping": {
-        "energyLevels": ["high"],
-        "timeSlotsMinutes": [90],
-        "budgetTiers": ["moderate"],
-        "weatherFlex": ["dry"],
-        "noveltyPreference": ["familiar"]
+        "energyLevels": [
+          "high"
+        ],
+        "timeSlotsMinutes": [
+          90
+        ],
+        "budgetTiers": [
+          "moderate"
+        ],
+        "weatherFlex": [
+          "dry"
+        ],
+        "noveltyPreference": [
+          "familiar"
+        ]
       },
       "availability": [
         {
@@ -255,10 +316,18 @@
         "link": "https://wolt.com/fi/experiences/tapiola-tennis",
         "qrPayload": "wolt://advisor/book?venue=espoo-tapiola-tennis-park&slot=2024-11-16T18:00:00%2B02:00"
       },
-      "addOns": ["Coach-on-call", "Post-match smoothie delivery"],
+      "addOns": [
+        "Coach-on-call",
+        "Post-match smoothie delivery"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["outdoor"],
-        "idealFor": ["high_energy_group", "sunset_golden_hour"],
+        "weatherSuitability": [
+          "outdoor"
+        ],
+        "idealFor": [
+          "high_energy_group",
+          "sunset_golden_hour"
+        ],
         "dataFreshnessHours": 12
       },
       "demoTalkingPoints": [
@@ -273,8 +342,8 @@
     "city": "Espoo",
     "type": "beach",
     "address": "Kunnarlantie 33-39, 02740 Espoo",
-    "latitude": 60.2528,
-    "longitude": 24.6886,
+    "latitude": 60.2416506,
+    "longitude": 24.6578819,
     "description": "Lake-front beach with sauna, equipment rentals, and large green areas.",
     "sourceName": "Espoo Outdoor Recreation Dataset",
     "sourceUrl": "https://www.espoo.fi/fi/avoin-data/uimarannat",
@@ -285,7 +354,12 @@
     "enriched": {
       "category": "activity",
       "subCategory": "lakeside_retreat",
-      "vibeTags": ["outdoor", "relaxed", "sauna", "picnic"],
+      "vibeTags": [
+        "outdoor",
+        "relaxed",
+        "sauna",
+        "picnic"
+      ],
       "neighborhood": "Oittaa",
       "distanceHintsKm": {
         "otaniemi": 12.5,
@@ -304,12 +378,28 @@
       },
       "budgetLevel": "budget",
       "questionsMapping": {
-        "energyLevels": ["low", "medium"],
-        "timeSlotsMinutes": [120, 180],
-        "budgetTiers": ["budget"],
-        "noveltyPreference": ["explorer"],
-        "weatherFlex": ["sunny", "cloudy"],
-        "hungerLevels": ["snack", "picnic"]
+        "energyLevels": [
+          "low",
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          120,
+          180
+        ],
+        "budgetTiers": [
+          "budget"
+        ],
+        "noveltyPreference": [
+          "explorer"
+        ],
+        "weatherFlex": [
+          "sunny",
+          "cloudy"
+        ],
+        "hungerLevels": [
+          "snack",
+          "picnic"
+        ]
       },
       "availability": [
         {
@@ -342,10 +432,19 @@
         "link": "https://wolt.com/fi/experiences/oittaa",
         "qrPayload": "wolt://advisor/book?venue=espoo-oittaa-beach&slot=2024-11-16T16:00:00%2B02:00"
       },
-      "addOns": ["Fat Lizard picnic delivery", "SUP board rental", "Sauna host"],
+      "addOns": [
+        "Fat Lizard picnic delivery",
+        "SUP board rental",
+        "Sauna host"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["outdoor"],
-        "idealFor": ["sunset", "wellness"],
+        "weatherSuitability": [
+          "outdoor"
+        ],
+        "idealFor": [
+          "sunset",
+          "wellness"
+        ],
         "dataFreshnessHours": 24
       },
       "demoTalkingPoints": [
@@ -360,8 +459,8 @@
     "city": "Espoo",
     "type": "swimming_hall",
     "address": "Veräjäpellonkatu 15, 02650 Espoo",
-    "latitude": 60.2194,
-    "longitude": 24.8117,
+    "latitude": 60.2260563,
+    "longitude": 24.8024658,
     "description": "Indoor pool complex with year-round heated outdoor lanes and amphitheater seating.",
     "sourceName": "Espoo Sports Facilities Dataset",
     "sourceUrl": "https://www.espoo.fi/fi/avoin-data/urheilupaikat",
@@ -372,7 +471,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "pool_sauna",
-      "vibeTags": ["indoor", "steam", "recovery"],
+      "vibeTags": [
+        "indoor",
+        "steam",
+        "recovery"
+      ],
       "neighborhood": "Leppävaara",
       "distanceHintsKm": {
         "otaniemi": 3.5,
@@ -391,11 +494,22 @@
       },
       "budgetLevel": "budget",
       "questionsMapping": {
-        "energyLevels": ["low", "medium"],
-        "timeSlotsMinutes": [90],
-        "budgetTiers": ["budget"],
-        "noveltyPreference": ["familiar"],
-        "weatherFlex": ["any"]
+        "energyLevels": [
+          "low",
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          90
+        ],
+        "budgetTiers": [
+          "budget"
+        ],
+        "noveltyPreference": [
+          "familiar"
+        ],
+        "weatherFlex": [
+          "any"
+        ]
       },
       "availability": [
         {
@@ -428,10 +542,19 @@
         "link": "https://wolt.com/fi/experiences/leppavaara-swim",
         "qrPayload": "wolt://advisor/book?venue=espoo-leppavaara-swim&slot=2024-11-16T20:00:00%2B02:00"
       },
-      "addOns": ["Private lane upgrade", "Juice bar vouchers"],
+      "addOns": [
+        "Private lane upgrade",
+        "Juice bar vouchers"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor", "all_weather"],
-        "idealFor": ["recovery", "mixed_energy_group"],
+        "weatherSuitability": [
+          "indoor",
+          "all_weather"
+        ],
+        "idealFor": [
+          "recovery",
+          "mixed_energy_group"
+        ],
         "dataFreshnessHours": 6
       },
       "demoTalkingPoints": [
@@ -445,9 +568,9 @@
     "name": "Matinkylä Sports Park Courts",
     "city": "Espoo",
     "type": "multi_sport",
-    "address": "Piispansilta 32, 02230 Espoo",
-    "latitude": 60.1593,
-    "longitude": 24.7427,
+    "address": "Matinkartanontie 9-11, 02230 Espoo",
+    "latitude": 60.159875,
+    "longitude": 24.7512305,
     "description": "Multi-purpose courts next to Iso Omena with basketball, futsal, and fitness rigs.",
     "sourceName": "Espoo Outdoor Recreation Dataset",
     "sourceUrl": "https://www.espoo.fi/fi/avoin-data/liikuntapaikat",
@@ -457,7 +580,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "multi_sport",
-      "vibeTags": ["outdoor", "lights", "urban"],
+      "vibeTags": [
+        "outdoor",
+        "lights",
+        "urban"
+      ],
       "neighborhood": "Matinkylä",
       "distanceHintsKm": {
         "otaniemi": 6.4,
@@ -476,11 +603,24 @@
       },
       "budgetLevel": "budget",
       "questionsMapping": {
-        "energyLevels": ["medium", "high"],
-        "timeSlotsMinutes": [75, 90],
-        "budgetTiers": ["budget", "moderate"],
-        "noveltyPreference": ["familiar"],
-        "weatherFlex": ["dry"]
+        "energyLevels": [
+          "medium",
+          "high"
+        ],
+        "timeSlotsMinutes": [
+          75,
+          90
+        ],
+        "budgetTiers": [
+          "budget",
+          "moderate"
+        ],
+        "noveltyPreference": [
+          "familiar"
+        ],
+        "weatherFlex": [
+          "dry"
+        ]
       },
       "availability": [
         {
@@ -513,10 +653,18 @@
         "link": "https://wolt.com/fi/experiences/matinkyla",
         "qrPayload": "wolt://advisor/book?venue=espoo-matinkyla-sports-park&slot=2024-11-16T18:00:00%2B02:00"
       },
-      "addOns": ["Portable speaker permit", "Skill coach drop-in"],
+      "addOns": [
+        "Portable speaker permit",
+        "Skill coach drop-in"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["outdoor"],
-        "idealFor": ["pick_up_games", "high_energy_group"],
+        "weatherSuitability": [
+          "outdoor"
+        ],
+        "idealFor": [
+          "pick_up_games",
+          "high_energy_group"
+        ],
         "dataFreshnessHours": 4
       },
       "demoTalkingPoints": [
@@ -530,9 +678,9 @@
     "name": "Haukilahti Beach",
     "city": "Espoo",
     "type": "beach",
-    "address": "Mellstenintie 7, 02170 Espoo",
-    "latitude": 60.1528,
-    "longitude": 24.7524,
+    "address": "Mellstenintie 6, 02170 Espoo",
+    "latitude": 60.1541871,
+    "longitude": 24.7732156,
     "description": "Sheltered seaside beach with adjacent sailing club and cafe.",
     "sourceName": "Espoo Outdoor Recreation Dataset",
     "sourceUrl": "https://www.espoo.fi/fi/avoin-data/uimarannat",
@@ -543,7 +691,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "sunset_beach",
-      "vibeTags": ["sunset", "relaxed", "sea_breeze"],
+      "vibeTags": [
+        "sunset",
+        "relaxed",
+        "sea_breeze"
+      ],
       "neighborhood": "Haukilahti",
       "distanceHintsKm": {
         "otaniemi": 4.8,
@@ -562,12 +714,26 @@
       },
       "budgetLevel": "budget",
       "questionsMapping": {
-        "energyLevels": ["low", "medium"],
-        "timeSlotsMinutes": [120],
-        "budgetTiers": ["budget"],
-        "noveltyPreference": ["explorer"],
-        "weatherFlex": ["clear", "cloudy"],
-        "hungerLevels": ["snack"]
+        "energyLevels": [
+          "low",
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          120
+        ],
+        "budgetTiers": [
+          "budget"
+        ],
+        "noveltyPreference": [
+          "explorer"
+        ],
+        "weatherFlex": [
+          "clear",
+          "cloudy"
+        ],
+        "hungerLevels": [
+          "snack"
+        ]
       },
       "availability": [
         {
@@ -589,10 +755,18 @@
         "link": "https://wolt.com/fi/experiences/haukilahti",
         "qrPayload": "wolt://advisor/book?venue=espoo-haukilahti-beach&slot=2024-11-16T18:30:00%2B02:00"
       },
-      "addOns": ["Portable fire pit permit", "Warm drinks crate"],
+      "addOns": [
+        "Portable fire pit permit",
+        "Warm drinks crate"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["outdoor"],
-        "idealFor": ["golden_hour", "low_energy_group"],
+        "weatherSuitability": [
+          "outdoor"
+        ],
+        "idealFor": [
+          "golden_hour",
+          "low_energy_group"
+        ],
         "dataFreshnessHours": 12
       },
       "demoTalkingPoints": [
@@ -606,9 +780,9 @@
     "name": "Keilaniemi Sea Sauna Deck",
     "city": "Espoo",
     "type": "sauna_deck",
-    "address": "Keilaniementie 1, 02150 Espoo",
-    "latitude": 60.1795,
-    "longitude": 24.8288,
+    "address": "Keilalahdentie 8, 02150 Espoo",
+    "latitude": 60.1690508,
+    "longitude": 24.8333285,
     "description": "Architectural sea sauna with private deck access, plunge pool, and direct courier routing.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://wolt.com",
@@ -620,7 +794,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "sauna_experience",
-      "vibeTags": ["premium", "sea_view", "steam"],
+      "vibeTags": [
+        "premium",
+        "sea_view",
+        "steam"
+      ],
       "neighborhood": "Keilaniemi",
       "distanceHintsKm": {
         "otaniemi": 2.5,
@@ -639,11 +817,21 @@
       },
       "budgetLevel": "premium",
       "questionsMapping": {
-        "energyLevels": ["medium"],
-        "timeSlotsMinutes": [120],
-        "budgetTiers": ["premium"],
-        "noveltyPreference": ["explorer"],
-        "experienceIntensity": ["immersive"]
+        "energyLevels": [
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          120
+        ],
+        "budgetTiers": [
+          "premium"
+        ],
+        "noveltyPreference": [
+          "explorer"
+        ],
+        "experienceIntensity": [
+          "immersive"
+        ]
       },
       "availability": [
         {
@@ -676,10 +864,18 @@
         "link": "https://wolt.com/fi/experiences/keilaniemi-sauna",
         "qrPayload": "wolt://advisor/book?venue=espoo-keilaniemi-sauna-deck&slot=2024-11-16T19:00:00%2B02:00"
       },
-      "addOns": ["Chef-prepared sauna platters", "Guided löyly ritual"],
+      "addOns": [
+        "Chef-prepared sauna platters",
+        "Guided löyly ritual"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["all_weather"],
-        "idealFor": ["special_occasion", "premium_groups"],
+        "weatherSuitability": [
+          "all_weather"
+        ],
+        "idealFor": [
+          "special_occasion",
+          "premium_groups"
+        ],
         "dataFreshnessHours": 2
       },
       "demoTalkingPoints": [
@@ -694,8 +890,8 @@
     "city": "Espoo",
     "type": "restaurant",
     "address": "Keilaniementie 1, 02150 Espoo",
-    "latitude": 60.1791,
-    "longitude": 24.829,
+    "latitude": 60.1749678,
+    "longitude": 24.8309288,
     "description": "Modern Nordic rooftop restaurant with panoramic views over Keilaniemi and the archipelago.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://lucyinthesky.fi/",
@@ -706,7 +902,11 @@
     "enriched": {
       "category": "dining",
       "subCategory": "modern_nordic",
-      "vibeTags": ["premium", "panoramic", "date-night"],
+      "vibeTags": [
+        "premium",
+        "panoramic",
+        "date-night"
+      ],
       "neighborhood": "Keilaniemi",
       "distanceHintsKm": {
         "otaniemi": 2.4,
@@ -725,11 +925,24 @@
       },
       "budgetLevel": "premium",
       "questionsMapping": {
-        "hungerLevels": ["medium", "high"],
-        "cravingTags": ["modern nordic", "tasting"],
-        "budgetTiers": ["premium"],
-        "energyLevels": ["low", "medium"],
-        "timeSlotsMinutes": [120]
+        "hungerLevels": [
+          "medium",
+          "high"
+        ],
+        "cravingTags": [
+          "modern nordic",
+          "tasting"
+        ],
+        "budgetTiers": [
+          "premium"
+        ],
+        "energyLevels": [
+          "low",
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          120
+        ]
       },
       "availability": [
         {
@@ -766,12 +979,24 @@
           "Celeriac tartare with smoked almond",
           "Sea buckthorn pavlova"
         ],
-        "dietaryOptions": ["vegan tasting", "gluten free", "lactose free"]
+        "dietaryOptions": [
+          "vegan tasting",
+          "gluten free",
+          "lactose free"
+        ]
       },
-      "addOns": ["Champagne pairing", "Private terrace welcome"],
+      "addOns": [
+        "Champagne pairing",
+        "Private terrace welcome"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["special_occasion", "city_view"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "special_occasion",
+          "city_view"
+        ],
         "dataFreshnessHours": 2
       },
       "demoTalkingPoints": [
@@ -786,8 +1011,8 @@
     "city": "Espoo",
     "type": "restaurant",
     "address": "Tietotie 1, 02150 Espoo",
-    "latitude": 60.1851,
-    "longitude": 24.8289,
+    "latitude": 60.1860217,
+    "longitude": 24.8203084,
     "description": "Local craft beer brewpub serving Detroit-style pizza, wings, and salads right next to Aalto campus.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://fatlizard.fi/",
@@ -798,7 +1023,11 @@
     "enriched": {
       "category": "dining",
       "subCategory": "craft_beer_pizza",
-      "vibeTags": ["casual", "loud", "campus"],
+      "vibeTags": [
+        "casual",
+        "loud",
+        "campus"
+      ],
       "neighborhood": "Otaniemi",
       "distanceHintsKm": {
         "otaniemi": 0.5,
@@ -817,11 +1046,26 @@
       },
       "budgetLevel": "moderate",
       "questionsMapping": {
-        "hungerLevels": ["medium", "high"],
-        "cravingTags": ["pizza", "craft beer", "wings"],
-        "budgetTiers": ["budget", "moderate"],
-        "timeSlotsMinutes": [90],
-        "energyLevels": ["medium", "high"]
+        "hungerLevels": [
+          "medium",
+          "high"
+        ],
+        "cravingTags": [
+          "pizza",
+          "craft beer",
+          "wings"
+        ],
+        "budgetTiers": [
+          "budget",
+          "moderate"
+        ],
+        "timeSlotsMinutes": [
+          90
+        ],
+        "energyLevels": [
+          "medium",
+          "high"
+        ]
       },
       "availability": [
         {
@@ -853,13 +1097,28 @@
         "qrPayload": "wolt://advisor/book?venue=espoo-fat-lizard-otaniemi&slot=2024-11-16T18:30:00%2B02:00"
       },
       "foodInfo": {
-        "menuHighlights": ["OG Pepperoni Detroit Slice", "Halloumi fries", "House IPA flight"],
-        "dietaryOptions": ["vegan cheese available", "gluten-free base"]
+        "menuHighlights": [
+          "OG Pepperoni Detroit Slice",
+          "Halloumi fries",
+          "House IPA flight"
+        ],
+        "dietaryOptions": [
+          "vegan cheese available",
+          "gluten-free base"
+        ]
       },
-      "addOns": ["Shared beer flight", "Pre-ordered wings bucket"],
+      "addOns": [
+        "Shared beer flight",
+        "Pre-ordered wings bucket"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["post_activity", "game-night"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "post_activity",
+          "game-night"
+        ],
         "dataFreshnessHours": 3
       },
       "demoTalkingPoints": [
@@ -873,9 +1132,9 @@
     "name": "Café Tarina Tapiola",
     "city": "Espoo",
     "type": "cafe",
-    "address": "Tapionaukio 3, 02100 Espoo",
-    "latitude": 60.1794,
-    "longitude": 24.804,
+    "address": "Länsituuli 10, 02100 Espoo",
+    "latitude": 60.1759467,
+    "longitude": 24.8036597,
     "description": "Neighborhood living-room style café with cinnamon buns, matcha, and plenty of seating.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://cafetarina.fi/",
@@ -886,7 +1145,11 @@
     "enriched": {
       "category": "coffee",
       "subCategory": "cafe",
-      "vibeTags": ["cozy", "living_room", "pastry"],
+      "vibeTags": [
+        "cozy",
+        "living_room",
+        "pastry"
+      ],
       "neighborhood": "Tapiola",
       "distanceHintsKm": {
         "otaniemi": 2,
@@ -905,11 +1168,25 @@
       },
       "budgetLevel": "budget",
       "questionsMapping": {
-        "hungerLevels": ["light"],
-        "cravingTags": ["coffee", "sweet", "chat"],
-        "budgetTiers": ["budget"],
-        "timeSlotsMinutes": [45, 60],
-        "energyLevels": ["low", "medium"]
+        "hungerLevels": [
+          "light"
+        ],
+        "cravingTags": [
+          "coffee",
+          "sweet",
+          "chat"
+        ],
+        "budgetTiers": [
+          "budget"
+        ],
+        "timeSlotsMinutes": [
+          45,
+          60
+        ],
+        "energyLevels": [
+          "low",
+          "medium"
+        ]
       },
       "availability": [
         {
@@ -941,13 +1218,28 @@
         "qrPayload": "wolt://advisor/book?venue=espoo-cafe-tarina-tapiola&slot=2024-11-16T10:00:00%2B02:00"
       },
       "foodInfo": {
-        "menuHighlights": ["Cardamom bun", "Matcha latte", "Vegan breakfast board"],
-        "dietaryOptions": ["oat milk default", "gluten-free carrot cake"]
+        "menuHighlights": [
+          "Cardamom bun",
+          "Matcha latte",
+          "Vegan breakfast board"
+        ],
+        "dietaryOptions": [
+          "oat milk default",
+          "gluten-free carrot cake"
+        ]
       },
-      "addOns": ["Reserved board games stack", "Pastry tasting flight"],
+      "addOns": [
+        "Reserved board games stack",
+        "Pastry tasting flight"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["light_hang", "post_museum"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "light_hang",
+          "post_museum"
+        ],
         "dataFreshnessHours": 8
       },
       "demoTalkingPoints": [
@@ -958,12 +1250,12 @@
   },
   {
     "slug": "espoo-otaniemi-coffee-lab",
-    "name": "Otaniemi Coffee Lab",
+    "name": "Espresso House - Otaniemi",
     "city": "Espoo",
     "type": "coffee_bar",
-    "address": "Otaniementie 19, 02150 Espoo",
-    "latitude": 60.1868,
-    "longitude": 24.8282,
+    "address": "Otaniementie 12, 02150 Espoo",
+    "latitude": 60.1848628,
+    "longitude": 24.8250354,
     "description": "Third-wave espresso bar and roastery pop-up testing limited micro-lots with communal standing tables.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://wolt.com",
@@ -974,7 +1266,11 @@
     "enriched": {
       "category": "coffee",
       "subCategory": "coffee_lab",
-      "vibeTags": ["third_wave", "standing", "limited_release"],
+      "vibeTags": [
+        "third_wave",
+        "standing",
+        "limited_release"
+      ],
       "neighborhood": "Otaniemi",
       "distanceHintsKm": {
         "otaniemi": 0.2,
@@ -993,11 +1289,23 @@
       },
       "budgetLevel": "moderate",
       "questionsMapping": {
-        "hungerLevels": ["light"],
-        "cravingTags": ["coffee", "curious"],
-        "budgetTiers": ["budget", "moderate"],
-        "timeSlotsMinutes": [45],
-        "experimentationLevel": ["high"]
+        "hungerLevels": [
+          "light"
+        ],
+        "cravingTags": [
+          "coffee",
+          "curious"
+        ],
+        "budgetTiers": [
+          "budget",
+          "moderate"
+        ],
+        "timeSlotsMinutes": [
+          45
+        ],
+        "experimentationLevel": [
+          "high"
+        ]
       },
       "availability": [
         {
@@ -1029,13 +1337,27 @@
         "qrPayload": "wolt://advisor/book?venue=espoo-otaniemi-coffee-lab&slot=2024-11-16T09:00:00%2B02:00"
       },
       "foodInfo": {
-        "menuHighlights": ["Nano-lot filter flight", "Yuzu espresso tonic"],
-        "dietaryOptions": ["oat + pea milk", "coconut whip"]
+        "menuHighlights": [
+          "Nano-lot filter flight",
+          "Yuzu espresso tonic"
+        ],
+        "dietaryOptions": [
+          "oat + pea milk",
+          "coconut whip"
+        ]
       },
-      "addOns": ["Bean subscription sign-up", "Reusable cup swap"],
+      "addOns": [
+        "Bean subscription sign-up",
+        "Reusable cup swap"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["pre_activity", "remote_work_break"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "pre_activity",
+          "remote_work_break"
+        ],
         "dataFreshnessHours": 1
       },
       "demoTalkingPoints": [
@@ -1049,9 +1371,9 @@
     "name": "Bistro Lilla Sten",
     "city": "Espoo",
     "type": "restaurant",
-    "address": "Itätuulenkuja 9, 7. kerros, 02100 Espoo",
-    "latitude": 60.175,
-    "longitude": 24.8052,
+    "address": "Vanha Jorvaksentie 3, 02320 Espoo",
+    "latitude": 60.1570518,
+    "longitude": 24.6108047,
     "description": "Panoramic bistro atop Hype Areena serving Nordic breakfast, porridge bar, and casual dinner menus with sea views.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://www.hyparena.fi/bistro",
@@ -1062,7 +1384,11 @@
     "enriched": {
       "category": "dining",
       "subCategory": "nordic_bistro",
-      "vibeTags": ["panoramic", "casual", "indoor"],
+      "vibeTags": [
+        "panoramic",
+        "casual",
+        "indoor"
+      ],
       "neighborhood": "Hype Areena",
       "distanceHintsKm": {
         "hypeAreena": 0,
@@ -1081,11 +1407,24 @@
       },
       "budgetLevel": "moderate",
       "questionsMapping": {
-        "hungerLevels": ["medium"],
-        "cravingTags": ["nordic", "casual"],
-        "budgetTiers": ["moderate"],
-        "timeSlotsMinutes": [60, 90],
-        "energyLevels": ["low", "medium"]
+        "hungerLevels": [
+          "medium"
+        ],
+        "cravingTags": [
+          "nordic",
+          "casual"
+        ],
+        "budgetTiers": [
+          "moderate"
+        ],
+        "timeSlotsMinutes": [
+          60,
+          90
+        ],
+        "energyLevels": [
+          "low",
+          "medium"
+        ]
       },
       "availability": [
         {
@@ -1117,12 +1456,24 @@
         "qrPayload": "wolt://advisor/book?venue=espoo-hype-bistro-lilla-sten&slot=2024-11-16T19:00:00%2B02:00"
       },
       "foodInfo": {
-        "menuHighlights": ["Sea buckthorn overnight oats", "Seared salmon & dill potatoes", "Lingonberry crumble"],
-        "dietaryOptions": ["gluten free", "vegan porridge bar"]
+        "menuHighlights": [
+          "Sea buckthorn overnight oats",
+          "Seared salmon & dill potatoes",
+          "Lingonberry crumble"
+        ],
+        "dietaryOptions": [
+          "gluten free",
+          "vegan porridge bar"
+        ]
       },
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["onsite_meal", "between_workshops"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "onsite_meal",
+          "between_workshops"
+        ],
         "dataFreshnessHours": 2
       },
       "demoTalkingPoints": [
@@ -1136,9 +1487,9 @@
     "name": "Hype Sun Deck Pool & Sauna",
     "city": "Espoo",
     "type": "sauna_deck",
-    "address": "Itätuulenkuja 9, Rooftop, 02100 Espoo",
-    "latitude": 60.175,
-    "longitude": 24.8053,
+    "address": "Vanha Jorvaksentie 3, 02320 Espoo",
+    "latitude": 60.1570518,
+    "longitude": 24.6108047,
     "description": "Rooftop terrace atop Hype Areena featuring heated plunge pools, sauna cabins, and skyline loungers.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://www.hyparena.fi/sundeck",
@@ -1149,7 +1500,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "rooftop_sauna",
-      "vibeTags": ["sunset", "pool", "premium"],
+      "vibeTags": [
+        "sunset",
+        "pool",
+        "premium"
+      ],
       "neighborhood": "Hype Areena",
       "distanceHintsKm": {
         "hypeAreena": 0,
@@ -1168,12 +1523,24 @@
       },
       "budgetLevel": "premium",
       "questionsMapping": {
-        "energyLevels": ["medium"],
-        "timeSlotsMinutes": [120],
-        "budgetTiers": ["premium"],
-        "noveltyPreference": ["explorer"],
-        "experienceIntensity": ["immersive"],
-        "weatherFlex": ["any"]
+        "energyLevels": [
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          120
+        ],
+        "budgetTiers": [
+          "premium"
+        ],
+        "noveltyPreference": [
+          "explorer"
+        ],
+        "experienceIntensity": [
+          "immersive"
+        ],
+        "weatherFlex": [
+          "any"
+        ]
       },
       "availability": [
         {
@@ -1206,10 +1573,19 @@
         "link": "https://wolt.com/fi/experiences/hype-sundeck",
         "qrPayload": "wolt://advisor/book?venue=espoo-hype-sun-deck&slot=2024-11-16T20:00:00%2B02:00"
       },
-      "addOns": ["Cold plunge towels", "Mocktail tray", "DJ playlist plug-in"],
+      "addOns": [
+        "Cold plunge towels",
+        "Mocktail tray",
+        "DJ playlist plug-in"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["all_weather"],
-        "idealFor": ["onsite_relax", "premium_groups"],
+        "weatherSuitability": [
+          "all_weather"
+        ],
+        "idealFor": [
+          "onsite_relax",
+          "premium_groups"
+        ],
         "dataFreshnessHours": 2
       },
       "demoTalkingPoints": [
@@ -1223,9 +1599,9 @@
     "name": "Hype Topdeck Lounge",
     "city": "Espoo",
     "type": "hangout_space",
-    "address": "Itätuulenkuja 9, 6. kerros, 02100 Espoo",
-    "latitude": 60.1751,
-    "longitude": 24.8051,
+    "address": "Vanha Jorvaksentie 3, 02320 Espoo",
+    "latitude": 60.1570518,
+    "longitude": 24.6108047,
     "description": "Reserved lounge corner inside Hype Areena with modular couches, projector, and plug-and-play soundbar.",
     "sourceName": "Wolt Advisor Demo Dataset",
     "sourceUrl": "https://www.hyparena.fi/",
@@ -1236,7 +1612,11 @@
     "enriched": {
       "category": "activity",
       "subCategory": "lounge",
-      "vibeTags": ["indoors", "casual", "onsite"],
+      "vibeTags": [
+        "indoors",
+        "casual",
+        "onsite"
+      ],
       "neighborhood": "Hype Areena",
       "distanceHintsKm": {
         "hypeAreena": 0,
@@ -1255,12 +1635,26 @@
       },
       "budgetLevel": "budget",
       "questionsMapping": {
-        "energyLevels": ["low", "medium"],
-        "timeSlotsMinutes": [60, 90],
-        "budgetTiers": ["budget"],
-        "hungerLevels": ["snack"],
-        "cravingTags": ["hangout"],
-        "noveltyPreference": ["familiar"]
+        "energyLevels": [
+          "low",
+          "medium"
+        ],
+        "timeSlotsMinutes": [
+          60,
+          90
+        ],
+        "budgetTiers": [
+          "budget"
+        ],
+        "hungerLevels": [
+          "snack"
+        ],
+        "cravingTags": [
+          "hangout"
+        ],
+        "noveltyPreference": [
+          "familiar"
+        ]
       },
       "availability": [
         {
@@ -1293,10 +1687,19 @@
         "link": "https://wolt.com/fi/experiences/hype-lounge",
         "qrPayload": "wolt://advisor/book?venue=espoo-hype-hangout-topdeck&slot=2024-11-16T17:00:00%2B02:00"
       },
-      "addOns": ["Projector HDMI kit", "Snack platter delivery", "Party games bundle"],
+      "addOns": [
+        "Projector HDMI kit",
+        "Snack platter delivery",
+        "Party games bundle"
+      ],
       "contextualSignals": {
-        "weatherSuitability": ["indoor"],
-        "idealFor": ["lazy_group", "post_pitch"],
+        "weatherSuitability": [
+          "indoor"
+        ],
+        "idealFor": [
+          "lazy_group",
+          "post_pitch"
+        ],
         "dataFreshnessHours": 3
       },
       "demoTalkingPoints": [
@@ -1306,4 +1709,3 @@
     }
   }
 ]
-

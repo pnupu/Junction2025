@@ -6,6 +6,11 @@ import {
   type PreferenceSummary,
 } from "@/server/agents/advisor-pipeline";
 import { runMoodCheckAgent } from "@/server/agents/mood-check";
+import { filterInfrastructureVenues } from "@/server/agents/venue-filter";
+import {
+  generateEventRecommendations,
+  saveEventRecommendations,
+} from "@/server/agents/event-recommender";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { generateShortCode } from "@/lib/generate-short-code";
 
@@ -49,7 +54,7 @@ export const eventRouter = createTRPCRouter({
         timeOfDayLabel: z.string().optional(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
       const eventGroup = await ctx.db.eventGroup.findUnique({
         where: { id: input.groupId },
         include: {
@@ -68,6 +73,35 @@ export const eventRouter = createTRPCRouter({
       if (!preference) {
         throw new Error("Preference not found for this session");
       }
+
+      // Step 1: Filter InfrastructureVenue based on location and preferences
+      // Get user preferences if available (for logged-in users) - parallelize with venue filtering
+      const userId = preference.userId;
+      
+      // Run venue filtering and user preferences fetch in parallel
+      const [userPreferences, filteredVenues] = await Promise.all([
+        userId
+          ? ctx.db.userPreference.findUnique({
+              where: { userId },
+            })
+          : Promise.resolve(null),
+        filterInfrastructureVenues(ctx.db, {
+          preferences: eventGroup.preferences,
+          userPreferences: null, // Will be used in filtering logic if needed
+          maxDistanceMeters: 10000, // 10km default
+          city: eventGroup.city ?? undefined,
+        }),
+      ]);
+      
+      // Re-filter venues with user preferences if available (for better matching)
+      const finalFilteredVenues = userPreferences
+        ? await filterInfrastructureVenues(ctx.db, {
+            preferences: eventGroup.preferences,
+            userPreferences,
+            maxDistanceMeters: 10000,
+            city: eventGroup.city ?? undefined,
+          })
+        : filteredVenues;
 
       // For mood questions, we only need stats, not the full AI-generated summary
       // This avoids expensive AI calls on every question fetch
@@ -95,6 +129,7 @@ export const eventRouter = createTRPCRouter({
         callToAction: "Let's find the perfect plan!",
       };
 
+      // Step 2: Generate mood questions with filtered venues context
       const mood = await runMoodCheckAgent({
         participantName: input.participantName ?? preference.userName ?? undefined,
         summary: lightweightSummary,
@@ -102,6 +137,7 @@ export const eventRouter = createTRPCRouter({
         answeredSignals:
           input.answeredSignals ?? existingResponses,
         timeOfDayLabel: input.timeOfDayLabel,
+        filteredVenues: finalFilteredVenues.length > 0 ? finalFilteredVenues : undefined,
       });
 
       const moodQuestionsData =
@@ -275,7 +311,7 @@ export const eventRouter = createTRPCRouter({
       return eventGroup;
     }),
 
-  // Generate mock recommendations (will be replaced with AI later)
+  // Generate recommendations based on filtered venues and mood responses
   generateRecommendations: publicProcedure
     .input(
       z.object({
@@ -295,7 +331,6 @@ export const eventRouter = createTRPCRouter({
       }
 
       // Set status to "generating" before starting generation
-      // This allows other participants to see that generation has started
       await ctx.db.eventGroup.update({
         where: { id: input.groupId },
         data: {
@@ -303,9 +338,60 @@ export const eventRouter = createTRPCRouter({
         },
       });
 
-      const { summary, ideas, stats } = await runAdvisorPipeline({
+      // Step 1: Filter InfrastructureVenue based on location and preferences
+      const userIds = eventGroup.preferences
+        .map((p) => p.userId)
+        .filter((id): id is string => id != null);
+      
+      // Get user preferences for all participants
+      const userPreferencesList = userIds.length > 0
+        ? await ctx.db.userPreference.findMany({
+            where: { userId: { in: userIds } },
+          })
+        : [];
+      
+      // Use the first user's preferences as primary (could be enhanced to aggregate)
+      const primaryUserPreferences = userPreferencesList[0] ?? null;
+
+      const filteredVenues = await filterInfrastructureVenues(ctx.db, {
+        preferences: eventGroup.preferences,
+        userPreferences: primaryUserPreferences,
+        maxDistanceMeters: 10000,
+        city: eventGroup.city ?? undefined,
+      });
+
+      // Step 2: Get mood responses from all participants
+      const allMoodResponses: Record<string, unknown> = {};
+      for (const pref of eventGroup.preferences) {
+        const responses = (pref as {
+          moodResponses?: Record<string, unknown>;
+        }).moodResponses;
+        if (responses && typeof responses === "object") {
+          // Merge responses (later responses override earlier ones)
+          Object.assign(allMoodResponses, responses);
+        }
+      }
+
+      // Step 3: Generate summary and stats
+      const stats = computeGroupStats(eventGroup.preferences);
+      const { summary } = await runAdvisorPipeline({
         eventGroup,
       });
+
+      // Step 4: Generate event recommendations
+      const { recommendations, debugNotes } = await generateEventRecommendations(
+        ctx.db,
+        {
+          eventGroup,
+          filteredVenues,
+          summary,
+          stats,
+          moodResponses: allMoodResponses,
+        },
+      );
+
+      // Step 5: Save recommendations to database
+      await saveEventRecommendations(ctx.db, input.groupId, recommendations);
 
       // Update event group status to "generated" after completion
       await ctx.db.eventGroup.update({
@@ -317,7 +403,13 @@ export const eventRouter = createTRPCRouter({
       });
 
       return {
-        recommendations: ideas,
+        recommendations: recommendations.map((rec) => ({
+          title: rec.title,
+          description: rec.description,
+          highlights: rec.highlights,
+          matchScore: rec.matchScore,
+          reasoning: rec.reasoning,
+        })),
         groupStats: {
           participantCount: stats.participantCount,
           avgActivityLevel: Math.round(stats.avgActivityLevel * 10) / 10,
@@ -325,6 +417,7 @@ export const eventRouter = createTRPCRouter({
           energyLabel: stats.energyLabel,
         },
         summary,
+        debugNotes,
       };
     }),
 });

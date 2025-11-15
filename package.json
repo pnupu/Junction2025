@@ -19,7 +19,8 @@
     "preview": "next build && next start",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "seed:venues": "tsx scripts/seed-infrastructure.ts"
+    "seed:venues": "tsx scripts/seed-infrastructure.ts",
+    "update:coordinates": "tsx scripts/update-coordinates.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",

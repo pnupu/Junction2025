@@ -80,7 +80,24 @@ export default function EventResultsPage() {
 
   const eventQuery = api.event.get.useQuery(
     { id: eventId },
-    { enabled: !!eventId, refetchInterval: 2000 },
+    {
+      enabled: !!eventId,
+      // Only poll when generating, otherwise rely on manual refetch
+      refetchInterval: (query) => {
+        const data = query.state.data as { status?: string } | undefined;
+        const status = data?.status;
+        
+        // Poll frequently when generating
+        if (status === "generating") {
+          return 2000; // 2 seconds
+        }
+        
+        // No polling when generated (data won't change)
+        return false;
+      },
+      refetchOnWindowFocus: true,
+      staleTime: 1000,
+    },
   );
   const rawEventData: unknown = eventQuery.data;
   const eventData = isEventDetails(rawEventData) ? rawEventData : undefined;
