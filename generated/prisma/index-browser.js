@@ -193,6 +193,60 @@ exports.Prisma.EventScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.EventOpportunityScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  summary: 'summary',
+  city: 'city',
+  country: 'country',
+  locationType: 'locationType',
+  locationDetails: 'locationDetails',
+  opportunityType: 'opportunityType',
+  woltContribution: 'woltContribution',
+  partnerVenues: 'partnerVenues',
+  keywords: 'keywords',
+  estimatedBudget: 'estimatedBudget',
+  idealUseCase: 'idealUseCase',
+  seasonality: 'seasonality',
+  priorityScore: 'priorityScore',
+  status: 'status',
+  sourceModel: 'sourceModel',
+  rawPayload: 'rawPayload',
+  eventId: 'eventId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InfrastructureVenueScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  city: 'city',
+  type: 'type',
+  address: 'address',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  description: 'description',
+  sourceName: 'sourceName',
+  sourceUrl: 'sourceUrl',
+  sourceId: 'sourceId',
+  officialLink: 'officialLink',
+  notes: 'notes',
+  woltPartnerTier: 'woltPartnerTier',
+  lastVerifiedAt: 'lastVerifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OpportunityVenueRefScalarFieldEnum = {
+  id: 'id',
+  opportunityId: 'opportunityId',
+  venueId: 'venueId',
+  usageNotes: 'usageNotes',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.EventCategoryScalarFieldEnum = {
   id: 'id',
   eventId: 'eventId',
@@ -204,11 +258,14 @@ exports.Prisma.EventGroupScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
+  joinCode: 'joinCode',
   targetDate: 'targetDate',
   targetTime: 'targetTime',
   budgetRange: 'budgetRange',
   preferredLocation: 'preferredLocation',
+  selectionSnapshot: 'selectionSnapshot',
   status: 'status',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -238,6 +295,7 @@ exports.Prisma.EventRecommendationScalarFieldEnum = {
   eventId: 'eventId',
   groupId: 'groupId',
   userId: 'userId',
+  opportunityId: 'opportunityId',
   matchScore: 'matchScore',
   reasoning: 'reasoning',
   modelVersion: 'modelVersion',
@@ -293,6 +351,9 @@ exports.Prisma.ModelName = {
   Category: 'Category',
   Venue: 'Venue',
   Event: 'Event',
+  EventOpportunity: 'EventOpportunity',
+  InfrastructureVenue: 'InfrastructureVenue',
+  OpportunityVenueRef: 'OpportunityVenueRef',
   EventCategory: 'EventCategory',
   EventGroup: 'EventGroup',
   EventGroupParticipant: 'EventGroupParticipant',

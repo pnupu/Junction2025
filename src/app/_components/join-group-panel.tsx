@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,40 +14,81 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const mockGroup = {
-  name: "Lina's City Crew",
-  host: "Lina",
-  location: "Helsinki",
-  vibe: ["Cozy", "Foodie circuit"],
-  members: 3,
-};
-
-const mockUpdates = [
-  "Sauna + cold plunge locked for 19:00",
-  "AI suggests sourdough pizza pop-up nearby",
-  "Two friends prefer gluten-free → updated routes",
-];
+import { api, type RouterOutputs } from "@/trpc/react";
 
 type JoinStatus = "idle" | "checking" | "ready";
+type ResolvedInvite = RouterOutputs["onboarding"]["resolveInvite"];
 
-export function JoinGroupPanel() {
-  const [code, setCode] = useState("");
+type JoinGroupPanelProps = {
+  prefillCode?: string;
+};
+
+export function JoinGroupPanel({ prefillCode }: JoinGroupPanelProps) {
+  const [code, setCode] = useState(prefillCode ?? "");
   const [status, setStatus] = useState<JoinStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [resolvedGroup, setResolvedGroup] = useState<ResolvedInvite | null>(null);
+  const [prefillAttempted, setPrefillAttempted] = useState(false);
 
-  const isCodeValid = code.trim().length === 3;
+  const uppercaseCode = useMemo(
+    () => code.replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 3),
+    [code],
+  );
+  const isCodeValid = uppercaseCode.length === 3;
 
-  const uppercaseCode = useMemo(() => code.toUpperCase().slice(0, 3), [code]);
+  const resolveInvite = api.onboarding.resolveInvite.useMutation();
+
+  const attemptResolve = useCallback(
+    async (inviteCode: string) => {
+      setStatus("checking");
+      setErrorMessage(null);
+      setResolvedGroup(null);
+      try {
+        const payload = await resolveInvite.mutateAsync({ code: inviteCode });
+        setResolvedGroup(payload);
+        setStatus("ready");
+      } catch (error) {
+        setStatus("idle");
+        setErrorMessage(
+          error instanceof Error ? error.message : "Unable to find an invite with that code.",
+        );
+      }
+    },
+    [resolveInvite],
+  );
+
+  useEffect(() => {
+    if (!prefillCode || prefillAttempted) return;
+    const cleaned = prefillCode.toUpperCase();
+    setCode(cleaned);
+    setPrefillAttempted(true);
+    if (cleaned.length === 3) void attemptResolve(cleaned);
+  }, [attemptResolve, prefillCode, prefillAttempted]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!isCodeValid) return;
-    setStatus("checking");
-
-    setTimeout(() => {
-      setStatus("ready");
-    }, 600);
+    void attemptResolve(uppercaseCode);
   };
+
+  const preferenceTags =
+    resolvedGroup?.selectionSnapshot &&
+    Object.values(resolvedGroup.selectionSnapshot ?? {})
+      .flat()
+      .filter(Boolean)
+      .slice(0, 4);
+
+  const liveUpdates = resolvedGroup
+    ? [
+        `${resolvedGroup.hostName} hosting · ${resolvedGroup.memberCount} members`,
+        resolvedGroup.selectionSnapshot.focus?.length
+          ? `Focus: ${resolvedGroup.selectionSnapshot.focus.join(", ")}`
+          : null,
+        resolvedGroup.selectionSnapshot.vibe?.length
+          ? `Vibe: ${resolvedGroup.selectionSnapshot.vibe.join(", ")}`
+          : null,
+      ].filter(Boolean)
+    : ["Waiting for code match…"];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -78,6 +119,11 @@ export function JoinGroupPanel() {
               <p id="code-help" className="text-sm text-slate-400">
                 Accepts letters only. Example: <span className="font-mono">WLT</span>
               </p>
+              {errorMessage && (
+                <p className="text-sm text-red-300" role="alert">
+                  {errorMessage}
+                </p>
+              )}
             </div>
 
             <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 p-5">
@@ -115,8 +161,8 @@ export function JoinGroupPanel() {
           </CardDescription>
           <CardTitle>Preview the crew</CardTitle>
           <CardDescription>
-            Once the code is validated, we surface core details so you know you’re in the
-            right place. Here’s mock data representing what the API will return.
+            Once the code is validated, we surface core details straight from the database so
+            you know you’re in the right place.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -125,15 +171,18 @@ export function JoinGroupPanel() {
               Group name
             </p>
             <h3 className="text-2xl font-semibold text-white">
-              {status === "ready" ? mockGroup.name : "— — —"}
+              {resolvedGroup?.groupName ?? "— — —"}
             </h3>
             <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-400">
-              <span>Host · {status === "ready" ? mockGroup.host : "—"}</span>
-              <span>City · {status === "ready" ? mockGroup.location : "—"}</span>
-              <span>Members · {status === "ready" ? mockGroup.members : "—"}</span>
+              <span>Host · {resolvedGroup?.hostName ?? "—"}</span>
+              <span>Members · {resolvedGroup?.memberCount ?? "—"}</span>
+              <span>Code · {resolvedGroup?.joinCode ?? "—"}</span>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {(status === "ready" ? mockGroup.vibe : ["Invite pending"]).map((tag) => (
+              {(preferenceTags && preferenceTags.length > 0
+                ? preferenceTags
+                : ["Invite pending"]
+              ).map((tag) => (
                 <Badge key={tag} className="bg-slate-800 text-slate-200">
                   {tag}
                 </Badge>
@@ -146,19 +195,17 @@ export function JoinGroupPanel() {
               Live updates
             </p>
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
-              {(status === "ready" ? mockUpdates : ["Waiting for code match…"]).map(
-                (update) => (
-                  <li key={update} className="rounded-lg bg-slate-900/60 px-3 py-2">
-                    {update}
-                  </li>
-                ),
-              )}
+              {liveUpdates.map((update) => (
+                <li key={update ?? "empty"} className="rounded-lg bg-slate-900/60 px-3 py-2">
+                  {update}
+                </li>
+              ))}
             </ul>
           </div>
         </CardContent>
         <CardFooter className="border-t border-slate-800 text-sm text-slate-400">
-          Step 03 will mirror the onboarding questions so we can merge everyone’s
-          preferences. Future teammates can connect this to tRPC once the API is ready.
+          Step 03 mirrors onboarding so everyone can submit their vibe. This will hook into
+          tRPC once we wire the shared group state.
         </CardFooter>
       </Card>
     </div>

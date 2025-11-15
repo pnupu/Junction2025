@@ -22,6 +22,7 @@ model User {
     // Relations
     preferences      UserPreference?
     eventGroups      EventGroupParticipant[]
+    createdGroups    EventGroup[]        @relation("GroupCreator")
     eventFeedback    UserFeedback[]
     recommendations  EventRecommendation[]
 }
@@ -129,11 +130,89 @@ model Event {
     categories      EventCategory[]
     eventGroups     EventGroupEvent[]
     recommendations EventRecommendation[]
+    opportunities   EventOpportunity[]
     feedback        UserFeedback[]
 
     @@index([venueId])
     @@index([isActive])
     @@index([popularityScore])
+}
+
+// AI-scouted opportunities before they become events
+model EventOpportunity {
+    id              String   @id @default(cuid())
+    slug            String   @unique
+    title           String
+    summary         String
+    city            String
+    country         String?
+    locationType    String   // e.g., "existing-venue", "pop-up", "hybrid"
+    locationDetails String?
+    opportunityType String?  // e.g., "wolt-market-drop", "courtside-upgrade"
+    woltContribution String
+    partnerVenues   String[]
+    keywords        String[]
+    estimatedBudget String?
+    idealUseCase    String?
+    seasonality     String?
+    priorityScore   Float    @default(0.5)
+    status          String   @default("idea") // idea, shortlisted, activated, archived
+    sourceModel     String?
+    rawPayload      Json?
+
+    eventId String?
+    event   Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+    recommendations EventRecommendation[]
+    venues    OpportunityVenueRef[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([city])
+    @@index([status])
+}
+
+model InfrastructureVenue {
+    id             String   @id @default(cuid())
+    slug           String   @unique
+    name           String
+    city           String
+    type           String
+    address        String?
+    latitude       Float?
+    longitude      Float?
+    description    String?
+    sourceName     String
+    sourceUrl      String
+    sourceId       String
+    officialLink   String?
+    notes          String?
+    woltPartnerTier String?
+    lastVerifiedAt DateTime?
+
+    opportunities OpportunityVenueRef[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([city])
+    @@index([type])
+    @@unique([sourceName, sourceId])
+}
+
+model OpportunityVenueRef {
+    id             String   @id @default(cuid())
+    opportunityId  String
+    venueId        String
+    usageNotes     String?
+    createdAt      DateTime @default(now())
+
+    opportunity EventOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+    venue       InfrastructureVenue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+    @@unique([opportunityId, venueId])
+    @@index([venueId])
 }
 
 // Many-to-many: Events and Categories
@@ -156,24 +235,29 @@ model EventGroup {
     id          String   @id @default(cuid())
     name        String?  // Optional group name
     description String?  // What the group is planning
+    joinCode    String   @unique
 
     // Group preferences (aggregated or manually set)
     targetDate      DateTime?
     targetTime      String?
     budgetRange     String?
     preferredLocation String?
+    selectionSnapshot Json?
 
     // Status
     status      String   @default("planning") // e.g., "planning", "confirmed", "completed", "cancelled"
+    createdById String?
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 
     // Relations
+    createdBy     User?                    @relation("GroupCreator", fields: [createdById], references: [id], onDelete: SetNull)
     participants EventGroupParticipant[]
     events       EventGroupEvent[]
     recommendations EventRecommendation[]
 
     @@index([status])
+    @@index([joinCode])
 }
 
 // Many-to-many: Users and Event Groups
@@ -226,6 +310,8 @@ model EventRecommendation {
     group       EventGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
     userId      String?
     user        User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    opportunityId String?
+    opportunity  EventOpportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
 
     // AI metadata
     matchScore  Float   // 0-1 score indicating how well this matches
@@ -242,6 +328,7 @@ model EventRecommendation {
     @@index([eventId])
     @@index([groupId])
     @@index([userId])
+    @@index([opportunityId])
     @@index([matchScore])
     @@index([status])
 }

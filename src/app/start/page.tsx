@@ -25,6 +25,13 @@ const steps = [
     href: "/start/group",
     tag: "Step 03",
   },
+  {
+    title: "Operator console",
+    description:
+      "Trigger the scout + recommendation agents and review stored opportunities.",
+    href: "/start/operators",
+    tag: "Ops",
+  },
 ];
 
 export default function StartPage() {
