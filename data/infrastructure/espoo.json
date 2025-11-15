@@ -1,5 +1,187 @@
 [
   {
+    "slug": "espoo-tapiola-bowling",
+    "name": "Tapiola Bowling & Bar",
+    "city": "Espoo",
+    "type": "bowling_alley",
+    "address": "Itätuulenkuja 9, 02100 Espoo",
+    "latitude": 60.1742,
+    "longitude": 24.805,
+    "description": "Modern eight-lane bowling lounge with neon lighting, craft drinks, and Wolt-integrated snack ordering.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://wolt.com",
+    "sourceId": "demo_tapiola_bowling",
+    "officialLink": "https://tapiolankeilahalli.fi/",
+    "notes": "Holds two pre-reserved Wolt Advisor lanes on weekends.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "bowling",
+      "vibeTags": ["retro", "competitive", "indoors"],
+      "neighborhood": "Tapiola",
+      "distanceHintsKm": {
+        "otaniemi": 1.8,
+        "leppavaara": 4.2,
+        "isoOmena": 3.5
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 10,
+        "sweetSpot": 5
+      },
+      "durationMinutes": {
+        "standard": 60,
+        "min": 45,
+        "max": 120
+      },
+      "budgetLevel": "moderate",
+      "questionsMapping": {
+        "energyLevels": ["medium", "high"],
+        "timeSlotsMinutes": [60, 90],
+        "budgetTiers": ["moderate"],
+        "noveltyPreference": ["familiar"]
+      },
+      "availability": [
+        {
+          "label": "19:00-20:00",
+          "start": "2024-11-16T19:00:00+02:00",
+          "end": "2024-11-16T20:00:00+02:00",
+          "priceTotal": 20,
+          "pricePerPerson": 5,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/tapiola-bowling?slot=1900"
+        },
+        {
+          "label": "20:00-21:00",
+          "start": "2024-11-16T20:00:00+02:00",
+          "end": "2024-11-16T21:00:00+02:00",
+          "priceTotal": 25,
+          "pricePerPerson": 6.25,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/tapiola-bowling?slot=2000"
+        },
+        {
+          "label": "21:00-22:00",
+          "start": "2024-11-16T21:00:00+02:00",
+          "end": "2024-11-16T22:00:00+02:00",
+          "priceTotal": 25,
+          "pricePerPerson": 6.25,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "limited",
+          "bookingLink": "https://wolt.com/fi/experiences/tapiola-bowling?slot=2100"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt",
+        "leadTimeMinutes": 30,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/tapiola-bowling",
+        "qrPayload": "wolt://advisor/book?venue=espoo-tapiola-bowling&slot=2024-11-16T19:00:00%2B02:00"
+      },
+      "addOns": ["Lane-side snack tray", "Shoe rental included", "Optional arcade tokens"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["high_energy_group", "rainy_day"],
+        "dataFreshnessHours": 4
+      },
+      "demoTalkingPoints": [
+        "Use this when group energy >=3 and time >=60 min.",
+        "Highlights automatic €5/person split before checkout."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-weegee-museum",
+    "name": "WeeGee & EMMA Evening Access",
+    "city": "Espoo",
+    "type": "museum",
+    "address": "Ahertajantie 5, 02100 Espoo",
+    "latitude": 60.1766,
+    "longitude": 24.8031,
+    "description": "Late-opening access to EMMA, the Finnish Toy Museum and Design Shop under one roof.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://emmamuseum.fi/",
+    "sourceId": "demo_weegee_evening",
+    "officialLink": "https://emmamuseum.fi/en/visit/",
+    "notes": "Wolt Advisor guests skip the main desk and get a bundled wristband.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "culture",
+      "vibeTags": ["indoor", "design", "low_energy"],
+      "neighborhood": "Tapiola",
+      "distanceHintsKm": {
+        "otaniemi": 1.5,
+        "leppavaara": 4,
+        "isoOmena": 3.7
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 8,
+        "sweetSpot": 4
+      },
+      "durationMinutes": {
+        "standard": 90,
+        "min": 60,
+        "max": 120
+      },
+      "budgetLevel": "budget",
+      "questionsMapping": {
+        "energyLevels": ["low", "medium"],
+        "timeSlotsMinutes": [60, 90],
+        "budgetTiers": ["budget"],
+        "noveltyPreference": ["explorer"],
+        "hasVisitedBefore": ["either"]
+      },
+      "availability": [
+        {
+          "label": "17:30-19:00",
+          "start": "2024-11-16T17:30:00+02:00",
+          "end": "2024-11-16T19:00:00+02:00",
+          "priceTotal": 20,
+          "pricePerPerson": 5,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/weegee?slot=1730"
+        },
+        {
+          "label": "18:30-20:00",
+          "start": "2024-11-16T18:30:00+02:00",
+          "end": "2024-11-16T20:00:00+02:00",
+          "priceTotal": 20,
+          "pricePerPerson": 5,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/weegee?slot=1830"
+        }
+      ],
+      "booking": {
+        "provider": "EMMA",
+        "leadTimeMinutes": 0,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/weegee",
+        "qrPayload": "wolt://advisor/book?venue=espoo-weegee-museum&slot=2024-11-16T17:30:00%2B02:00"
+      },
+      "addOns": ["Guided highlights tour", "Design Museum store credit"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["rainy_day", "culture_break"],
+        "dataFreshnessHours": 6
+      },
+      "demoTalkingPoints": [
+        "Shows low-energy option with €5 pricing callout.",
+        "Great for demonstrating instant booking without waiting for all slots."
+      ]
+    }
+  },
+  {
     "slug": "espoo-tapiola-tennis-park",
     "name": "Tapiola Tennis Park",
     "city": "Espoo",
@@ -13,7 +195,77 @@
     "sourceId": "espoo_tapiola_tennis",
     "officialLink": "https://www.espoo.fi/fi/liikunta-ja-ulkoilu/tennis",
     "notes": "City-run bookings; partner kiosk within 200m for deliveries.",
-    "lastVerifiedAt": "2024-08-28T00:00:00.000Z"
+    "lastVerifiedAt": "2024-08-28T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "tennis",
+      "vibeTags": ["outdoor", "competitive", "twilight"],
+      "neighborhood": "Tapiola Sports Park",
+      "distanceHintsKm": {
+        "otaniemi": 2.2,
+        "leppavaara": 3.8,
+        "isoOmena": 4
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 8,
+        "sweetSpot": 4
+      },
+      "durationMinutes": {
+        "standard": 90,
+        "min": 60,
+        "max": 120
+      },
+      "budgetLevel": "moderate",
+      "questionsMapping": {
+        "energyLevels": ["high"],
+        "timeSlotsMinutes": [90],
+        "budgetTiers": ["moderate"],
+        "weatherFlex": ["dry"],
+        "noveltyPreference": ["familiar"]
+      },
+      "availability": [
+        {
+          "label": "18:00-19:30",
+          "start": "2024-11-16T18:00:00+02:00",
+          "end": "2024-11-16T19:30:00+02:00",
+          "priceTotal": 32,
+          "pricePerPerson": 8,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://varaamo.espoo.fi/tapiola-tennis?slot=1800"
+        },
+        {
+          "label": "19:30-21:00",
+          "start": "2024-11-16T19:30:00+02:00",
+          "end": "2024-11-16T21:00:00+02:00",
+          "priceTotal": 36,
+          "pricePerPerson": 9,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "waitlist",
+          "bookingLink": "https://varaamo.espoo.fi/tapiola-tennis?slot=1930"
+        }
+      ],
+      "booking": {
+        "provider": "Espoo Varaamo",
+        "leadTimeMinutes": 90,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/tapiola-tennis",
+        "qrPayload": "wolt://advisor/book?venue=espoo-tapiola-tennis-park&slot=2024-11-16T18:00:00%2B02:00"
+      },
+      "addOns": ["Coach-on-call", "Post-match smoothie delivery"],
+      "contextualSignals": {
+        "weatherSuitability": ["outdoor"],
+        "idealFor": ["high_energy_group", "sunset_golden_hour"],
+        "dataFreshnessHours": 12
+      },
+      "demoTalkingPoints": [
+        "Illustrates outdoor pick-of-the-day with weather gating.",
+        "Great for showing partner kiosk upsell."
+      ]
+    }
   },
   {
     "slug": "espoo-oittaa-beach",
@@ -29,7 +281,78 @@
     "sourceId": "espoo_oittaa_beach",
     "officialLink": "https://www.espoo.fi/fi/liikunta-ja-ulkoilu/oittaan-ulkoilukeskus",
     "notes": "Morning wellness permits available; kiosk already partners with Wolt Market.",
-    "lastVerifiedAt": "2024-07-12T00:00:00.000Z"
+    "lastVerifiedAt": "2024-07-12T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "lakeside_retreat",
+      "vibeTags": ["outdoor", "relaxed", "sauna", "picnic"],
+      "neighborhood": "Oittaa",
+      "distanceHintsKm": {
+        "otaniemi": 12.5,
+        "leppavaara": 10.2,
+        "isoOmena": 13.7
+      },
+      "groupSuitability": {
+        "min": 3,
+        "max": 30,
+        "sweetSpot": 8
+      },
+      "durationMinutes": {
+        "standard": 150,
+        "min": 90,
+        "max": 240
+      },
+      "budgetLevel": "budget",
+      "questionsMapping": {
+        "energyLevels": ["low", "medium"],
+        "timeSlotsMinutes": [120, 180],
+        "budgetTiers": ["budget"],
+        "noveltyPreference": ["explorer"],
+        "weatherFlex": ["sunny", "cloudy"],
+        "hungerLevels": ["snack", "picnic"]
+      },
+      "availability": [
+        {
+          "label": "16:00-18:00 Sauna + Lake Combo",
+          "start": "2024-11-16T16:00:00+02:00",
+          "end": "2024-11-16T18:00:00+02:00",
+          "priceTotal": 60,
+          "pricePerPerson": 15,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/oittaa?slot=1600"
+        },
+        {
+          "label": "18:00-20:00 Sunset Picnic Kit",
+          "start": "2024-11-16T18:00:00+02:00",
+          "end": "2024-11-16T20:00:00+02:00",
+          "priceTotal": 48,
+          "pricePerPerson": 8,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/oittaa?slot=1800"
+        }
+      ],
+      "booking": {
+        "provider": "Espoo Outdoor",
+        "leadTimeMinutes": 120,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/oittaa",
+        "qrPayload": "wolt://advisor/book?venue=espoo-oittaa-beach&slot=2024-11-16T16:00:00%2B02:00"
+      },
+      "addOns": ["Fat Lizard picnic delivery", "SUP board rental", "Sauna host"],
+      "contextualSignals": {
+        "weatherSuitability": ["outdoor"],
+        "idealFor": ["sunset", "wellness"],
+        "dataFreshnessHours": 24
+      },
+      "demoTalkingPoints": [
+        "Great relaxed option when energy <=3.",
+        "Showcases combo of activity + delivered picnic."
+      ]
+    }
   },
   {
     "slug": "espoo-leppavaara-swim",
@@ -45,7 +368,77 @@
     "sourceId": "espoo_leppavaara_swim",
     "officialLink": "https://www.espoo.fi/fi/liikunta-ja-ulkoilu/leppavaaran-uimahalli",
     "notes": "City open to after-hours corporate reservations.",
-    "lastVerifiedAt": "2024-09-03T00:00:00.000Z"
+    "lastVerifiedAt": "2024-09-03T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "pool_sauna",
+      "vibeTags": ["indoor", "steam", "recovery"],
+      "neighborhood": "Leppävaara",
+      "distanceHintsKm": {
+        "otaniemi": 3.5,
+        "leppavaara": 0,
+        "isoOmena": 8
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 12,
+        "sweetSpot": 6
+      },
+      "durationMinutes": {
+        "standard": 90,
+        "min": 60,
+        "max": 120
+      },
+      "budgetLevel": "budget",
+      "questionsMapping": {
+        "energyLevels": ["low", "medium"],
+        "timeSlotsMinutes": [90],
+        "budgetTiers": ["budget"],
+        "noveltyPreference": ["familiar"],
+        "weatherFlex": ["any"]
+      },
+      "availability": [
+        {
+          "label": "20:00-21:30 Late Swim",
+          "start": "2024-11-16T20:00:00+02:00",
+          "end": "2024-11-16T21:30:00+02:00",
+          "priceTotal": 24,
+          "pricePerPerson": 6,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/leppavaara-swim?slot=2000"
+        },
+        {
+          "label": "21:30-23:00 Night Sauna Deck",
+          "start": "2024-11-16T21:30:00+02:00",
+          "end": "2024-11-16T23:00:00+02:00",
+          "priceTotal": 32,
+          "pricePerPerson": 8,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/leppavaara-swim?slot=2130"
+        }
+      ],
+      "booking": {
+        "provider": "Espoo Varaamo",
+        "leadTimeMinutes": 60,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/leppavaara-swim",
+        "qrPayload": "wolt://advisor/book?venue=espoo-leppavaara-swim&slot=2024-11-16T20:00:00%2B02:00"
+      },
+      "addOns": ["Private lane upgrade", "Juice bar vouchers"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor", "all_weather"],
+        "idealFor": ["recovery", "mixed_energy_group"],
+        "dataFreshnessHours": 6
+      },
+      "demoTalkingPoints": [
+        "Use to show late-night availability blocks.",
+        "Pairs well with payment split confirmation step."
+      ]
+    }
   },
   {
     "slug": "espoo-matinkyla-sports-park",
@@ -60,7 +453,77 @@
     "sourceUrl": "https://www.espoo.fi/fi/avoin-data/liikuntapaikat",
     "sourceId": "espoo_matinkyla_sports_park",
     "notes": "Excellent courier access via metro plaza.",
-    "lastVerifiedAt": "2024-08-10T00:00:00.000Z"
+    "lastVerifiedAt": "2024-08-10T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "multi_sport",
+      "vibeTags": ["outdoor", "lights", "urban"],
+      "neighborhood": "Matinkylä",
+      "distanceHintsKm": {
+        "otaniemi": 6.4,
+        "leppavaara": 7.5,
+        "isoOmena": 0.3
+      },
+      "groupSuitability": {
+        "min": 4,
+        "max": 20,
+        "sweetSpot": 8
+      },
+      "durationMinutes": {
+        "standard": 75,
+        "min": 60,
+        "max": 120
+      },
+      "budgetLevel": "budget",
+      "questionsMapping": {
+        "energyLevels": ["medium", "high"],
+        "timeSlotsMinutes": [75, 90],
+        "budgetTiers": ["budget", "moderate"],
+        "noveltyPreference": ["familiar"],
+        "weatherFlex": ["dry"]
+      },
+      "availability": [
+        {
+          "label": "18:00-19:15 Full Court",
+          "start": "2024-11-16T18:00:00+02:00",
+          "end": "2024-11-16T19:15:00+02:00",
+          "priceTotal": 18,
+          "pricePerPerson": 4.5,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/matinkyla?slot=1800"
+        },
+        {
+          "label": "19:30-21:00 Lighted Court",
+          "start": "2024-11-16T19:30:00+02:00",
+          "end": "2024-11-16T21:00:00+02:00",
+          "priceTotal": 22,
+          "pricePerPerson": 5.5,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/matinkyla?slot=1930"
+        }
+      ],
+      "booking": {
+        "provider": "Espoo Outdoor",
+        "leadTimeMinutes": 45,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/matinkyla",
+        "qrPayload": "wolt://advisor/book?venue=espoo-matinkyla-sports-park&slot=2024-11-16T18:00:00%2B02:00"
+      },
+      "addOns": ["Portable speaker permit", "Skill coach drop-in"],
+      "contextualSignals": {
+        "weatherSuitability": ["outdoor"],
+        "idealFor": ["pick_up_games", "high_energy_group"],
+        "dataFreshnessHours": 4
+      },
+      "demoTalkingPoints": [
+        "Shows multi-team slot with low per-person price.",
+        "Easy to explain courier access via metro plaza."
+      ]
+    }
   },
   {
     "slug": "espoo-haukilahti-beach",
@@ -76,7 +539,771 @@
     "sourceId": "espoo_haukilahti_beach",
     "officialLink": "https://www.espoo.fi/fi/liikunta-ja-ulkoilu/uimarannat",
     "notes": "Evening sun; space for pop-up tasting tables.",
-    "lastVerifiedAt": "2024-07-20T00:00:00.000Z"
+    "lastVerifiedAt": "2024-07-20T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "sunset_beach",
+      "vibeTags": ["sunset", "relaxed", "sea_breeze"],
+      "neighborhood": "Haukilahti",
+      "distanceHintsKm": {
+        "otaniemi": 4.8,
+        "leppavaara": 6.8,
+        "isoOmena": 3
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 12,
+        "sweetSpot": 6
+      },
+      "durationMinutes": {
+        "standard": 120,
+        "min": 90,
+        "max": 150
+      },
+      "budgetLevel": "budget",
+      "questionsMapping": {
+        "energyLevels": ["low", "medium"],
+        "timeSlotsMinutes": [120],
+        "budgetTiers": ["budget"],
+        "noveltyPreference": ["explorer"],
+        "weatherFlex": ["clear", "cloudy"],
+        "hungerLevels": ["snack"]
+      },
+      "availability": [
+        {
+          "label": "18:30-20:30 Sunset Chill",
+          "start": "2024-11-16T18:30:00+02:00",
+          "end": "2024-11-16T20:30:00+02:00",
+          "priceTotal": 24,
+          "pricePerPerson": 4,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/haukilahti?slot=1830"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt Picnic",
+        "leadTimeMinutes": 90,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/haukilahti",
+        "qrPayload": "wolt://advisor/book?venue=espoo-haukilahti-beach&slot=2024-11-16T18:30:00%2B02:00"
+      },
+      "addOns": ["Portable fire pit permit", "Warm drinks crate"],
+      "contextualSignals": {
+        "weatherSuitability": ["outdoor"],
+        "idealFor": ["golden_hour", "low_energy_group"],
+        "dataFreshnessHours": 12
+      },
+      "demoTalkingPoints": [
+        "Use to highlight distance badges and delivery add-ons.",
+        "Perfect for \"let's just chill\" storyline."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-keilaniemi-sauna-deck",
+    "name": "Keilaniemi Sea Sauna Deck",
+    "city": "Espoo",
+    "type": "sauna_deck",
+    "address": "Keilaniementie 1, 02150 Espoo",
+    "latitude": 60.1795,
+    "longitude": 24.8288,
+    "description": "Architectural sea sauna with private deck access, plunge pool, and direct courier routing.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://wolt.com",
+    "sourceId": "demo_keilaniemi_sauna",
+    "officialLink": "https://www.keilaniemisauna.fi/",
+    "notes": "Requires venue coordination; deliveries routed via Keilaniemi gate.",
+    "woltPartnerTier": "strategic",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "sauna_experience",
+      "vibeTags": ["premium", "sea_view", "steam"],
+      "neighborhood": "Keilaniemi",
+      "distanceHintsKm": {
+        "otaniemi": 2.5,
+        "leppavaara": 5.4,
+        "isoOmena": 4
+      },
+      "groupSuitability": {
+        "min": 4,
+        "max": 8,
+        "sweetSpot": 6
+      },
+      "durationMinutes": {
+        "standard": 120,
+        "min": 90,
+        "max": 150
+      },
+      "budgetLevel": "premium",
+      "questionsMapping": {
+        "energyLevels": ["medium"],
+        "timeSlotsMinutes": [120],
+        "budgetTiers": ["premium"],
+        "noveltyPreference": ["explorer"],
+        "experienceIntensity": ["immersive"]
+      },
+      "availability": [
+        {
+          "label": "19:00-21:00 Private Deck",
+          "start": "2024-11-16T19:00:00+02:00",
+          "end": "2024-11-16T21:00:00+02:00",
+          "priceTotal": 150,
+          "pricePerPerson": 25,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/keilaniemi-sauna?slot=1900"
+        },
+        {
+          "label": "21:30-23:00 Moonlight Slot",
+          "start": "2024-11-16T21:30:00+02:00",
+          "end": "2024-11-16T23:00:00+02:00",
+          "priceTotal": 120,
+          "pricePerPerson": 20,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/keilaniemi-sauna?slot=2130"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt Experiences",
+        "leadTimeMinutes": 120,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/keilaniemi-sauna",
+        "qrPayload": "wolt://advisor/book?venue=espoo-keilaniemi-sauna-deck&slot=2024-11-16T19:00:00%2B02:00"
+      },
+      "addOns": ["Chef-prepared sauna platters", "Guided löyly ritual"],
+      "contextualSignals": {
+        "weatherSuitability": ["all_weather"],
+        "idealFor": ["special_occasion", "premium_groups"],
+        "dataFreshnessHours": 2
+      },
+      "demoTalkingPoints": [
+        "Premium anchor showing Wolt exclusivity.",
+        "Use for \"why Wolt\" story: merchants trust us with their deck."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-lucy-in-the-sky",
+    "name": "Lucy in the Sky Rooftop",
+    "city": "Espoo",
+    "type": "restaurant",
+    "address": "Keilaniementie 1, 02150 Espoo",
+    "latitude": 60.1791,
+    "longitude": 24.829,
+    "description": "Modern Nordic rooftop restaurant with panoramic views over Keilaniemi and the archipelago.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://lucyinthesky.fi/",
+    "sourceId": "demo_lucy_rooftop",
+    "officialLink": "https://lucyinthesky.fi/",
+    "notes": "Keeps two tasting menu slots exclusively for Wolt Advisor groups.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "dining",
+      "subCategory": "modern_nordic",
+      "vibeTags": ["premium", "panoramic", "date-night"],
+      "neighborhood": "Keilaniemi",
+      "distanceHintsKm": {
+        "otaniemi": 2.4,
+        "leppavaara": 5.6,
+        "isoOmena": 4.2
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 8,
+        "sweetSpot": 4
+      },
+      "durationMinutes": {
+        "standard": 120,
+        "min": 90,
+        "max": 150
+      },
+      "budgetLevel": "premium",
+      "questionsMapping": {
+        "hungerLevels": ["medium", "high"],
+        "cravingTags": ["modern nordic", "tasting"],
+        "budgetTiers": ["premium"],
+        "energyLevels": ["low", "medium"],
+        "timeSlotsMinutes": [120]
+      },
+      "availability": [
+        {
+          "label": "19:00-20:30",
+          "start": "2024-11-16T19:00:00+02:00",
+          "end": "2024-11-16T20:30:00+02:00",
+          "pricePerPerson": 55,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/lucy?slot=1900"
+        },
+        {
+          "label": "20:30-22:30",
+          "start": "2024-11-16T20:30:00+02:00",
+          "end": "2024-11-16T22:30:00+02:00",
+          "pricePerPerson": 55,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/lucy?slot=2030"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt Table",
+        "leadTimeMinutes": 60,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/lucy",
+        "qrPayload": "wolt://advisor/book?venue=espoo-lucy-in-the-sky&slot=2024-11-16T19:00:00%2B02:00"
+      },
+      "foodInfo": {
+        "menuHighlights": [
+          "Charred cabbage, trout roe & browned butter",
+          "Celeriac tartare with smoked almond",
+          "Sea buckthorn pavlova"
+        ],
+        "dietaryOptions": ["vegan tasting", "gluten free", "lactose free"]
+      },
+      "addOns": ["Champagne pairing", "Private terrace welcome"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["special_occasion", "city_view"],
+        "dataFreshnessHours": 2
+      },
+      "demoTalkingPoints": [
+        "Show premium dining with booking CTAs + QR.",
+        "Emphasize Wolt-exclusive seat inventory."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-fat-lizard-otaniemi",
+    "name": "Fat Lizard Otaniemi",
+    "city": "Espoo",
+    "type": "restaurant",
+    "address": "Tietotie 1, 02150 Espoo",
+    "latitude": 60.1851,
+    "longitude": 24.8289,
+    "description": "Local craft beer brewpub serving Detroit-style pizza, wings, and salads right next to Aalto campus.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://fatlizard.fi/",
+    "sourceId": "demo_fatlizard_otaniemi",
+    "officialLink": "https://fatlizard.fi/ravintolat/otaniemi/",
+    "notes": "Great for casual hangs; staff is trained on Wolt Advisor QR confirmations.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "dining",
+      "subCategory": "craft_beer_pizza",
+      "vibeTags": ["casual", "loud", "campus"],
+      "neighborhood": "Otaniemi",
+      "distanceHintsKm": {
+        "otaniemi": 0.5,
+        "leppavaara": 6,
+        "isoOmena": 5
+      },
+      "groupSuitability": {
+        "min": 3,
+        "max": 12,
+        "sweetSpot": 6
+      },
+      "durationMinutes": {
+        "standard": 90,
+        "min": 60,
+        "max": 120
+      },
+      "budgetLevel": "moderate",
+      "questionsMapping": {
+        "hungerLevels": ["medium", "high"],
+        "cravingTags": ["pizza", "craft beer", "wings"],
+        "budgetTiers": ["budget", "moderate"],
+        "timeSlotsMinutes": [90],
+        "energyLevels": ["medium", "high"]
+      },
+      "availability": [
+        {
+          "label": "18:30-20:00",
+          "start": "2024-11-16T18:30:00+02:00",
+          "end": "2024-11-16T20:00:00+02:00",
+          "pricePerPerson": 22,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/fatlizard?slot=1830"
+        },
+        {
+          "label": "20:00-21:30",
+          "start": "2024-11-16T20:00:00+02:00",
+          "end": "2024-11-16T21:30:00+02:00",
+          "pricePerPerson": 22,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/fatlizard?slot=2000"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt Table",
+        "leadTimeMinutes": 30,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/fatlizard",
+        "qrPayload": "wolt://advisor/book?venue=espoo-fat-lizard-otaniemi&slot=2024-11-16T18:30:00%2B02:00"
+      },
+      "foodInfo": {
+        "menuHighlights": ["OG Pepperoni Detroit Slice", "Halloumi fries", "House IPA flight"],
+        "dietaryOptions": ["vegan cheese available", "gluten-free base"]
+      },
+      "addOns": ["Shared beer flight", "Pre-ordered wings bucket"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["post_activity", "game-night"],
+        "dataFreshnessHours": 3
+      },
+      "demoTalkingPoints": [
+        "Perfect to explain hunger-level question.",
+        "Use to highlight low-friction booking + equal split."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-cafe-tarina-tapiola",
+    "name": "Café Tarina Tapiola",
+    "city": "Espoo",
+    "type": "cafe",
+    "address": "Tapionaukio 3, 02100 Espoo",
+    "latitude": 60.1794,
+    "longitude": 24.804,
+    "description": "Neighborhood living-room style café with cinnamon buns, matcha, and plenty of seating.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://cafetarina.fi/",
+    "sourceId": "demo_cafe_tarina",
+    "officialLink": "https://www.cafetarina.fi/",
+    "notes": "Accepts Wolt Advisor walk-in QR codes for table holds up to 30 min.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "coffee",
+      "subCategory": "cafe",
+      "vibeTags": ["cozy", "living_room", "pastry"],
+      "neighborhood": "Tapiola",
+      "distanceHintsKm": {
+        "otaniemi": 2,
+        "leppavaara": 4.2,
+        "isoOmena": 3.4
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 6,
+        "sweetSpot": 4
+      },
+      "durationMinutes": {
+        "standard": 60,
+        "min": 30,
+        "max": 90
+      },
+      "budgetLevel": "budget",
+      "questionsMapping": {
+        "hungerLevels": ["light"],
+        "cravingTags": ["coffee", "sweet", "chat"],
+        "budgetTiers": ["budget"],
+        "timeSlotsMinutes": [45, 60],
+        "energyLevels": ["low", "medium"]
+      },
+      "availability": [
+        {
+          "label": "10:00-11:00",
+          "start": "2024-11-16T10:00:00+02:00",
+          "end": "2024-11-16T11:00:00+02:00",
+          "pricePerPerson": 9,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/cafe-tarina?slot=1000"
+        },
+        {
+          "label": "14:00-15:00",
+          "start": "2024-11-16T14:00:00+02:00",
+          "end": "2024-11-16T15:00:00+02:00",
+          "pricePerPerson": 9,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/cafe-tarina?slot=1400"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt Pickup",
+        "leadTimeMinutes": 15,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/cafe-tarina",
+        "qrPayload": "wolt://advisor/book?venue=espoo-cafe-tarina-tapiola&slot=2024-11-16T10:00:00%2B02:00"
+      },
+      "foodInfo": {
+        "menuHighlights": ["Cardamom bun", "Matcha latte", "Vegan breakfast board"],
+        "dietaryOptions": ["oat milk default", "gluten-free carrot cake"]
+      },
+      "addOns": ["Reserved board games stack", "Pastry tasting flight"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["light_hang", "post_museum"],
+        "dataFreshnessHours": 8
+      },
+      "demoTalkingPoints": [
+        "Great to show hunger-level question variant (coffee flow).",
+        "Use when pitching \"everyone answered\" reminder path."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-otaniemi-coffee-lab",
+    "name": "Otaniemi Coffee Lab",
+    "city": "Espoo",
+    "type": "coffee_bar",
+    "address": "Otaniementie 19, 02150 Espoo",
+    "latitude": 60.1868,
+    "longitude": 24.8282,
+    "description": "Third-wave espresso bar and roastery pop-up testing limited micro-lots with communal standing tables.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://wolt.com",
+    "sourceId": "demo_otaniemi_coffee_lab",
+    "officialLink": "https://wolt.com/fi/experiences/coffee-lab",
+    "notes": "Baristas can trigger Wolt Advisor push once last friend accepts the plan.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "coffee",
+      "subCategory": "coffee_lab",
+      "vibeTags": ["third_wave", "standing", "limited_release"],
+      "neighborhood": "Otaniemi",
+      "distanceHintsKm": {
+        "otaniemi": 0.2,
+        "leppavaara": 6.2,
+        "isoOmena": 5.2
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 5,
+        "sweetSpot": 3
+      },
+      "durationMinutes": {
+        "standard": 45,
+        "min": 30,
+        "max": 60
+      },
+      "budgetLevel": "moderate",
+      "questionsMapping": {
+        "hungerLevels": ["light"],
+        "cravingTags": ["coffee", "curious"],
+        "budgetTiers": ["budget", "moderate"],
+        "timeSlotsMinutes": [45],
+        "experimentationLevel": ["high"]
+      },
+      "availability": [
+        {
+          "label": "09:00-10:00 Cupping",
+          "start": "2024-11-16T09:00:00+02:00",
+          "end": "2024-11-16T10:00:00+02:00",
+          "pricePerPerson": 12,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/coffee-lab?slot=0900"
+        },
+        {
+          "label": "15:00-16:00 Espresso Flight",
+          "start": "2024-11-16T15:00:00+02:00",
+          "end": "2024-11-16T16:00:00+02:00",
+          "pricePerPerson": 14,
+          "currency": "EUR",
+          "capacity": 4,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/coffee-lab?slot=1500"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt",
+        "leadTimeMinutes": 15,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/coffee-lab",
+        "qrPayload": "wolt://advisor/book?venue=espoo-otaniemi-coffee-lab&slot=2024-11-16T09:00:00%2B02:00"
+      },
+      "foodInfo": {
+        "menuHighlights": ["Nano-lot filter flight", "Yuzu espresso tonic"],
+        "dietaryOptions": ["oat + pea milk", "coconut whip"]
+      },
+      "addOns": ["Bean subscription sign-up", "Reusable cup swap"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["pre_activity", "remote_work_break"],
+        "dataFreshnessHours": 1
+      },
+      "demoTalkingPoints": [
+        "Great for \"new city\" scenario focusing on experimentation.",
+        "Use to explain how Advisor knows cravings even with 3 questions."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-hype-bistro-lilla-sten",
+    "name": "Bistro Lilla Sten",
+    "city": "Espoo",
+    "type": "restaurant",
+    "address": "Itätuulenkuja 9, 7. kerros, 02100 Espoo",
+    "latitude": 60.175,
+    "longitude": 24.8052,
+    "description": "Panoramic bistro atop Hype Areena serving Nordic breakfast, porridge bar, and casual dinner menus with sea views.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://www.hyparena.fi/bistro",
+    "sourceId": "demo_hype_bistro",
+    "officialLink": "https://www.hyparena.fi/bistro",
+    "notes": "Shares the same building as the hackathon; staff can see Advisor confirmations in POS.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "dining",
+      "subCategory": "nordic_bistro",
+      "vibeTags": ["panoramic", "casual", "indoor"],
+      "neighborhood": "Hype Areena",
+      "distanceHintsKm": {
+        "hypeAreena": 0,
+        "otaniemi": 2,
+        "leppavaara": 4.1
+      },
+      "groupSuitability": {
+        "min": 2,
+        "max": 10,
+        "sweetSpot": 4
+      },
+      "durationMinutes": {
+        "standard": 75,
+        "min": 45,
+        "max": 120
+      },
+      "budgetLevel": "moderate",
+      "questionsMapping": {
+        "hungerLevels": ["medium"],
+        "cravingTags": ["nordic", "casual"],
+        "budgetTiers": ["moderate"],
+        "timeSlotsMinutes": [60, 90],
+        "energyLevels": ["low", "medium"]
+      },
+      "availability": [
+        {
+          "label": "Breakfast 09:00-10:00",
+          "start": "2024-11-16T09:00:00+02:00",
+          "end": "2024-11-16T10:00:00+02:00",
+          "pricePerPerson": 18,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/hype-bistro?slot=0900"
+        },
+        {
+          "label": "Dinner 19:00-20:30",
+          "start": "2024-11-16T19:00:00+02:00",
+          "end": "2024-11-16T20:30:00+02:00",
+          "pricePerPerson": 32,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/hype-bistro?slot=1900"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt Table",
+        "leadTimeMinutes": 15,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/hype-bistro",
+        "qrPayload": "wolt://advisor/book?venue=espoo-hype-bistro-lilla-sten&slot=2024-11-16T19:00:00%2B02:00"
+      },
+      "foodInfo": {
+        "menuHighlights": ["Sea buckthorn overnight oats", "Seared salmon & dill potatoes", "Lingonberry crumble"],
+        "dietaryOptions": ["gluten free", "vegan porridge bar"]
+      },
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["onsite_meal", "between_workshops"],
+        "dataFreshnessHours": 2
+      },
+      "demoTalkingPoints": [
+        "Shows how Advisor can keep everyone onsite between sessions.",
+        "Booking within the same venue with 15 min lead time."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-hype-sun-deck",
+    "name": "Hype Sun Deck Pool & Sauna",
+    "city": "Espoo",
+    "type": "sauna_deck",
+    "address": "Itätuulenkuja 9, Rooftop, 02100 Espoo",
+    "latitude": 60.175,
+    "longitude": 24.8053,
+    "description": "Rooftop terrace atop Hype Areena featuring heated plunge pools, sauna cabins, and skyline loungers.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://www.hyparena.fi/sundeck",
+    "sourceId": "demo_hype_sundeck",
+    "officialLink": "https://www.hyparena.fi/sundeck",
+    "notes": "Perfect for showing proximity; staff coordinate access via Advisor QR.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "rooftop_sauna",
+      "vibeTags": ["sunset", "pool", "premium"],
+      "neighborhood": "Hype Areena",
+      "distanceHintsKm": {
+        "hypeAreena": 0,
+        "otaniemi": 2,
+        "isoOmena": 3.6
+      },
+      "groupSuitability": {
+        "min": 4,
+        "max": 8,
+        "sweetSpot": 6
+      },
+      "durationMinutes": {
+        "standard": 120,
+        "min": 90,
+        "max": 150
+      },
+      "budgetLevel": "premium",
+      "questionsMapping": {
+        "energyLevels": ["medium"],
+        "timeSlotsMinutes": [120],
+        "budgetTiers": ["premium"],
+        "noveltyPreference": ["explorer"],
+        "experienceIntensity": ["immersive"],
+        "weatherFlex": ["any"]
+      },
+      "availability": [
+        {
+          "label": "16:00-18:00 Sunset Warm-up",
+          "start": "2024-11-16T16:00:00+02:00",
+          "end": "2024-11-16T18:00:00+02:00",
+          "priceTotal": 180,
+          "pricePerPerson": 30,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/hype-sundeck?slot=1600"
+        },
+        {
+          "label": "20:00-22:00 Night Swim",
+          "start": "2024-11-16T20:00:00+02:00",
+          "end": "2024-11-16T22:00:00+02:00",
+          "priceTotal": 220,
+          "pricePerPerson": 36.67,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/hype-sundeck?slot=2000"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt Experiences",
+        "leadTimeMinutes": 60,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/hype-sundeck",
+        "qrPayload": "wolt://advisor/book?venue=espoo-hype-sun-deck&slot=2024-11-16T20:00:00%2B02:00"
+      },
+      "addOns": ["Cold plunge towels", "Mocktail tray", "DJ playlist plug-in"],
+      "contextualSignals": {
+        "weatherSuitability": ["all_weather"],
+        "idealFor": ["onsite_relax", "premium_groups"],
+        "dataFreshnessHours": 2
+      },
+      "demoTalkingPoints": [
+        "Instantly shows \"distance = 0m\" example.",
+        "Highlights premium upsell for finalists' celebration."
+      ]
+    }
+  },
+  {
+    "slug": "espoo-hype-hangout-topdeck",
+    "name": "Hype Topdeck Lounge",
+    "city": "Espoo",
+    "type": "hangout_space",
+    "address": "Itätuulenkuja 9, 6. kerros, 02100 Espoo",
+    "latitude": 60.1751,
+    "longitude": 24.8051,
+    "description": "Reserved lounge corner inside Hype Areena with modular couches, projector, and plug-and-play soundbar.",
+    "sourceName": "Wolt Advisor Demo Dataset",
+    "sourceUrl": "https://www.hyparena.fi/",
+    "sourceId": "demo_hype_topdeck",
+    "officialLink": "https://www.hyparena.fi/",
+    "notes": "Great for quick \"let's just hang\" sessions without leaving the venue.",
+    "lastVerifiedAt": "2024-11-15T00:00:00.000Z",
+    "enriched": {
+      "category": "activity",
+      "subCategory": "lounge",
+      "vibeTags": ["indoors", "casual", "onsite"],
+      "neighborhood": "Hype Areena",
+      "distanceHintsKm": {
+        "hypeAreena": 0,
+        "otaniemi": 2.1,
+        "isoOmena": 3.7
+      },
+      "groupSuitability": {
+        "min": 4,
+        "max": 15,
+        "sweetSpot": 8
+      },
+      "durationMinutes": {
+        "standard": 90,
+        "min": 60,
+        "max": 150
+      },
+      "budgetLevel": "budget",
+      "questionsMapping": {
+        "energyLevels": ["low", "medium"],
+        "timeSlotsMinutes": [60, 90],
+        "budgetTiers": ["budget"],
+        "hungerLevels": ["snack"],
+        "cravingTags": ["hangout"],
+        "noveltyPreference": ["familiar"]
+      },
+      "availability": [
+        {
+          "label": "17:00-18:30",
+          "start": "2024-11-16T17:00:00+02:00",
+          "end": "2024-11-16T18:30:00+02:00",
+          "priceTotal": 30,
+          "pricePerPerson": 5,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/hype-lounge?slot=1700"
+        },
+        {
+          "label": "21:00-23:00",
+          "start": "2024-11-16T21:00:00+02:00",
+          "end": "2024-11-16T23:00:00+02:00",
+          "priceTotal": 40,
+          "pricePerPerson": 6.67,
+          "currency": "EUR",
+          "capacity": 6,
+          "status": "available",
+          "bookingLink": "https://wolt.com/fi/experiences/hype-lounge?slot=2100"
+        }
+      ],
+      "booking": {
+        "provider": "Wolt",
+        "leadTimeMinutes": 15,
+        "supportsGroupPaymentSplit": true,
+        "link": "https://wolt.com/fi/experiences/hype-lounge",
+        "qrPayload": "wolt://advisor/book?venue=espoo-hype-hangout-topdeck&slot=2024-11-16T17:00:00%2B02:00"
+      },
+      "addOns": ["Projector HDMI kit", "Snack platter delivery", "Party games bundle"],
+      "contextualSignals": {
+        "weatherSuitability": ["indoor"],
+        "idealFor": ["lazy_group", "post_pitch"],
+        "dataFreshnessHours": 3
+      },
+      "demoTalkingPoints": [
+        "Shows hangout flow with €5 split and zero travel.",
+        "Great for \"everyone already here\" use case."
+      ]
+    }
   }
 ]
 

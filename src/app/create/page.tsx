@@ -13,15 +13,17 @@ export default function CreateEventPage() {
     },
   });
 
+  const { mutate, isPending, data } = createEvent;
+
   useEffect(() => {
     // Auto-create event when page loads
-    if (!createEvent.isPending && !createEvent.data) {
-      createEvent.mutate();
+    if (!isPending && !data) {
+      mutate();
     }
-  }, []);
+  }, [data, isPending, mutate]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <main className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="text-center">
         <div className="mb-4 text-6xl">✨</div>
         <h1 className="mb-3 text-3xl font-semibold text-white">Creating Event...</h1>

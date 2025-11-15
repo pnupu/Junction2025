@@ -7,7 +7,7 @@ import "./src/env.js";
 /** @type {import("next").NextConfig} */
 const config = {
   experimental: {
-    viewTransitions: true,
+    viewTransition: true,
   },
 };
 

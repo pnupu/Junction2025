@@ -3,7 +3,7 @@ import type {
   InfrastructureVenue,
   Prisma,
   PrismaClient,
-} from "../../../generated/prisma";
+} from "@prisma/client";
 import OpenAI from "openai";
 import { z } from "zod";
 

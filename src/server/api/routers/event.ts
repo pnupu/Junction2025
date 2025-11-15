@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { runAdvisorPipeline } from "@/server/agents/advisor-pipeline";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 
 export const eventRouter = createTRPCRouter({
@@ -125,71 +126,9 @@ export const eventRouter = createTRPCRouter({
         throw new Error("Event not found");
       }
 
-      // Calculate average activity level and most common money preference
-      const avgActivityLevel =
-        eventGroup.preferences.reduce((sum, p) => sum + p.activityLevel, 0) /
-        eventGroup.preferences.length;
-
-      const moneyPreferenceCounts = eventGroup.preferences.reduce(
-        (acc, p) => {
-          acc[p.moneyPreference] = (acc[p.moneyPreference] ?? 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>,
-      );
-
-      const popularMoneyPreference = Object.entries(moneyPreferenceCounts).sort(
-        ([, a], [, b]) => b - a,
-      )[0]?.[0] ?? "moderate";
-
-      // Mock recommendations based on preferences
-      const mockRecommendations = [
-        {
-          title: avgActivityLevel > 3 ? "Adventure City Tour" : "Relaxed Food Walk",
-          description:
-            avgActivityLevel > 3
-              ? "High-energy exploration of the city's hidden gems"
-              : "Leisurely stroll through the best local eateries",
-          type: avgActivityLevel > 3 ? "active" : "relaxed",
-          priceLevel: popularMoneyPreference,
-          duration: avgActivityLevel > 3 ? "4 hours" : "2 hours",
-          highlights: [
-            "Perfect for your group's vibe",
-            `${eventGroup.preferences.length} preferences matched`,
-            `${popularMoneyPreference} budget`,
-          ],
-        },
-        {
-          title: "Cultural Experience",
-          description: "Blend of local culture, food, and activities",
-          type: "balanced",
-          priceLevel: popularMoneyPreference,
-          duration: "3 hours",
-          highlights: [
-            "Balanced activity level",
-            "Cultural immersion",
-            "Great for groups",
-          ],
-        },
-        {
-          title:
-            avgActivityLevel < 3
-              ? "Cozy Evening Hangout"
-              : "City Adventure Challenge",
-          description:
-            avgActivityLevel < 3
-              ? "Perfect spots for conversation and connection"
-              : "Fun challenges and active exploration",
-          type: avgActivityLevel < 3 ? "relaxed" : "active",
-          priceLevel: popularMoneyPreference,
-          duration: avgActivityLevel < 3 ? "Evening" : "Half day",
-          highlights: [
-            "Tailored to your group",
-            "Memorable experiences",
-            "Easy to organize",
-          ],
-        },
-      ];
+      const { summary, ideas, stats } = await runAdvisorPipeline({
+        eventGroup,
+      });
 
       // Update event group status
       await ctx.db.eventGroup.update({
@@ -201,12 +140,14 @@ export const eventRouter = createTRPCRouter({
       });
 
       return {
-        recommendations: mockRecommendations,
+        recommendations: ideas,
         groupStats: {
-          participantCount: eventGroup.preferences.length,
-          avgActivityLevel: Math.round(avgActivityLevel * 10) / 10,
-          popularMoneyPreference,
+          participantCount: stats.participantCount,
+          avgActivityLevel: Math.round(stats.avgActivityLevel * 10) / 10,
+          popularMoneyPreference: stats.popularMoneyPreference,
+          energyLabel: stats.energyLabel,
         },
+        summary,
       };
     }),
 });

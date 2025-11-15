@@ -21,6 +21,47 @@ type Recommendation = {
   highlights: string[];
 };
 
+type EventPreference = {
+  userIcon: string;
+  activityLevel: number;
+};
+
+type EventDetails = {
+  city?: string | null;
+  preferences: EventPreference[];
+};
+
+function isEventDetails(data: unknown): data is EventDetails {
+  if (!data || typeof data !== "object") return false;
+  const candidate = data as {
+    preferences?: unknown;
+    city?: unknown;
+  };
+
+  if (!Array.isArray(candidate.preferences)) {
+    return false;
+  }
+
+  const prefsAreValid = candidate.preferences.every((pref) => {
+    if (!pref || typeof pref !== "object") return false;
+    const prefCandidate = pref as { userIcon?: unknown; activityLevel?: unknown };
+    return (
+      typeof prefCandidate.userIcon === "string" &&
+      typeof prefCandidate.activityLevel === "number"
+    );
+  });
+
+  if (!prefsAreValid) {
+    return false;
+  }
+
+  return (
+    candidate.city === undefined ||
+    candidate.city === null ||
+    typeof candidate.city === "string"
+  );
+}
+
 export default function EventResultsPage() {
   const params = useParams();
   const eventId = params.id as string;
@@ -33,10 +74,12 @@ export default function EventResultsPage() {
   } | null>(null);
   const [showQRDialog, setShowQRDialog] = useState<boolean>(false);
 
-  const { data: eventData } = api.event.get.useQuery(
+  const eventQuery = api.event.get.useQuery(
     { id: eventId },
     { enabled: !!eventId },
   );
+  const rawEventData: unknown = eventQuery.data;
+  const eventData = isEventDetails(rawEventData) ? rawEventData : undefined;
 
   const generateRecommendations = api.event.generateRecommendations.useMutation({
     onSuccess: (data) => {
@@ -44,12 +87,13 @@ export default function EventResultsPage() {
       setGroupStats(data.groupStats);
     },
   });
+  const { mutate: runRecommendations, isPending: isGenerating } = generateRecommendations;
 
   useEffect(() => {
-    if (eventId && !generateRecommendations.isPending && recommendations.length === 0) {
-      generateRecommendations.mutate({ groupId: eventId });
+    if (eventId && !isGenerating && recommendations.length === 0) {
+      runRecommendations({ groupId: eventId });
     }
-  }, [eventId]);
+  }, [eventId, isGenerating, recommendations.length, runRecommendations]);
 
   const handleCopyLink = () => {
     const url = window.location.origin + `/event/${eventId}`;
@@ -82,7 +126,7 @@ export default function EventResultsPage() {
     }
   };
 
-  if (generateRecommendations.isPending) {
+  if (isGenerating) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
