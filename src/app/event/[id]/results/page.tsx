@@ -2,7 +2,14 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { api } from "@/trpc/react";
 
 type Recommendation = {
@@ -24,6 +31,7 @@ export default function EventResultsPage() {
     avgActivityLevel: number;
     popularMoneyPreference: string;
   } | null>(null);
+  const [showQRDialog, setShowQRDialog] = useState<boolean>(false);
 
   const { data: eventData } = api.event.get.useQuery(
     { id: eventId },
@@ -93,7 +101,7 @@ export default function EventResultsPage() {
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="mb-1 text-3xl font-semibold text-white">
                 Your Event Options
@@ -104,14 +112,45 @@ export default function EventResultsPage() {
                 {groupStats?.participantCount === 1 ? "participant" : "participants"}
               </p>
             </div>
-            <Button
-              onClick={handleCopyLink}
-              variant="outline"
-              className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
-            >
-              📋 Share
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowQRDialog(true)}
+                variant="outline"
+                className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
+              >
+                📄 QR Code
+              </Button>
+              <Button
+                onClick={handleCopyLink}
+                variant="outline"
+                className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
+              >
+                📋 Share
+              </Button>
+            </div>
           </div>
+
+          {/* QR Code Dialog */}
+          <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+            <DialogContent className="border-slate-700 bg-slate-900 text-white sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-center text-white">Invite More People</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col items-center gap-4 py-6">
+                <div className="rounded-2xl bg-white p-6">
+                  <QRCodeSVG
+                    value={typeof window !== "undefined" ? window.location.origin + `/event/${eventId}` : ""}
+                    size={256}
+                    level="H"
+                    includeMargin={true}
+                  />
+                </div>
+                <p className="text-center text-sm text-slate-400">
+                  Scan to join and add preferences to this event
+                </p>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Group Stats */}
           {groupStats && (

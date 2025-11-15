@@ -2,7 +2,14 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { api } from "@/trpc/react";
 
 const userIcons = [
@@ -54,6 +61,7 @@ export default function EventPage() {
   const [budget, setBudget] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState<boolean>(false);
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+  const [showQRDialog, setShowQRDialog] = useState<boolean>(false);
 
   const { data: eventData, refetch } = api.event.get.useQuery(
     { id: eventId },
@@ -143,22 +151,69 @@ export default function EventPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="mx-auto max-w-2xl px-4 py-8">
-        {/* Header with Copy Link */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-white">Event Planning</h1>
-            <p className="text-sm text-slate-400">
-              {completedCount} {completedCount === 1 ? "person" : "people"} answered
-            </p>
-          </div>
-          <Button
-            onClick={() => void handleCopyLink()}
-            variant="outline"
-            className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
-          >
-            📋 Copy Link
-          </Button>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="mb-1 text-2xl font-semibold text-white">Event Planning</h1>
+          <p className="text-sm text-slate-400">
+            {completedCount} {completedCount === 1 ? "person" : "people"} answered
+          </p>
         </div>
+
+        {/* QR Code and Share Section */}
+        <div className="mb-8 rounded-2xl bg-slate-900/50 p-6 backdrop-blur">
+          <h2 className="mb-4 text-sm font-medium text-slate-400">Invite Others</h2>
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowQRDialog(true)}
+                className="group relative overflow-hidden rounded-xl bg-white p-3 transition-all hover:scale-105 hover:shadow-xl"
+              >
+                <QRCodeSVG
+                  value={typeof window !== "undefined" ? window.location.href : ""}
+                  size={80}
+                  level="H"
+                  includeMargin={false}
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="text-xs font-medium text-white">Click to enlarge</span>
+                </div>
+              </button>
+              <div>
+                <p className="text-sm font-medium text-white">Scan to join</p>
+                <p className="text-xs text-slate-400">Click QR to enlarge</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => void handleCopyLink()}
+              variant="outline"
+              className="border-slate-700 bg-slate-800/50 text-white hover:bg-slate-700"
+            >
+              📋 Copy Link
+            </Button>
+          </div>
+        </div>
+
+        {/* QR Code Dialog */}
+        <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+          <DialogContent className="border-slate-700 bg-slate-900 text-white sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-white">Scan to Join Event</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center gap-4 py-6">
+              <div className="rounded-2xl bg-white p-6">
+                <QRCodeSVG
+                  value={typeof window !== "undefined" ? window.location.href : ""}
+                  size={256}
+                  level="H"
+                  includeMargin={true}
+                />
+              </div>
+              <p className="text-center text-sm text-slate-400">
+                Share this QR code to invite others to the event
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Participants List */}
         {completedCount > 0 && (
