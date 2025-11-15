@@ -72,107 +72,194 @@ export default function Home() {
   // Profile creation form
   if (showProfileForm) {
     return (
-      <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
-        {/* Background image */}
-        <div className="fixed bottom-0 left-1/2 h-[50vh] w-full max-w-[595px] -translate-x-1/2">
-          <img
-            src="/happy-times.png"
-            alt=""
-            className="h-full w-full object-cover object-top"
-          />
-        </div>
+      <>
+        {/* Desktop: Show background with modal overlay */}
+        <main className="relative hidden min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12 md:flex">
+          {/* Background image */}
+          <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
+            <img
+              src="/happy-times.png"
+              alt=""
+              className="h-full w-full object-cover object-bottom"
+            />
+          </div>
 
-        {/* Content */}
-        <div className="relative z-10 w-full max-w-md">
-          <h1 className="mb-12 text-center text-4xl font-bold text-white">
-            Create Your Profile
-          </h1>
+          {/* Modal overlay */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white px-5 py-6 shadow-xl">
+              {/* Close button */}
+              <button
+                onClick={() => setShowProfileForm(false)}
+                className="absolute right-4 top-4 text-[#62748E] hover:text-[#0F172B]"
+              >
+                ✕
+              </button>
 
-          <div className="space-y-6">
+              <div className="flex flex-col gap-8">
+                <h1 className="text-4xl font-semibold text-[#0F172B]">
+                  Profile
+                </h1>
+
+                {/* Name Input */}
+                <div>
+                  <Input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name"
+                    className="h-14 rounded-xl border-[1.5px] border-[#CAD5E2] bg-white px-6 py-4 text-base text-[#0F172B] placeholder:text-[#62748E]"
+                  />
+                </div>
+
+                {/* Activity Preference */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-base font-medium text-[#0F172B]">
+                    Activity preference
+                  </label>
+                  <div className="flex gap-3">
+                    {activityOptions.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setActivityPreference(option.id)}
+                        className={`
+                          flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all
+                          ${
+                            activityPreference === option.id
+                              ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
+                              : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
+                          }
+                        `}
+                      >
+                        <span className="text-xl font-semibold">{option.emoji}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Food Preference */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-base font-medium text-[#0F172B]">
+                    Food preference
+                  </label>
+                  <div className="flex gap-3">
+                    {foodOptions.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setFoodPreference(option.id)}
+                        className={`
+                          flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all
+                          ${
+                            foodPreference === option.id
+                              ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
+                              : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
+                          }
+                        `}
+                      >
+                        <span className="text-xl font-semibold">{option.emoji}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex flex-col gap-2.5">
+                  <Button
+                    onClick={handleCreateProfile}
+                    disabled={!name || !activityPreference || !foodPreference}
+                    className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#029DE2]/90 disabled:opacity-50"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Mobile: Full screen white background */}
+        <main className="flex min-h-screen flex-col bg-white px-5 py-6 md:hidden">
+          <div className="flex flex-col gap-8">
+            {/* Top spacing */}
+            <div className="h-6" />
+            
+            <h1 className="text-4xl font-semibold text-[#0F172B]">
+              Profile
+            </h1>
+
             {/* Name Input */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-white">
-                What&apos;s your name?
-              </label>
               <Input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="h-12 rounded-xl border-2 border-white/30 bg-white/10 text-white placeholder:text-white/50"
+                placeholder="Name"
+                className="h-14 rounded-xl border-[1.5px] border-[#CAD5E2] bg-white px-6 py-4 text-base text-[#0F172B] placeholder:text-[#62748E]"
               />
             </div>
 
             {/* Activity Preference */}
-            <div>
-              <label className="mb-3 block text-sm font-medium text-white">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-base font-medium text-[#0F172B]">
                 Activity preference
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="flex gap-3">
                 {activityOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setActivityPreference(option.id)}
                     className={`
-                      flex flex-col items-center justify-center rounded-xl border-2 p-4 transition-all
+                      flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all
                       ${
                         activityPreference === option.id
-                          ? "scale-105 border-white bg-white/20"
-                          : "border-white/30 bg-white/5 hover:border-white/50"
+                          ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
+                          : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
                       }
                     `}
                   >
-                    <span className="mb-1 text-2xl">{option.emoji}</span>
-                    <span className="text-xs font-medium text-white">{option.label}</span>
+                    <span className="text-xl font-semibold">{option.emoji}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Food Preference */}
-            <div>
-              <label className="mb-3 block text-sm font-medium text-white">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-base font-medium text-[#0F172B]">
                 Food preference
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="flex gap-3">
                 {foodOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setFoodPreference(option.id)}
                     className={`
-                      flex flex-col items-center justify-center rounded-xl border-2 p-4 transition-all
+                      flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all
                       ${
                         foodPreference === option.id
-                          ? "scale-105 border-white bg-white/20"
-                          : "border-white/30 bg-white/5 hover:border-white/50"
+                          ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
+                          : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
                       }
                     `}
                   >
-                    <span className="mb-1 text-2xl">{option.emoji}</span>
-                    <span className="text-xs font-medium text-white">{option.label}</span>
+                    <span className="text-xl font-semibold">{option.emoji}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Submit Button */}
-            <Button
-              onClick={handleCreateProfile}
-              disabled={!name || !activityPreference || !foodPreference}
-              className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90 disabled:opacity-50"
-            >
-              Save Profile
-            </Button>
-
-            <button
-              onClick={() => setShowProfileForm(false)}
-              className="w-full text-center text-sm text-white/80 hover:text-white"
-            >
-              Cancel
-            </button>
+            {/* Bottom spacer and button */}
+            <div className="flex grow flex-col justify-end gap-2.5">
+              <Button
+                onClick={handleCreateProfile}
+                disabled={!name || !activityPreference || !foodPreference}
+                className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#029DE2]/90 disabled:opacity-50"
+              >
+                Continue
+              </Button>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </>
     );
   }
 
