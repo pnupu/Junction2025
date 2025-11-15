@@ -7,31 +7,28 @@ import { Input } from "@/components/ui/input";
 export type UserProfile = {
   name: string;
   dietaryRestrictions: "none" | "vegan-vege" | "gluten-free";
-  eatOutFrequency: "rarely" | "monthly" | "weekly";
+  eatingFrequency: "rarely" | "monthly" | "weekly";
   healthConsciousness: "little" | "moderate" | "very";
-  // Legacy fields for backward compatibility
-  activityPreference?: "chill" | "celebratory" | "active";
-  foodPreference?: "no-limit" | "veg" | "gluten";
   latitude?: number;
   longitude?: number;
 };
 
-const dietaryRestrictionsOptions = [
-  { id: "none" as const, label: "None", emoji: "😊", icon: "🍴" },
-  { id: "vegan-vege" as const, label: "Vegan/vege", emoji: "✌️", icon: "🌿" },
-  { id: "gluten-free" as const, label: "Gluten free", emoji: "❌", icon: "🍞" },
+const dietaryOptions = [
+  { id: "none" as const, label: "None", emoji: "😋🍽️" },
+  { id: "vegan-vege" as const, label: "Vegan/vege", emoji: "✌️🥬" },
+  { id: "gluten-free" as const, label: "Gluten free", emoji: "❌🍞" },
 ];
 
-const eatOutFrequencyOptions = [
+const frequencyOptions = [
   { id: "rarely" as const, label: "Rarely", emoji: "🧦" },
   { id: "monthly" as const, label: "Monthly", emoji: "👞" },
   { id: "weekly" as const, label: "Weekly", emoji: "👟" },
 ];
 
-const healthConsciousnessOptions = [
-  { id: "little" as const, label: "Little", emoji: "👍" },
+const healthOptions = [
+  { id: "little" as const, label: "Little", emoji: "🤙" },
   { id: "moderate" as const, label: "Moderate", emoji: "🏃" },
-  { id: "very" as const, label: "Very", emoji: "💪" },
+  { id: "very" as const, label: "Very", emoji: "🦾" },
 ];
 
 interface ProfileModalProps {
@@ -53,8 +50,8 @@ export function ProfileModal({
   const [dietaryRestrictions, setDietaryRestrictions] = useState<
     UserProfile["dietaryRestrictions"] | null
   >(null);
-  const [eatOutFrequency, setEatOutFrequency] = useState<
-    UserProfile["eatOutFrequency"] | null
+  const [eatingFrequency, setEatingFrequency] = useState<
+    UserProfile["eatingFrequency"] | null
   >(null);
   const [healthConsciousness, setHealthConsciousness] = useState<
     UserProfile["healthConsciousness"] | null
@@ -68,32 +65,9 @@ export function ProfileModal({
         try {
           const profile = JSON.parse(existingProfile) as UserProfile;
           setName(profile.name);
-          // Support both new and legacy fields
-          if (profile.dietaryRestrictions) {
-            setDietaryRestrictions(profile.dietaryRestrictions);
-          } else if (profile.foodPreference) {
-            // Migrate legacy foodPreference to dietaryRestrictions
-            const migrationMap: Record<string, UserProfile["dietaryRestrictions"]> = {
-              "no-limit": "none",
-              "veg": "vegan-vege",
-              "gluten": "gluten-free",
-            };
-            setDietaryRestrictions(migrationMap[profile.foodPreference] || "none");
-          }
-          if (profile.eatOutFrequency) {
-            setEatOutFrequency(profile.eatOutFrequency);
-          }
-          if (profile.healthConsciousness) {
-            setHealthConsciousness(profile.healthConsciousness);
-          } else if (profile.activityPreference) {
-            // Migrate legacy activityPreference to healthConsciousness
-            const migrationMap: Record<string, UserProfile["healthConsciousness"]> = {
-              "chill": "little",
-              "celebratory": "moderate",
-              "active": "very",
-            };
-            setHealthConsciousness(migrationMap[profile.activityPreference] || "moderate");
-          }
+          setDietaryRestrictions(profile.dietaryRestrictions);
+          setEatingFrequency(profile.eatingFrequency);
+          setHealthConsciousness(profile.healthConsciousness);
         } catch {
           // Invalid profile, ignore
         }
@@ -102,7 +76,7 @@ export function ProfileModal({
   }, [isOpen]);
 
   const handleSave = async () => {
-    if (!name || !dietaryRestrictions || !eatOutFrequency || !healthConsciousness) return;
+    if (!name || !dietaryRestrictions || !eatingFrequency || !healthConsciousness) return;
 
     // Always request fresh location permission
     let latitude: number | undefined;
@@ -139,7 +113,7 @@ export function ProfileModal({
     const profile: UserProfile = {
       name,
       dietaryRestrictions,
-      eatOutFrequency,
+      eatingFrequency,
       healthConsciousness,
       latitude,
       longitude,
@@ -169,73 +143,70 @@ export function ProfileModal({
         />
       </div>
 
-      {/* Dietary restrictions */}
+      {/* Dietary Restrictions */}
       <div className="flex flex-col gap-1.5">
         <label className="text-base font-medium text-[#0F172B]">
           Dietary restrictions
         </label>
-        <div className="flex gap-3">
-          {dietaryRestrictionsOptions.map((option) => (
+        <div className="flex gap-2">
+          {dietaryOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => setDietaryRestrictions(option.id)}
-              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-4 transition-all ${
+              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-8 transition-all ${
                 dietaryRestrictions === option.id
                   ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
                   : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
               } `}
             >
-              <div className="flex items-center gap-1">
-                <span className="text-lg">{option.emoji}</span>
-                <span className="text-lg">{option.icon}</span>
-              </div>
-              <span className="text-sm font-medium text-[#0F172B]">{option.label}</span>
+              <span className="text-xl font-semibold leading-none">{option.emoji}</span>
+              <span className="text-sm text-[#62748E]">{option.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Eat out / order in frequency */}
+      {/* Eating Frequency */}
       <div className="flex flex-col gap-1.5">
         <label className="text-base font-medium text-[#0F172B]">
           Eat out / order in frequency
         </label>
-        <div className="flex gap-3">
-          {eatOutFrequencyOptions.map((option) => (
+        <div className="flex gap-2">
+          {frequencyOptions.map((option) => (
             <button
               key={option.id}
-              onClick={() => setEatOutFrequency(option.id)}
-              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-4 transition-all ${
-                eatOutFrequency === option.id
+              onClick={() => setEatingFrequency(option.id)}
+              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-8 transition-all ${
+                eatingFrequency === option.id
                   ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
                   : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
               } `}
             >
-              <span className="text-2xl">{option.emoji}</span>
-              <span className="text-sm font-medium text-[#0F172B]">{option.label}</span>
+              <span className="text-xl font-semibold leading-none">{option.emoji}</span>
+              <span className="text-sm text-[#62748E]">{option.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Health consciousness */}
+      {/* Health Consciousness */}
       <div className="flex flex-col gap-1.5">
         <label className="text-base font-medium text-[#0F172B]">
           Health consciousness
         </label>
-        <div className="flex gap-3">
-          {healthConsciousnessOptions.map((option) => (
+        <div className="flex gap-2">
+          {healthOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => setHealthConsciousness(option.id)}
-              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-4 transition-all ${
+              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-8 transition-all ${
                 healthConsciousness === option.id
                   ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
                   : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
               } `}
             >
-              <span className="text-2xl">{option.emoji}</span>
-              <span className="text-sm font-medium text-[#0F172B]">{option.label}</span>
+              <span className="text-xl font-semibold leading-none">{option.emoji}</span>
+              <span className="text-sm text-[#62748E]">{option.label}</span>
             </button>
           ))}
         </div>
@@ -245,7 +216,7 @@ export function ProfileModal({
       <div className="flex flex-col gap-2.5">
         <Button
           onClick={handleSave}
-          disabled={!name || !dietaryRestrictions || !eatOutFrequency || !healthConsciousness}
+          disabled={!name || !dietaryRestrictions || !eatingFrequency || !healthConsciousness}
           className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#029DE2]/90 disabled:opacity-50"
         >
           Continue

@@ -16,7 +16,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { api } from "@/trpc/react";
+import { api, type RouterOutputs } from "@/trpc/react";
 import {
   ProfileModal,
   getUserProfile,
@@ -26,9 +26,13 @@ import {
   EventMapModal,
   type ParticipantLocation,
 } from "@/components/event-map-modal";
-import { MoodQuestions } from "@/components/mood-questions";
 import { GenerateUsersButton } from "@/components/ui/generate-users-button";
+import { OpinionModal } from "@/components/opinion-modal";
+import { useMoodQuestionsFlow } from "@/components/mood-questions-flow";
+import { MoodQuestionCard } from "@/components/mood-question-card";
 import dynamic from "next/dynamic";
+
+type RecommendationItem = RouterOutputs["event"]["getRecommendations"]["recommendations"][number];
 
 // Type for Leaflet module (only what we need)
 type LeafletModule = {
@@ -81,6 +85,7 @@ export default function EventPage() {
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
   const [showMapModal, setShowMapModal] = useState<boolean>(false);
+  const [showOpinionModal, setShowOpinionModal] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [L, setL] = useState<LeafletModule | null>(null);
@@ -283,19 +288,19 @@ export default function EventPage() {
       let healthConsciousness: "little" | "moderate" | "very" = "moderate";
       if ("healthConsciousness" in profile && profile.healthConsciousness) {
         healthConsciousness = profile.healthConsciousness;
-      } else if (profile.activityPreference) {
+      } else if (profile.healthConsciousness) {
         healthConsciousness = 
-          profile.activityPreference === "chill" ? "little" : 
-          profile.activityPreference === "celebratory" ? "moderate" : "very";
+          profile.healthConsciousness === "little" ? "little" : 
+          profile.healthConsciousness === "moderate" ? "moderate" : "very";
       }
       
       let dietaryRestrictions: "none" | "vegan-vege" | "gluten-free" = "none";
       if ("dietaryRestrictions" in profile && profile.dietaryRestrictions) {
         dietaryRestrictions = profile.dietaryRestrictions;
-      } else if (profile.foodPreference) {
+      } else if (profile.dietaryRestrictions) {
         dietaryRestrictions = 
-          profile.foodPreference === "no-limit" ? "none" : 
-          profile.foodPreference === "veg" ? "vegan-vege" : "gluten-free";
+          profile.dietaryRestrictions === "none" ? "none" : 
+          profile.dietaryRestrictions === "vegan-vege" ? "vegan-vege" : "gluten-free";
       }
 
       addPreferences.mutate({
@@ -495,6 +500,17 @@ export default function EventPage() {
   console.log("currentUserPreference", currentUserPreference);
   console.log("currentUserPreference", currentUserPreference);
 
+  // Mood questions flow hook (prefetch data)
+  const moodFlow = useMoodQuestionsFlow({
+    groupId: eventData?.id ?? "",
+    sessionId,
+    participantName: userProfile?.name,
+    onComplete: () => {
+      setShowOpinionModal(false);
+      void refetch();
+    },
+  });
+
   return (
     <>
       <ProfileModal
@@ -514,6 +530,46 @@ export default function EventPage() {
         isEnlarged={true}
         eventName={userProfile?.name ?? "Your"}
       />
+      <OpinionModal
+        isOpen={showOpinionModal}
+        onClose={() => setShowOpinionModal(false)}
+        participants={participantLocations}
+        isLoading={moodFlow.isLoading}
+      >
+        {moodFlow.hasQuestions && moodFlow.questions.length > 0 && (
+          <div className="w-full rounded-2xl bg-white p-6 shadow-lg">
+            <h2 className="mb-6 text-center text-xl font-semibold text-[#0F172B]">
+              Quick mood check 🎯
+            </h2>
+            {moodFlow.followUp && (
+              <p className="mb-4 text-center text-sm text-slate-600">
+                {moodFlow.followUp}
+              </p>
+            )}
+            <div className="space-y-6">
+              {moodFlow.questions.map((question) => (
+                <MoodQuestionCard
+                  key={question.id}
+                  question={question}
+                  value={moodFlow.answers[question.id]}
+                  onChange={(value) =>
+                    moodFlow.handleAnswerChange(question.id, question.signalKey, value)
+                  }
+                />
+              ))}
+            </div>
+            <div className="mt-6">
+              <Button
+                onClick={moodFlow.handleSubmit}
+                disabled={!moodFlow.allAnswered || moodFlow.isSubmitting}
+                className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3] disabled:opacity-50"
+              >
+                {moodFlow.isSubmitting ? "Saving..." : "Continue"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </OpinionModal>
       <main className="min-h-screen bg-white">
         {/* Back button */}
         <div className="absolute top-4 left-4 z-20">
@@ -859,7 +915,7 @@ export default function EventPage() {
                     <>
                       {/* Event Ideas List */}
                       <div className="space-y-3">
-                        {recommendationsQuery.data.recommendations.map((rec, idx) => {
+                        {recommendationsQuery.data.recommendations.map((rec: RecommendationItem, idx: number) => {
                           // Get price level as € symbols
                           const getPriceSymbols = (level: string) => {
                             switch (level) {
@@ -1023,19 +1079,6 @@ export default function EventPage() {
             </div>
           )}
 
-          {/* Mood Questions - Show after user has joined */}
-          {hasJoined && eventData?.id && sessionId && !hasMoodResponses && (
-            <MoodQuestions
-              key={`mood-${eventData.id}-${sessionId}`}
-              groupId={eventData.id}
-              sessionId={sessionId}
-              participantName={userProfile?.name}
-              onComplete={() => {
-                void refetch();
-              }}
-            />
-          )}
-
           {/* Creator Action Button - Only visible to event creator and when ideas haven't been generated */}
           {isCreator &&
           hasJoined && eventStatus === "collecting_preferences" ? (
@@ -1058,13 +1101,7 @@ export default function EventPage() {
           {/* Waiting message for non-creators */}
           {!isCreator && hasJoined && (
             <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
-              <div className="mb-3 text-4xl">⏳</div>
-              <h3 className="mb-2 text-xl font-semibold text-white">
-                Waiting for the host
-              </h3>
-              <p className="text-white/80">
-                The event creator will generate activities when ready
-              </p>
+       {/*This should be empty */}
             </div>
           )}
 
@@ -1080,7 +1117,33 @@ export default function EventPage() {
               />
             </div>
           )}
+
+          {/* "Give your opinion" button - Below demo users on desktop, fixed at bottom on mobile */}
+          {hasJoined && !hasMoodResponses && (
+            <div className="mt-6 hidden md:block">
+              <Button
+                onClick={() => setShowOpinionModal(true)}
+                className="h-14 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white shadow-lg hover:bg-[#0287C3]"
+              >
+                Give your opinion
+              </Button>
+            </div>
+          )}
         </div>
+
+        {/* Fixed "Give your opinion" button - Only on mobile */}
+        {hasJoined && !hasMoodResponses && (
+          <div className="fixed bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-white via-white to-transparent px-5 pb-5 pt-8 md:hidden">
+            <div className="mx-auto max-w-[500px]">
+              <Button
+                onClick={() => setShowOpinionModal(true)}
+                className="h-14 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white shadow-lg hover:bg-[#0287C3]"
+              >
+                Give your opinion
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
