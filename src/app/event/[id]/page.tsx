@@ -27,6 +27,7 @@ import {
   type ParticipantLocation,
 } from "@/components/event-map-modal";
 import { MoodQuestions } from "@/components/mood-questions";
+import { GenerateUsersButton } from "@/components/ui/generate-users-button";
 import dynamic from "next/dynamic";
 
 // Type for Leaflet module (only what we need)
@@ -90,7 +91,7 @@ export default function EventPage() {
     eventIdOrCode.length <= 10 && /^[A-Z0-9]+$/i.test(eventIdOrCode);
 
   // Smart polling: only poll when something is actively happening
-  const { data: eventData, refetch } = api.event.get.useQuery(
+  const { data: eventData, refetch, isLoading } = api.event.get.useQuery(
     isLikelyInviteCode
       ? { inviteCode: eventIdOrCode.toUpperCase() }
       : { id: eventIdOrCode },
@@ -445,6 +446,21 @@ export default function EventPage() {
     return Array.from(locationMap.values());
   }, [participantLocations]);
 
+  // Check if recommendations are being generated or have been generated, and redirect
+  useEffect(() => {
+    if (eventData) {
+      const status = (eventData as { status?: string }).status;
+      const isGenerated =
+        (eventData as { isGenerated?: boolean }).isGenerated ??
+        status === "generated";
+      const isGenerating = status === "generating";
+
+      // Redirect to results page if generating or generated
+      if ((isGenerating || isGenerated) && eventData.id) {
+        router.push(`/event/${eventData.id}/results`);
+      }
+    }
+  }, [eventData, router]);
 
   // Sort participants by createdAt to ensure consistent ordering
   const participants = [...(eventData?.preferences ?? [])].sort(
@@ -759,57 +775,57 @@ export default function EventPage() {
                   <h2 className="mb-4 text-sm font-medium tracking-wide text-white/80 uppercase">
                     Participants ({participantCount})
                   </h2>
-              <div className="space-y-3">
-                {participants.map((participant, idx) => {
-                  const moodResponses = (
-                    participant as { moodResponses?: Record<string, unknown> }
-                  ).moodResponses;
-                  const currentEnergy =
-                    moodResponses &&
-                    typeof moodResponses === "object" &&
-                    !Array.isArray(moodResponses)
-                      ? moodResponses.currentEnergy
-                      : undefined;
-                  const energyDisplay =
-                    typeof currentEnergy === "string"
-                      ? currentEnergy
-                      : `Activity level: ${participant.activityLevel}/5`;
+                  <div className="space-y-3">
+                    {participants.map((participant, idx) => {
+                      const moodResponses = (
+                        participant as { moodResponses?: Record<string, unknown> }
+                      ).moodResponses;
+                      const currentEnergy =
+                        moodResponses &&
+                        typeof moodResponses === "object" &&
+                        !Array.isArray(moodResponses)
+                          ? moodResponses.currentEnergy
+                          : undefined;
+                      const energyDisplay =
+                        typeof currentEnergy === "string"
+                          ? currentEnergy
+                          : `Activity level: ${participant.activityLevel}/5`;
 
-                  // Check if participant has answered mood questions
-                  const hasAnsweredMoodQuestions =
-                    moodResponses &&
-                    typeof moodResponses === "object" &&
-                    !Array.isArray(moodResponses) &&
-                    Object.keys(moodResponses).length > 0;
+                      // Check if participant has answered mood questions
+                      const hasAnsweredMoodQuestions =
+                        moodResponses &&
+                        typeof moodResponses === "object" &&
+                        !Array.isArray(moodResponses) &&
+                        Object.keys(moodResponses).length > 0;
 
-                  // Determine task status circles (3 circles showing progress)
-                  const isCreatorOfEvent = idx === 0; // First participant is creator
+                      // Determine task status circles (3 circles showing progress)
+                      const isCreatorOfEvent = idx === 0; // First participant is creator
 
-                  return (
-                    <div
-                      key={participant.id ?? participant.sessionId ?? idx}
-                      className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-3"
-                    >
-                      <p className="text-base text-[#0F172B]">
-                        {isCreatorOfEvent && "👑 "}
-                        {participant.userName ?? "Anonymous"}
-                      </p>
-                      <div className="flex gap-1">
-                        {/* Task status indicators - 3 circles */}
+                      return (
                         <div
-                          className={`h-3 w-3 rounded-full border-[1.5px] border-[#029DE2] ${
-                            hasAnsweredMoodQuestions
-                              ? "bg-[#029DE2]"
-                              : "bg-white"
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                          key={participant.id ?? participant.sessionId ?? idx}
+                          className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-3"
+                        >
+                          <p className="text-base text-[#0F172B]">
+                            {isCreatorOfEvent && "👑 "}
+                            {participant.userName ?? "Anonymous"}
+                          </p>
+                          <div className="flex gap-1">
+                            {/* Task status indicators - 3 circles */}
+                            <div
+                              className={`h-3 w-3 rounded-full border-[1.5px] border-[#029DE2] ${
+                                hasAnsweredMoodQuestions
+                                  ? "bg-[#029DE2]"
+                                  : "bg-white"
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </>
           )}
 
@@ -1011,7 +1027,8 @@ export default function EventPage() {
 
           {/* Creator Action Button - Only visible to event creator and when ideas haven't been generated */}
           {isCreator &&
-          hasJoined && eventStatus === "collecting_preferences" ? (
+          hasJoined &&
+          eventStatus === "ready_to_generate" ? (
             <div className="mt-8">
               <Button
                 onClick={handleGenerateEvent}
@@ -1038,6 +1055,19 @@ export default function EventPage() {
               <p className="text-white/80">
                 The event creator will generate activities when ready
               </p>
+            </div>
+          )}
+
+          {/* Generate Demo Users Button */}
+          {isCreator && hasJoined && (
+            <div className="mt-6">
+              <GenerateUsersButton
+                onGenerateUsers={(count) => {
+                  console.log(`Generated ${count} demo users`);
+                  // TODO: Implement actual demo user generation
+                  void refetch();
+                }}
+              />
             </div>
           )}
         </div>
