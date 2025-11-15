@@ -1,53 +1,143 @@
 import Link from "next/link";
 
-import { LatestPost } from "@/app/_components/post";
-import { api, HydrateClient } from "@/trpc/server";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
+const flowSteps = [
+  {
+    title: "Pulse check",
+    copy: "Ultra-fast onboarding captures a name + gut-feel preferences without friction.",
+    tag: "Step 01",
+  },
+  {
+    title: "Spin up crew space",
+    copy: "We auto-create an event group, short code, and invite QR that friends can scan.",
+    tag: "Step 02",
+  },
+  {
+    title: "Stream experiences",
+    copy: "AI blends food, venues, and local experiences that adapt as more friends join.",
+    tag: "Step 03",
+  },
+];
 
-  void api.post.getLatest.prefetch();
+const highlights = [
+  {
+    label: "City-agnostic",
+    value: "30+",
+    copy: "market-ready playbooks that scale with Wolt’s footprint.",
+  },
+  {
+    label: "Signals captured",
+    value: "15",
+    copy: "preference inputs routed into our matching engine.",
+  },
+  {
+    label: "Share speed",
+    value: "<10s",
+    copy: "from name entry to a working invite link.",
+  },
+];
 
+export default function Home() {
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 py-12 sm:px-8 lg:py-16">
+        <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <div className="space-y-6">
+            <p className="text-sm uppercase tracking-[0.35em] text-blue-300">
+              AI for the next local experience
+            </p>
+            <h1 className="text-5xl font-semibold leading-tight text-white sm:text-6xl">
+              Plan hyper-personal city experiences with a few taps
+            </h1>
+            <p className="text-lg text-slate-300">
+              Our hackathon prototype shows how Wolt could let friends co-create
+              unforgettable moments: fast onboarding, AI-personalized experience
+              streams, and instant invites that feel magical.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/start"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "bg-blue-500 px-6 text-white hover:bg-blue-500/90",
+                )}
+              >
+                Start a new plan
+              </Link>
+              <Link
+                href="/join"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "outline" }),
+                  "border-slate-700 text-gray-300 hover:bg-slate-900",
+                )}
+              >
+                I have a code
+              </Link>
+            </div>
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+            <p className="text-sm uppercase tracking-[0.2em] text-slate-400">
+              Why it matters
+            </p>
+            <p className="mt-3 text-xl text-white">
+              We target four criteria in the brief: strong AI personalization,
+              market scalability, novel invite mechanics, and tangible user
+              impact for city exploration.
+            </p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              {highlights.map((item) => (
+                <div key={item.label} className="rounded-2xl border border-slate-800/70 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                    {item.label}
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
+                  <p className="text-sm text-slate-400">{item.copy}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm uppercase tracking-[0.3em] text-slate-500">
+              Flow overview
+            </p>
+            <h2 className="text-3xl font-semibold text-white">
+              We split the experience into focused pages
+            </h2>
+            <p className="text-slate-400">
+              The landing page tees up the narrative. Dedicated routes handle onboarding
+              and join flows so the demo stays clean and teammates can build deeper logic
+              later.
             </p>
           </div>
 
-          <LatestPost />
-        </div>
-      </main>
-    </HydrateClient>
+          <div className="grid gap-6 md:grid-cols-3">
+            {flowSteps.map((step, index) => (
+              <div
+                key={step.title}
+                className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5"
+              >
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                  {step.tag}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-white">
+                  {index + 1}. {step.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-400">{step.copy}</p>
+                <div className="mt-4 text-sm text-blue-300">
+                  {index === 0 && "Live on /start"}
+                  {index === 1 && "Auto-created during onboarding"}
+                  {index === 2 && "Preview panel shows mock data"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }

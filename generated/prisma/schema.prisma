@@ -11,11 +11,263 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  name      String
+// User model - represents users of the app
+model User {
+  id        String   @id @default(cuid())
+  name      String? // Optional name for easy demo experience
+  avatarUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relations
+  preferences     UserPreference?
+  eventGroups     EventGroupParticipant[]
+  eventFeedback   UserFeedback[]
+  recommendations EventRecommendation[]
+}
+
+// User preferences - detailed preferences for AI personalization
+model UserPreference {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Dietary preferences
+  dietaryRestrictions String[] // e.g., ["vegetarian", "vegan", "gluten-free"]
+  allergies           String[] // e.g., ["peanuts", "shellfish"]
+  cuisinePreferences  String[] // e.g., ["italian", "japanese", "mexican"]
+
+  // Activity preferences
+  activityTypes String[] // e.g., ["outdoor", "indoor", "cultural", "sports"]
+  preferredTime String? // e.g., "evening", "afternoon", "morning"
+  preferredDay  String? // e.g., "weekend", "weekday"
+
+  // Budget and group preferences
+  budgetRange         String? // e.g., "low", "medium", "high", "premium"
+  groupSizePreference Int? // Preferred group size
+  socialPreference    String? // e.g., "intimate", "social", "party"
+
+  // Location preferences
+  preferredLocations String[] // City areas or neighborhoods
+  maxTravelDistance  Int? // in meters
+
+  // Experience preferences
+  experienceIntensity String? // e.g., "relaxed", "moderate", "adventurous"
+  interests           String[] // e.g., ["music", "art", "food", "sports"]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Event categories - for organizing event types
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  icon        String? // Icon identifier
+  createdAt   DateTime @default(now())
+
+  events EventCategory[]
+
   @@index([name])
+}
+
+// Venue model - represents locations/venues (restaurants, places)
+model Venue {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  address     String
+  city        String
+  country     String
+  latitude    Float?
+  longitude   Float?
+  venueType   String // e.g., "restaurant", "cafe", "bar", "park", "museum"
+  priceRange  String? // e.g., "low", "medium", "high"
+  rating      Float?
+  imageUrl    String?
+  externalId  String? // ID from Wolt API or other external source
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events Event[]
+
+  @@index([city, country])
+  @@index([venueType])
+  @@index([externalId])
+}
+
+// Event model - represents event ideas/experiences
+model Event {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String?
+
+  // Event details
+  duration   Int? // Duration in minutes
+  priceRange String? // e.g., "low", "medium", "high"
+  difficulty String? // e.g., "easy", "moderate", "challenging"
+  capacity   Int? // Max number of participants
+
+  // Location
+  venueId        String?
+  venue          Venue?  @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  customLocation String? // For events without a specific venue
+
+  // Metadata
+  tags            String[] // Flexible tags for AI matching
+  isActive        Boolean  @default(true)
+  popularityScore Float    @default(0) // For ranking
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  categories      EventCategory[]
+  eventGroups     EventGroupEvent[]
+  recommendations EventRecommendation[]
+  feedback        UserFeedback[]
+
+  @@index([venueId])
+  @@index([isActive])
+  @@index([popularityScore])
+}
+
+// Many-to-many: Events and Categories
+model EventCategory {
+  id         String   @id @default(cuid())
+  eventId    String
+  categoryId String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, categoryId])
+  @@index([eventId])
+  @@index([categoryId])
+}
+
+// Event Group - represents a group of users planning an event together
+model EventGroup {
+  id          String  @id @default(cuid())
+  name        String? // Optional group name
+  description String? // What the group is planning
+
+  // Group preferences (aggregated or manually set)
+  targetDate        DateTime?
+  targetTime        String?
+  budgetRange       String?
+  preferredLocation String?
+
+  // Status
+  status    String   @default("planning") // e.g., "planning", "confirmed", "completed", "cancelled"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  participants    EventGroupParticipant[]
+  events          EventGroupEvent[]
+  recommendations EventRecommendation[]
+
+  @@index([status])
+}
+
+// Many-to-many: Users and Event Groups
+model EventGroupParticipant {
+  id      String     @id @default(cuid())
+  groupId String
+  userId  String
+  role    String     @default("participant") // e.g., "organizer", "participant"
+  status  String     @default("invited") // e.g., "invited", "accepted", "declined"
+  group   EventGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+// Many-to-many: Event Groups and Events (saved/considered events)
+model EventGroupEvent {
+  id      String     @id @default(cuid())
+  groupId String
+  eventId String
+  group   EventGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  event   Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Status for this event in the group
+  status String  @default("suggested") // e.g., "suggested", "shortlisted", "selected", "rejected"
+  notes  String? // User notes about this event
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([groupId, eventId])
+  @@index([groupId])
+  @@index([eventId])
+  @@index([status])
+}
+
+// AI-generated event recommendations
+model EventRecommendation {
+  id String @id @default(cuid())
+
+  // What this recommendation is for
+  eventId String?
+  event   Event?      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  groupId String?
+  group   EventGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId  String?
+  user    User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // AI metadata
+  matchScore   Float // 0-1 score indicating how well this matches
+  reasoning    String? // AI explanation for why this was recommended
+  modelVersion String? // AI model version used
+  features     Json? // Feature vector or matching criteria used
+
+  // Status
+  status String @default("generated") // e.g., "generated", "viewed", "accepted", "rejected"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([groupId])
+  @@index([userId])
+  @@index([matchScore])
+  @@index([status])
+}
+
+// User feedback on events/recommendations - for ML improvement
+model UserFeedback {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Feedback data
+  rating      Int? // 1-5 rating
+  liked       Boolean? // Simple like/dislike
+  feedback    String? // Text feedback
+  wouldAttend Boolean? // Would they attend this event?
+
+  // Context
+  groupId          String? // If feedback is for a group event
+  recommendationId String? // If this was from a recommendation
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([groupId])
+  @@index([rating])
 }

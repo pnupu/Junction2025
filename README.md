@@ -2,6 +2,17 @@
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
 
+## AI recommendation scaffold
+
+The onboarding preview now calls an OpenAI-powered tRPC endpoint. To enable live generations locally or in CI, add the following variables to `.env`:
+
+```
+OPENAI_API_KEY=sk-your-key
+OPENAI_MODEL=gpt-4o-mini # optional override
+```
+
+When no key is present, the UI gracefully falls back to a local seed set so you can still demo the flow.
+
 ## What's next? How do I make an app with this?
 
 We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.

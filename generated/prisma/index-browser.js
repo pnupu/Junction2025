@@ -121,11 +121,143 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.PostScalarFieldEnum = {
+exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UserPreferenceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  dietaryRestrictions: 'dietaryRestrictions',
+  allergies: 'allergies',
+  cuisinePreferences: 'cuisinePreferences',
+  activityTypes: 'activityTypes',
+  preferredTime: 'preferredTime',
+  preferredDay: 'preferredDay',
+  budgetRange: 'budgetRange',
+  groupSizePreference: 'groupSizePreference',
+  socialPreference: 'socialPreference',
+  preferredLocations: 'preferredLocations',
+  maxTravelDistance: 'maxTravelDistance',
+  experienceIntensity: 'experienceIntensity',
+  interests: 'interests',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  icon: 'icon',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.VenueScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  address: 'address',
+  city: 'city',
+  country: 'country',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  venueType: 'venueType',
+  priceRange: 'priceRange',
+  rating: 'rating',
+  imageUrl: 'imageUrl',
+  externalId: 'externalId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  imageUrl: 'imageUrl',
+  duration: 'duration',
+  priceRange: 'priceRange',
+  difficulty: 'difficulty',
+  capacity: 'capacity',
+  venueId: 'venueId',
+  customLocation: 'customLocation',
+  tags: 'tags',
+  isActive: 'isActive',
+  popularityScore: 'popularityScore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventCategoryScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  categoryId: 'categoryId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.EventGroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  targetDate: 'targetDate',
+  targetTime: 'targetTime',
+  budgetRange: 'budgetRange',
+  preferredLocation: 'preferredLocation',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventGroupParticipantScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  userId: 'userId',
+  role: 'role',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventGroupEventScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  eventId: 'eventId',
+  status: 'status',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventRecommendationScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  groupId: 'groupId',
+  userId: 'userId',
+  matchScore: 'matchScore',
+  reasoning: 'reasoning',
+  modelVersion: 'modelVersion',
+  features: 'features',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UserFeedbackScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventId: 'eventId',
+  rating: 'rating',
+  liked: 'liked',
+  feedback: 'feedback',
+  wouldAttend: 'wouldAttend',
+  groupId: 'groupId',
+  recommendationId: 'recommendationId',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -133,14 +265,40 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
 
 exports.Prisma.ModelName = {
-  Post: 'Post'
+  User: 'User',
+  UserPreference: 'UserPreference',
+  Category: 'Category',
+  Venue: 'Venue',
+  Event: 'Event',
+  EventCategory: 'EventCategory',
+  EventGroup: 'EventGroup',
+  EventGroupParticipant: 'EventGroupParticipant',
+  EventGroupEvent: 'EventGroupEvent',
+  EventRecommendation: 'EventRecommendation',
+  UserFeedback: 'UserFeedback'
 };
 
 /**
