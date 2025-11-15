@@ -61,10 +61,19 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/start/name"
+                href="/create"
                 className={cn(
                   buttonVariants({ size: "lg" }),
                   "bg-blue-500 px-6 text-white hover:bg-blue-500/90",
+                )}
+              >
+                Create Event
+              </Link>
+              <Link
+                href="/start/name"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "outline" }),
+                  "border-slate-700 text-gray-300 hover:bg-slate-900",
                 )}
               >
                 Start a new plan

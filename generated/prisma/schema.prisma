@@ -156,24 +156,53 @@ model EventGroup {
   id          String  @id @default(cuid())
   name        String? // Optional group name
   description String? // What the group is planning
+  inviteCode  String  @unique @default(cuid()) // Short code for joining
+  creatorId   String? // User who created the event
 
   // Group preferences (aggregated or manually set)
   targetDate        DateTime?
   targetTime        String?
   budgetRange       String?
   preferredLocation String?
+  city              String? // City for the event
 
   // Status
-  status    String   @default("planning") // e.g., "planning", "confirmed", "completed", "cancelled"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status      String   @default("collecting_preferences") // "collecting_preferences", "ready_to_generate", "generated", "completed"
+  isGenerated Boolean  @default(false) // Whether recommendations have been generated
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   participants    EventGroupParticipant[]
   events          EventGroupEvent[]
   recommendations EventRecommendation[]
+  preferences     EventGroupPreference[] // Individual user preferences
 
   @@index([status])
+  @@index([inviteCode])
+}
+
+// Event Group Preferences - stores individual user preferences for an event
+model EventGroupPreference {
+  id      String     @id @default(cuid())
+  groupId String
+  group   EventGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  // User identification (can be anonymous)
+  userId    String? // Optional user ID if logged in
+  sessionId String // Session identifier for anonymous users
+  userName  String? // Display name
+  userIcon  String // Icon/emoji to differentiate users
+
+  // Preference data
+  moneyPreference String // "budget", "moderate", "premium"
+  activityLevel   Int // 1-5 scale: 1=very laidback, 5=very active
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([groupId, sessionId])
+  @@index([groupId])
 }
 
 // Many-to-many: Users and Event Groups
