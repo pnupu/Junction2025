@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { GroupStepPanel } from "@/app/_components/onboarding/group-step-panel";
@@ -41,7 +42,9 @@ export default function GroupPage() {
           </div>
         </div>
 
-        <GroupStepPanel />
+        <Suspense fallback={<div className="text-slate-400">Loading...</div>}>
+          <GroupStepPanel />
+        </Suspense>
       </div>
     </main>
   );

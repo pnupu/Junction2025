@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { PreferencesStepForm } from "@/app/_components/onboarding/preferences-step-form";
@@ -43,7 +44,9 @@ export default function PreferencesPage() {
           </div>
         </div>
 
-        <PreferencesStepForm />
+        <Suspense fallback={<div className="text-slate-400">Loading...</div>}>
+          <PreferencesStepForm />
+        </Suspense>
       </div>
     </main>
   );

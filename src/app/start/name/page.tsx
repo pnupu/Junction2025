@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { NameStepForm } from "@/app/_components/onboarding/name-step-form";
@@ -30,7 +31,9 @@ export default function StartNamePage() {
           </Link>
         </div>
 
-        <NameStepForm />
+        <Suspense fallback={<div className="text-slate-400">Loading...</div>}>
+          <NameStepForm />
+        </Suspense>
       </div>
     </main>
   );

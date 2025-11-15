@@ -42,9 +42,10 @@ export function PreferencesStepForm() {
 
   const isValid = useMemo(
     () =>
-      preferenceSections.every(
-        (section) => section.allowMultiple || selections[section.id]?.length,
-      ),
+      preferenceSections.every((section) => {
+        if (section.allowMultiple) return true;
+        return (selections[section.id]?.length ?? 0) > 0;
+      }),
     [selections],
   );
 
