@@ -309,6 +309,7 @@ export default function EventPage() {
         onClose={() => setShowMapModal(false)}
         participants={participantLocations}
         isEnlarged={true}
+        eventName={userProfile?.name ?? "Your"}
       />
       <main className="min-h-screen bg-[#029DE2]">
         {/* Inline Map Preview - Full Width */}
@@ -317,8 +318,15 @@ export default function EventPage() {
             <div className="overflow-hidden bg-white/10 backdrop-blur md:rounded-2xl">
               <button
                 onClick={() => setShowMapModal(true)}
-                className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90 md:h-80"
+                className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90 md:h-80 relative "
               >
+                {/* Title with shadow overlay */}
+                <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/70 via-black/40 to-transparent px-6 py-6 pb-12">
+                  <h1 className="text-2xl font-bold text-white drop-shadow-lg">
+                    {userProfile?.name ?? "Your"}&apos;s Event
+                  </h1>
+                </div>
+                <div className="relative h-full w-full z-1">
                 <MapContainer
                   center={[
                     participantLocations.reduce(
@@ -349,22 +357,47 @@ export default function EventPage() {
                       icon={L.divIcon({
                         className: "custom-marker",
                         html: `
-                          <div style="
-                            width: 32px;
-                            height: 32px;
-                            background: #029DE2;
-                            border: 2px solid white;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: white;
-                            font-weight: bold;
-                            font-size: 12px;
-                            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                          ">
-                            ${location.count > 1 ? location.count : location.initials}
+                          <div style="position: relative; width: 32px; height: 32px;">
+                            <div style="
+                              position: absolute;
+                              width: 32px;
+                              height: 32px;
+                              background: #029DE2;
+                              border-radius: 50%;
+                              animation: pulse 2s ease-in-out infinite;
+                              opacity: 0.6;
+                            "></div>
+                            <div style="
+                              position: relative;
+                              width: 32px;
+                              height: 32px;
+                              background: #029DE2;
+                              border: 2px solid white;
+                              border-radius: 50%;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              color: white;
+                              font-weight: bold;
+                              font-size: 12px;
+                              box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                              z-index: 1;
+                            ">
+                              ${location.count > 1 ? location.count : location.initials}
+                            </div>
                           </div>
+                          <style>
+                            @keyframes pulse {
+                              0%, 100% {
+                                transform: scale(1);
+                                opacity: 0.6;
+                              }
+                              50% {
+                                transform: scale(1.5);
+                                opacity: 0;
+                              }
+                            }
+                          </style>
                         `,
                         iconSize: [32, 32],
                         iconAnchor: [16, 32],
@@ -372,6 +405,7 @@ export default function EventPage() {
                     />
                   ))}
                 </MapContainer>
+                </div>
                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all hover:bg-black/10">
                   <div className="rounded-lg bg-white/90 px-4 py-2 text-sm font-semibold text-[#029DE2] shadow-lg backdrop-blur">
                     🗺️ Click to expand map
@@ -383,7 +417,7 @@ export default function EventPage() {
         )}
 
         {/* Content Container - Max Width on Desktop */}
-        <div className="mx-auto max-w-[500px] px-6 py-8">
+        <div className="mx-auto max-w-[500px] px-6 py-2">
           {/* Invite Section */}
           <div className="mb-6">
             <Button

@@ -42,6 +42,7 @@ interface EventMapModalProps {
   participants: ParticipantLocation[];
   isEnlarged?: boolean;
   onToggleEnlarge?: () => void;
+  eventName?: string;
 }
 
 export function EventMapModal({
@@ -50,9 +51,12 @@ export function EventMapModal({
   participants,
   isEnlarged = false,
   onToggleEnlarge,
+  eventName,
 }: EventMapModalProps) {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [L, setL] = useState<typeof import("leaflet") | null>(null);
+  const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
+  const [mapInstance, setMapInstance] = useState<any>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -121,33 +125,72 @@ export function EventMapModal({
       : 24.9354;
 
   // Create custom marker icons with initials or count
-  const createCustomIcon = (display: string) => {
+  const createCustomIcon = (display: string, isHighlighted: boolean = false) => {
     if (!L) return undefined;
 
     return L.divIcon({
       className: "custom-marker",
       html: `
-        <div style="
-          width: 40px;
-          height: 40px;
-          background: #029DE2;
-          border: 3px solid white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          font-size: 14px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        ">
-          ${display}
+        <div style="position: relative; width: 40px; height: 40px;">
+          <div style="
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: ${isHighlighted ? '#FFD700' : '#029DE2'};
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            opacity: 0.6;
+          "></div>
+          <div style="
+            position: relative;
+            width: 40px;
+            height: 40px;
+            background: ${isHighlighted ? '#FFD700' : '#029DE2'};
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 1;
+          ">
+            ${display}
+          </div>
         </div>
+        <style>
+          @keyframes pulse {
+            0%, 100% {
+              transform: scale(1);
+              opacity: 0.6;
+            }
+            50% {
+              transform: scale(1.5);
+              opacity: 0;
+            }
+          }
+        </style>
       `,
       iconSize: [40, 40],
       iconAnchor: [20, 40],
       popupAnchor: [0, -40],
     });
+  };
+
+  const handleParticipantClick = (userName: string) => {
+    setSelectedParticipant(userName === selectedParticipant ? null : userName);
+    
+    // Find the participant's location
+    const participant = participants.find(p => p.userName === userName);
+    if (participant && mapInstance) {
+      // Center and zoom to the participant
+      mapInstance.setView([participant.latitude, participant.longitude], 15, {
+        animate: true,
+        duration: 0.5,
+      });
+    }
   };
 
   const mapContent =
@@ -161,35 +204,40 @@ export function EventMapModal({
             width: "100%",
             borderRadius: isEnlarged ? "0" : "12px",
           }}
+          ref={setMapInstance}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {groupedLocations.map((location, idx) => (
-            <Marker
-              key={idx}
-              position={[location.latitude, location.longitude]}
-              icon={createCustomIcon(
-                location.count > 1 ? String(location.count) : location.initials,
-              )}
-            >
-              <Popup>
-                {location.count > 1 ? (
-                  <div>
-                    <strong>{location.count} participants</strong>
-                    <ul className="mt-1 list-disc pl-4">
-                      {location.names.map((name, i) => (
-                        <li key={i}>{name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <strong>{location.names[0]}</strong>
+          {groupedLocations.map((location, idx) => {
+            const isHighlighted = location.count === 1 && location.names[0] === selectedParticipant;
+            return (
+              <Marker
+                key={idx}
+                position={[location.latitude, location.longitude]}
+                icon={createCustomIcon(
+                  location.count > 1 ? String(location.count) : location.initials,
+                  isHighlighted,
                 )}
-              </Popup>
-            </Marker>
-          ))}
+              >
+                <Popup>
+                  {location.count > 1 ? (
+                    <div>
+                      <strong>{location.count} participants</strong>
+                      <ul className="mt-1 list-disc pl-4">
+                        {location.names.map((name, i) => (
+                          <li key={i}>{name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <strong>{location.names[0]}</strong>
+                  )}
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
 
         {/* Enlarge/Shrink button */}
@@ -215,7 +263,7 @@ export function EventMapModal({
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
             <h2 className="text-2xl font-semibold text-[#0F172B]">
-              Participant Locations
+              {eventName ? `${eventName}'s Event` : 'Participant Locations'}
             </h2>
             <button
               onClick={onClose}
@@ -224,7 +272,30 @@ export function EventMapModal({
               ✕
             </button>
           </div>
-          <div className="flex-1">{mapContent}</div>
+          <div className="flex-1 relative">
+            {mapContent}
+            {/* Participant list at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur border-t border-slate-200 px-6 py-4">
+              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+                {participants.map((participant, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleParticipantClick(participant.userName)}
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedParticipant === participant.userName
+                        ? 'bg-[#FFD700] text-white shadow-lg scale-105'
+                        : 'bg-[#029DE2] text-white hover:bg-[#0287C3] hover:scale-105'
+                    }`}
+                  >
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/30 text-xs font-bold">
+                      {participant.initials}
+                    </span>
+                    <span>{participant.userName}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
