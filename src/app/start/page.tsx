@@ -1,8 +1,31 @@
 import Link from "next/link";
 
-import { OnboardingFlow } from "@/app/_components/onboarding-flow";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+const steps = [
+  {
+    title: "Name pulse",
+    description:
+      "Capture a friendly name in seconds. Ideal for demo mode before auth is wired.",
+    href: "/start/name",
+    tag: "Step 01",
+  },
+  {
+    title: "Preferences",
+    description:
+      "Collect high-signal vibes, dietary notes, and budget comfort zones for AI.",
+    href: "/start/preferences",
+    tag: "Step 02",
+  },
+  {
+    title: "Crew space",
+    description:
+      "Auto-generate the invite code, QR placeholder, and experience preview stream.",
+    href: "/start/group",
+    tag: "Step 03",
+  },
+];
 
 export default function StartPage() {
   return (
@@ -32,7 +55,29 @@ export default function StartPage() {
           </Link>
         </div>
 
-        <OnboardingFlow />
+        <div className="grid gap-6 md:grid-cols-3">
+          {steps.map((step) => (
+            <div
+              key={step.title}
+              className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5"
+            >
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                {step.tag}
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-white">{step.title}</h2>
+              <p className="mt-2 text-sm text-slate-400">{step.description}</p>
+              <Link
+                href={step.href}
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "mt-4 inline-flex bg-blue-500 text-white hover:bg-blue-500/80",
+                )}
+              >
+                Open step
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
     </main>
   );

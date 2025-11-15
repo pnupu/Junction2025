@@ -8,16 +8,19 @@ const flowSteps = [
     title: "Pulse check",
     copy: "Ultra-fast onboarding captures a name + gut-feel preferences without friction.",
     tag: "Step 01",
+    location: "/start/name",
   },
   {
     title: "Spin up crew space",
     copy: "We auto-create an event group, short code, and invite QR that friends can scan.",
     tag: "Step 02",
+    location: "/start/preferences",
   },
   {
     title: "Stream experiences",
     copy: "AI blends food, venues, and local experiences that adapt as more friends join.",
     tag: "Step 03",
+    location: "/start/group",
   },
 ];
 
@@ -58,7 +61,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/start"
+                href="/start/name"
                 className={cn(
                   buttonVariants({ size: "lg" }),
                   "bg-blue-500 px-6 text-white hover:bg-blue-500/90",
@@ -128,11 +131,7 @@ export default function Home() {
                   {index + 1}. {step.title}
                 </h3>
                 <p className="mt-2 text-sm text-slate-400">{step.copy}</p>
-                <div className="mt-4 text-sm text-blue-300">
-                  {index === 0 && "Live on /start"}
-                  {index === 1 && "Auto-created during onboarding"}
-                  {index === 2 && "Preview panel shows mock data"}
-                </div>
+                <div className="mt-4 text-sm text-blue-300">{step.location}</div>
               </div>
             ))}
           </div>

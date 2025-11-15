@@ -22,7 +22,7 @@ export default function JoinPage() {
             </p>
           </div>
           <Link
-            href="/start"
+            href="/start/name"
             className={cn(
               buttonVariants({ variant: "secondary" }),
               "self-start bg-blue-500/10 text-blue-200 hover:bg-blue-500/20",
