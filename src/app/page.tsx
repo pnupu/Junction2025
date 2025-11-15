@@ -11,12 +11,12 @@ import {
   getUserProfile,
   type UserProfile,
 } from "@/components/profile-modal";
+import { Loader } from "@/components/ui/loader";
 
 export default function Home() {
   const router = useRouter();
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [showProfileForm, setShowProfileForm] = useState(false);
-  const [showJoinForm, setShowJoinForm] = useState(false);
   const [eventCode, setEventCode] = useState("");
   const [isJumping, setIsJumping] = useState(false);
 
@@ -77,52 +77,6 @@ export default function Home() {
     );
   }
 
-  // Join event form
-  if (showJoinForm) {
-    return (
-      <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
-        {artPic}
-
-        {/* Content */}
-        <div className="relative z-10 w-full max-w-md">
-          <h1 className="mb-12 text-center text-4xl font-bold text-white">
-            Join Event
-          </h1>
-
-          <div className="space-y-6">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-white">
-                Enter event code
-              </label>
-              <Input
-                type="text"
-                value={eventCode}
-                onChange={(e) => setEventCode(e.target.value.toUpperCase())}
-                placeholder="Event code"
-                className="h-12 rounded-xl border-2 border-white/30 bg-white/10 text-center text-lg text-white uppercase placeholder:text-white/50"
-              />
-            </div>
-
-            <Button
-              onClick={handleJoinEvent}
-              disabled={!eventCode.trim()}
-              className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90 disabled:opacity-50"
-            >
-              Join Event
-            </Button>
-
-            <button
-              onClick={() => setShowJoinForm(false)}
-              className="w-full text-center text-sm text-white/80 hover:text-white"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
   // Main landing page
   return (
     <main
@@ -137,8 +91,9 @@ export default function Home() {
           <h1
             className={`mt-32 text-center text-5xl leading-none font-bold ${hasProfile ? "text-[#029DE2]" : "text-white"}`}
           >
-            Let&apos;s do something together
+            Let&apos;s do something together 
           </h1>
+          
         ) : (
           <Image
             src="/wolt_meet.svg"

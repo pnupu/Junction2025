@@ -226,6 +226,15 @@ export default function EventPage() {
       // Show profile modal if no profile exists and haven't joined yet
       setShowProfileModal(true);
     }
+
+    // Replace history state to prevent going back to /create
+    if (typeof window !== "undefined" && window.history.state) {
+      window.history.replaceState(
+        { ...window.history.state, as: `/event/${eventIdOrCode}`, url: `/event/${eventIdOrCode}` },
+        "",
+        `/event/${eventIdOrCode}`
+      );
+    }
   }, [eventIdOrCode]);
 
   // Determine if current user is the creator based on event data
@@ -417,6 +426,29 @@ export default function EventPage() {
         eventName={userProfile?.name ?? "Your"}
       />
       <main className="min-h-screen bg-white">
+        {/* Back button */}
+        <div className="absolute top-4 left-4 z-20">
+          <button
+            onClick={() => router.push("/")}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110"
+            aria-label="Go to home"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
+
         {/* Inline Map Preview - Full Width */}
         {participantLocations.length > 0 && leafletLoaded && L ? (
           <div className="relative h-64 w-full overflow-hidden">

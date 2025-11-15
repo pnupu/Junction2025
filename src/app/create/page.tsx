@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { api } from "@/trpc/react";
+import { Loader } from "@/components/ui/loader";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -25,12 +26,10 @@ export default function CreateEventPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#029DE2]">
-      <div className="text-center">
-        <div className="mb-4 text-6xl">✨</div>
-        <h1 className="mb-3 text-3xl font-semibold text-white">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <h1 className="text-3xl font-semibold text-white">
           Creating Event...
         </h1>
-        <p className="text-white/80">Setting up your event page</p>
       </div>
     </main>
   );
