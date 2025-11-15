@@ -632,7 +632,7 @@ export default function EventPage() {
                         </div>
                       </div>
                       <div
-                        className={`h-3 w-3 rounded-full ${
+                        className={`h-3 w-3 rounded-full animate-ping opacity-75 ${
                           hasAnsweredMoodQuestions
                             ? "bg-green-400"
                             : "bg-yellow-400"
