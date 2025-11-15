@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { JoinGroupPanel } from "@/app/_components/join-group-panel";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +31,6 @@ export default function JoinPage() {
           </Link>
         </div>
 
-        <JoinGroupPanel />
       </div>
     </main>
   );

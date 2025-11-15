@@ -112,7 +112,7 @@ export default function EventPage() {
       sessionId,
       userName: selectedIcon.name,
       userIcon: selectedIcon.emoji,
-      moneyPreference: moneyPreferenceMap[budget] || "moderate",
+      moneyPreference: moneyPreferenceMap[budget] ?? "moderate",
       activityLevel: mood === "active" ? 5 : mood === "celebratory" ? 3 : 1,
     });
 
@@ -175,7 +175,7 @@ export default function EventPage() {
                       {pref.userIcon}
                     </div>
                     <div>
-                      <div className="font-medium text-white">{pref.userName || "Anonymous"}</div>
+                      <div className="font-medium text-white">{pref.userName ?? "Anonymous"}</div>
                       <div className="text-xs text-slate-400">
                         {pref.moneyPreference} • Activity: {pref.activityLevel}/5
                       </div>
@@ -338,7 +338,7 @@ export default function EventPage() {
         {step === "complete" && hasSubmitted && (
           <div className="rounded-3xl bg-slate-900/50 p-12 text-center backdrop-blur">
             <div className="mb-4 text-6xl">
-              {myPreference?.userIcon || selectedIcon?.emoji || "✓"}
+              {myPreference?.userIcon ?? selectedIcon?.emoji ?? "✓"}
             </div>
             <h2 className="mb-3 text-2xl font-semibold text-white">
               Preferences Submitted!

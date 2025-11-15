@@ -132,7 +132,7 @@ export const eventRouter = createTRPCRouter({
 
       const moneyPreferenceCounts = eventGroup.preferences.reduce(
         (acc, p) => {
-          acc[p.moneyPreference] = (acc[p.moneyPreference] || 0) + 1;
+          acc[p.moneyPreference] = (acc[p.moneyPreference] ?? 0) + 1;
           return acc;
         },
         {} as Record<string, number>,
@@ -140,7 +140,7 @@ export const eventRouter = createTRPCRouter({
 
       const popularMoneyPreference = Object.entries(moneyPreferenceCounts).sort(
         ([, a], [, b]) => b - a,
-      )[0]?.[0] || "moderate";
+      )[0]?.[0] ?? "moderate";
 
       // Mock recommendations based on preferences
       const mockRecommendations = [

@@ -11,7 +11,7 @@ export default function Home() {
             Plan Together
           </h1>
           <p className="mx-auto max-w-xl text-xl text-slate-400">
-            AI-powered event planning that adapts to everyone's preferences
+            AI-powered event planning that adapts to everyone&apos;s preferences
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export default function Home() {
           <div className="rounded-2xl bg-slate-900/50 p-6 text-center backdrop-blur">
             <div className="mb-3 text-4xl">��</div>
             <h3 className="mb-2 font-semibold text-white">Together</h3>
-            <p className="text-sm text-slate-400">Everyone's voice matters</p>
+            <p className="text-sm text-slate-400">Everyone&apos;s voice matters</p>
           </div>
           <div className="rounded-2xl bg-slate-900/50 p-6 text-center backdrop-blur">
             <div className="mb-3 text-4xl">🚀</div>
