@@ -31,7 +31,7 @@ async function loadVenuesFromFile(filePath: string) {
 
 async function seedVenues() {
   const dataDir = path.resolve(process.cwd(), "data", "infrastructure");
-  const files = ["helsinki.json", "espoo.json"];
+  const files = ["espoo.json"];
   const summary: { city: string; inserted: number; updated: number }[] = [];
 
   for (const file of files) {

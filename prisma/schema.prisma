@@ -276,6 +276,8 @@ model EventGroupPreference {
     // Preference data
     moneyPreference String  // "budget", "moderate", "premium"
     activityLevel   Int     // 1-5 scale: 1=very laidback, 5=very active
+    moodQuestions   Json?
+    moodResponses   Json?
     
     // Location data
     latitude    Float?   // User's location latitude

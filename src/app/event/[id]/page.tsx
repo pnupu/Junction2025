@@ -20,7 +20,31 @@ import {
   EventMapModal,
   type ParticipantLocation,
 } from "@/components/event-map-modal";
+import { MoodQuestions } from "@/components/mood-questions";
 import dynamic from "next/dynamic";
+
+// Type for Leaflet module (only what we need)
+type LeafletModule = {
+  Icon: {
+    Default: {
+      prototype: { _getIconUrl?: unknown };
+      mergeOptions: (options: {
+        iconRetinaUrl: string;
+        iconUrl: string;
+        shadowUrl: string;
+      }) => void;
+    };
+  };
+  divIcon: (options: {
+    className: string;
+    html: string;
+    iconSize: [number, number];
+    iconAnchor: [number, number];
+  }) => {
+    // DivIcon type - simplified for our use case
+    options: unknown;
+  };
+};
 
 // Dynamically import React Leaflet components for inline map
 const MapContainer = dynamic(
@@ -52,7 +76,7 @@ export default function EventPage() {
   const [showMapModal, setShowMapModal] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [L, setL] = useState<(typeof import("leaflet")) | null>(null);
+  const [L, setL] = useState<LeafletModule | null>(null);
 
   // Try to get event by invite code first (if it looks like a code), otherwise by ID
   const isLikelyInviteCode =
@@ -62,7 +86,12 @@ export default function EventPage() {
     isLikelyInviteCode
       ? { inviteCode: eventIdOrCode.toUpperCase() }
       : { id: eventIdOrCode },
-    { enabled: !!eventIdOrCode, refetchInterval: 3000 },
+    {
+      enabled: !!eventIdOrCode,
+      refetchInterval: 2000, // Refetch every 2 seconds for real-time updates
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+    },
   );
 
   const addPreferences = api.event.addPreferences.useMutation({
@@ -145,14 +174,6 @@ export default function EventPage() {
     }
     setSessionId(sid);
 
-    const creatorId = sessionStorage.getItem(`event_${eventIdOrCode}_creator`);
-    if (!creatorId) {
-      sessionStorage.setItem(`event_${eventIdOrCode}_creator`, sid);
-      setIsCreator(true);
-    } else if (creatorId === sid) {
-      setIsCreator(true);
-    }
-
     // Check if already joined
     const joined = sessionStorage.getItem(`event_${eventIdOrCode}_joined`);
     if (joined === "true") {
@@ -169,6 +190,19 @@ export default function EventPage() {
     }
   }, [eventIdOrCode]);
 
+  // Determine if current user is the creator based on event data
+  useEffect(() => {
+    if (eventData && sessionId) {
+      // Creator is the first person who joined (first preference by createdAt)
+      const sortedPreferences = [...(eventData.preferences ?? [])].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+      const firstPreference = sortedPreferences[0];
+      setIsCreator(firstPreference?.sessionId === sessionId);
+    }
+  }, [eventData, sessionId]);
+
   // Auto-join when eventData is loaded and we have a profile but haven't joined yet
   useEffect(() => {
     if (eventData && userProfile && !hasJoined) {
@@ -181,13 +215,14 @@ export default function EventPage() {
 
   // Load Leaflet for inline map
   useEffect(() => {
-    void import("leaflet").then((leaflet) => {
+    void import("leaflet").then((leafletModule) => {
+      // Handle both default export and named exports
+      const leaflet = (leafletModule.default ?? leafletModule) as LeafletModule;
       setL(leaflet);
       setLeafletLoaded(true);
 
       // Fix default marker icon issue
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      delete (leaflet.Icon.Default.prototype as any)._getIconUrl;
+      delete leaflet.Icon.Default.prototype._getIconUrl;
       leaflet.Icon.Default.mergeOptions({
         iconRetinaUrl: "/leaflet/marker-icon-2x.png",
         iconUrl: "/leaflet/marker-icon.png",
@@ -245,6 +280,22 @@ export default function EventPage() {
       }));
   }, [eventData]);
 
+  // Check if recommendations are being generated or have been generated, and redirect
+  useEffect(() => {
+    if (eventData) {
+      const status = (eventData as { status?: string }).status;
+      const isGenerated =
+        (eventData as { isGenerated?: boolean }).isGenerated ??
+        status === "generated";
+      const isGenerating = status === "generating";
+      
+      // Redirect to results page if generating or generated
+      if ((isGenerating || isGenerated) && eventData.id) {
+        router.push(`/event/${eventData.id}/results`);
+      }
+    }
+  }, [eventData, router]);
+
   if (!eventData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -253,8 +304,27 @@ export default function EventPage() {
     );
   }
 
-  const participants = eventData.preferences;
+  // Sort participants by createdAt to ensure consistent ordering
+  const participants = [...(eventData.preferences ?? [])].sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
   const participantCount = participants.length;
+
+  // Find current user's preference to check if they've answered mood questions
+  const currentUserPreference = participants.find(
+    (p) => p.sessionId === sessionId,
+  );
+  const hasMoodResponses =
+    currentUserPreference &&
+    (currentUserPreference as { moodResponses?: Record<string, unknown> })
+      .moodResponses &&
+    Object.keys(
+      (currentUserPreference as { moodResponses?: Record<string, unknown> })
+        .moodResponses ?? {},
+    ).length > 0;
+
+    console.log("currentUserPreference", currentUserPreference);
 
   return (
     <>
@@ -314,9 +384,12 @@ export default function EventPage() {
                     <Marker
                       key={idx}
                       position={[participant.latitude, participant.longitude]}
-                      icon={L.divIcon({
-                        className: "custom-marker",
-                        html: `
+                      // @ts-expect-error - Leaflet divIcon return type doesn't match react-leaflet's expected type, but works at runtime
+                      icon={
+                        L
+                          ? L.divIcon({
+                              className: "custom-marker",
+                              html: `
                           <div style="
                             width: 32px;
                             height: 32px;
@@ -334,9 +407,11 @@ export default function EventPage() {
                             ${participant.initials}
                           </div>
                         `,
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 32],
-                      })}
+                              iconSize: [32, 32],
+                              iconAnchor: [16, 32],
+                            })
+                          : undefined
+                      }
                     />
                   ))}
                 </MapContainer>
@@ -447,16 +522,31 @@ export default function EventPage() {
                 Participants
               </h2>
               <div className="space-y-3">
-                {participants.map(
-                  (
-                    participant: {
-                      userName?: string | null;
-                      activityLevel: number;
-                    },
-                    idx: number,
-                  ) => (
+                {participants.map((participant, idx) => {
+                  const moodResponses =
+                    (participant as { moodResponses?: Record<string, unknown> })
+                      .moodResponses;
+                  const currentEnergy =
+                    moodResponses &&
+                    typeof moodResponses === "object" &&
+                    !Array.isArray(moodResponses)
+                      ? moodResponses.currentEnergy
+                      : undefined;
+                  const energyDisplay =
+                    typeof currentEnergy === "string"
+                      ? currentEnergy
+                      : `Activity level: ${participant.activityLevel}/5`;
+
+                  // Check if participant has answered mood questions
+                  const hasAnsweredMoodQuestions =
+                    moodResponses &&
+                    typeof moodResponses === "object" &&
+                    !Array.isArray(moodResponses) &&
+                    Object.keys(moodResponses).length > 0;
+
+                  return (
                     <div
-                      key={idx}
+                      key={participant.id ?? participant.sessionId ?? idx}
                       className="flex items-center justify-between rounded-xl bg-white/20 p-4 backdrop-blur"
                     >
                       <div className="flex items-center gap-3">
@@ -468,20 +558,42 @@ export default function EventPage() {
                             {participant.userName ?? "Anonymous"}
                           </div>
                           <div className="text-xs text-white/70">
-                            Activity level: {participant.activityLevel}/5
+                            {energyDisplay}
                           </div>
                         </div>
                       </div>
-                      <div className="h-3 w-3 rounded-full bg-green-400"></div>
+                      <div
+                        className={`h-3 w-3 rounded-full ${
+                          hasAnsweredMoodQuestions
+                            ? "bg-green-400"
+                            : "bg-yellow-400"
+                        }`}
+                      ></div>
                     </div>
-                  ),
-                )}
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* Creator Action Button */}
-          {isCreator && hasJoined && (
+          {/* Mood Questions - Show after user has joined */}
+          {hasJoined &&
+            eventData?.id &&
+            sessionId &&
+            !hasMoodResponses && (
+              <MoodQuestions
+                key={`mood-${eventData.id}-${sessionId}`}
+                groupId={eventData.id}
+                sessionId={sessionId}
+                participantName={userProfile?.name}
+                onComplete={() => {
+                  void refetch();
+                }}
+              />
+            )}
+
+          {/* Creator Action Button - Only visible to event creator */}
+          {isCreator && hasJoined ? (
             <div className="mt-8">
               <Button
                 onClick={handleGenerateEvent}
@@ -496,7 +608,7 @@ export default function EventPage() {
                 </p>
               )}
             </div>
-          )}
+          ) : null}
 
           {/* Waiting message for non-creators */}
           {!isCreator && hasJoined && (

@@ -1,5 +1,9 @@
 import type { EventGroup, EventGroupPreference } from "@prisma/client";
 import OpenAI from "openai";
+import { zodToJsonSchema } from "zod-to-json-schema";
+import type {
+  ResponseCreateParamsNonStreaming,
+} from "openai/resources/responses/responses";
 import { z } from "zod";
 
 import { env } from "@/env";
@@ -14,8 +18,16 @@ const openaiClient =
     ? new OpenAI({ apiKey: env.OPENAI_API_KEY })
     : null;
 
-const MONEY_TIERS = ["budget", "moderate", "premium"] as const;
-type MoneyTier = (typeof MONEY_TIERS)[number];
+export const MONEY_TIERS = ["budget", "moderate", "premium"] as const;
+export type MoneyTier = (typeof MONEY_TIERS)[number];
+
+export type MoodSignals = {
+  currentEnergy?: string;
+  timeAvailable?: string;
+  hungerLevel?: string;
+  indoorOutdoorPreference?: string;
+  [key: string]: string | undefined;
+};
 
 function isMoneyTier(value: unknown): value is MoneyTier {
   return typeof value === "string" && MONEY_TIERS.includes(value as MoneyTier);
@@ -52,7 +64,7 @@ const plannerSchema = z.object({
 export type PreferenceSummary = z.infer<typeof summarySchema>;
 export type AdvisorIdea = z.infer<typeof ideaSchema>;
 
-type GroupStatsExtended = {
+export type GroupStatsExtended = {
   participantCount: number;
   avgActivityLevel: number;
   popularMoneyPreference: MoneyTier;
@@ -77,26 +89,37 @@ type SummarySignals = {
   hungerLevel: string;
   stats: GroupStatsExtended;
   placeholderAnswers: PlaceholderAnswer[];
+  moodSignals: MoodSignals;
 };
 
 type PlannerInput = {
   summary: PreferenceSummary;
   stats: GroupStatsExtended;
   venues: DemoVenue[];
+  liveSignals?: MoodSignals;
 };
+
+export async function generateSummaryContext(
+  eventGroup: EventGroup & { preferences: EventGroupPreference[] },
+) {
+  const stats = computeGroupStats(eventGroup.preferences);
+  const signals = buildSummarySignals(eventGroup, stats);
+  const summary = await runSummaryAgent(signals);
+
+  return { summary, stats, moodSignals: signals.moodSignals };
+}
 
 export async function runAdvisorPipeline({
   eventGroup,
 }: {
   eventGroup: EventGroup & { preferences: EventGroupPreference[] };
 }) {
-  const stats = computeGroupStats(eventGroup.preferences);
-  const signals = buildSummarySignals(eventGroup, stats);
-  const summary = await runSummaryAgent(signals);
+  const { summary, stats, moodSignals } = await generateSummaryContext(eventGroup);
   const plan = await runPlannerAgent({
     summary,
     stats,
     venues: demoVenues,
+    liveSignals: moodSignals,
   });
 
   return {
@@ -107,6 +130,141 @@ export async function runAdvisorPipeline({
   };
 }
 
+type JsonSchema = Record<string, unknown>;
+
+const zodToJsonSchemaTyped = zodToJsonSchema as (
+  schema: z.ZodTypeAny,
+  options?: { name?: string; target?: string },
+) => JsonSchema;
+
+function resolveRef(
+  ref: string,
+  defs: Record<string, JsonSchema> | undefined,
+): JsonSchema | null {
+  if (!defs || !ref.startsWith("#/$defs/")) {
+    return null;
+  }
+  const defName = ref.replace("#/$defs/", "");
+  return defs[defName] ?? null;
+}
+
+function sanitizeSchemaForOpenAI(
+  schema: JsonSchema,
+  defs?: Record<string, JsonSchema>,
+): JsonSchema {
+  // OpenAI API requirements for Structured Outputs:
+  // 1. Root must have type: "object" (not $ref)
+  // 2. additionalProperties: false must be set on all objects
+  // 3. All properties must be in required array
+  // 4. Cannot have $ref with type keyword
+  // 5. "uri" format is not valid, remove it
+  
+  // If schema has $ref at root, resolve it
+  if (schema.$ref && !schema.properties) {
+    const resolved = resolveRef(schema.$ref as string, defs ?? schema.$defs as Record<string, JsonSchema> | undefined);
+    if (resolved) {
+      return sanitizeSchemaForOpenAI(resolved, defs ?? schema.$defs as Record<string, JsonSchema> | undefined);
+    }
+    // If we can't resolve, create a basic object schema
+    return {
+      type: "object",
+      properties: {},
+      required: [],
+      additionalProperties: false,
+    };
+  }
+  
+  // Extract $defs if present for reference resolution
+  const schemaDefs = (schema.$defs as Record<string, JsonSchema> | undefined) ?? defs;
+  
+  // Recursively sanitize nested schemas first
+  const sanitized = { ...schema };
+  
+  // Remove "uri" format (OpenAI doesn't accept it)
+  if (sanitized.format === "uri") {
+    delete sanitized.format;
+  }
+  
+  // Handle objects
+  if (sanitized.type === "object" || sanitized.properties) {
+    // Always set type to object if properties exist
+    sanitized.type = "object";
+    
+    // OpenAI requires additionalProperties: false
+    sanitized.additionalProperties = false;
+    
+    // Recursively process properties
+    if (sanitized.properties && typeof sanitized.properties === "object") {
+      const props = sanitized.properties as Record<string, JsonSchema>;
+      sanitized.properties = Object.fromEntries(
+        Object.entries(props).map(([key, value]) => {
+          // Resolve $ref if present
+          if (value.$ref && typeof value.$ref === "string") {
+            const resolved = resolveRef(value.$ref, schemaDefs);
+            if (resolved) {
+              value = sanitizeSchemaForOpenAI(resolved, schemaDefs);
+            }
+          }
+          return [key, sanitizeSchemaForOpenAI(value, schemaDefs)];
+        }),
+      );
+      
+      // Ensure all properties are in required array
+      if (!sanitized.required || !Array.isArray(sanitized.required)) {
+        sanitized.required = Object.keys(props);
+      } else {
+        // Merge existing required with all property keys
+        const existingRequired = sanitized.required as string[];
+        const allKeys = new Set([
+          ...existingRequired,
+          ...Object.keys(props),
+        ]);
+        sanitized.required = Array.from(allKeys);
+      }
+    }
+  }
+  
+  // Handle arrays
+  if (sanitized.type === "array" || sanitized.items) {
+    sanitized.type = "array";
+    
+    // Recursively process items
+    if (sanitized.items && typeof sanitized.items === "object") {
+      const items = sanitized.items as JsonSchema;
+      // Resolve $ref if present
+      if (items.$ref && typeof items.$ref === "string") {
+        const resolved = resolveRef(items.$ref, schemaDefs);
+        if (resolved) {
+          sanitized.items = sanitizeSchemaForOpenAI(resolved, schemaDefs);
+        } else {
+          sanitized.items = sanitizeSchemaForOpenAI(items, schemaDefs);
+        }
+      } else {
+        sanitized.items = sanitizeSchemaForOpenAI(items, schemaDefs);
+      }
+    }
+  }
+  
+  // Remove $ref if it exists alongside other properties (invalid)
+  if (sanitized.$ref && sanitized.type) {
+    delete sanitized.$ref;
+  }
+  
+  // Remove $defs since we've resolved all references
+  delete sanitized.$defs;
+  
+  // Always ensure root has type: "object" if it has properties
+  if (sanitized.properties && !sanitized.type) {
+    sanitized.type = "object";
+  }
+  
+  return sanitized;
+}
+
+// Generate schema without name to avoid $ref at root
+const rawSummarySchema = zodToJsonSchemaTyped(summarySchema);
+const summaryJsonSchema = sanitizeSchemaForOpenAI(rawSummarySchema);
+
 async function runSummaryAgent(
   signals: SummarySignals,
 ): Promise<PreferenceSummary> {
@@ -114,16 +272,25 @@ async function runSummaryAgent(
     return buildFallbackSummary(signals);
   }
 
+  const client = openaiClient;
+
   try {
-    const response = await openaiClient.chat.completions.create({
+    const request: ResponseCreateParamsNonStreaming = {
       model: env.OPENAI_MODEL,
       temperature: 0.4,
-      response_format: { type: "json_object" },
-      messages: [
+      text: {
+        format: {
+          type: "json_schema",
+          name: "preference_summary",
+          schema: summaryJsonSchema,
+          strict: true,
+        },
+      },
+      input: [
         {
           role: "system",
           content:
-            "You are Wolt Advisor's Preference Summarizer. Craft upbeat, concrete summaries that capture a friend group's energy. Output JSON containing headline, summary, vibeKeywords, budgetTier, energyLevel, timeWindow, hungerLevel, callToAction.",
+            "You are Wolt Advisor's Preference Summarizer. Craft upbeat, concrete summaries that capture a friend group's energy.",
         },
         {
           role: "user",
@@ -142,22 +309,25 @@ async function runSummaryAgent(
               dominantBudget: signals.stats.popularMoneyPreference,
             },
             placeholderAnswers: signals.placeholderAnswers,
+            liveSignals: signals.moodSignals,
           }),
         },
       ],
-    });
+    };
 
-    const payload = response.choices[0]?.message?.content;
-    if (!payload) {
+    const responsesApi = client.responses;
+    const response = await responsesApi.create(request);
+
+    const raw = response.output_text;
+
+    if (!raw) {
       throw new Error("Missing summary payload");
     }
 
-    const parsedJson: unknown = JSON.parse(payload);
-    const parsed = summarySchema.safeParse(parsedJson);
-    if (!parsed.success) {
-      throw new Error(parsed.error.message);
-    }
-    return parsed.data;
+    const summaryPayload: unknown = JSON.parse(raw);
+    const parsed = summarySchema.parse(summaryPayload);
+
+    return parsed;
   } catch (error) {
     console.warn(
       "[AdvisorPipeline] Summary agent failed, using fallback",
@@ -167,21 +337,29 @@ async function runSummaryAgent(
   }
 }
 
+// Generate schema without name to avoid $ref at root
+const rawPlannerSchema = zodToJsonSchemaTyped(plannerSchema);
+const plannerJsonSchema = sanitizeSchemaForOpenAI(rawPlannerSchema);
+
 async function runPlannerAgent({
   summary,
   stats,
   venues,
+  liveSignals,
 }: PlannerInput): Promise<{ ideas: AdvisorIdea[]; debugNotes?: string[] }> {
   if (!openaiClient || !env.OPENAI_MODEL) {
     return {
-      ideas: buildFallbackIdeas(summary, stats, venues),
+      ideas: buildFallbackIdeas(summary, stats, venues, liveSignals),
       debugNotes: ["fallback-mode"],
     };
   }
 
+  const client = openaiClient;
+
   const promptPayload = {
     summary,
     stats,
+    liveSignals: liveSignals ?? {},
     requirements: {
       count: 3,
       city: "Espoo",
@@ -189,7 +367,7 @@ async function runPlannerAgent({
       instructions: [
         "Use only the venues listed below.",
         "Each idea can pair up to two venues (e.g., activity + dining).",
-        "Reference venues by slug.",
+        "Reference venues by slug, no made-up locations.",
         "Ensure priceLevel aligns with summary budgetTier or provide a good contrast.",
         "Surface concrete time slots or availability labels when provided.",
       ],
@@ -198,36 +376,45 @@ async function runPlannerAgent({
   };
 
   try {
-    const response = await openaiClient.chat.completions.create({
+    const request: ResponseCreateParamsNonStreaming = {
       model: env.OPENAI_MODEL,
       temperature: 0.5,
-      response_format: { type: "json_object" },
-      messages: [
+      text: {
+        format: {
+          type: "json_schema",
+          name: "planner_ideas",
+          schema: plannerJsonSchema,
+          strict: true,
+        },
+      },
+      input: [
         {
           role: "system",
           content:
-            "You are Wolt Advisor's Planning Agent. Combine local venues into 3 shippable event ideas with clear rationale. Respond in JSON with `ideas` array.",
+            "You are Wolt Advisor's Planning Agent. Combine local venues into 3 shippable event ideas with clear rationale.",
         },
         {
           role: "user",
           content: JSON.stringify(promptPayload),
         },
       ],
-    });
+    };
 
-    const payload = response.choices[0]?.message?.content;
-    if (!payload) {
+    const responsesApi = client.responses;
+    const response = await responsesApi.create(request);
+
+    const raw = response.output_text;
+
+    if (!raw) {
       throw new Error("Missing planner payload");
     }
-    const parsedJson: unknown = JSON.parse(payload);
-    const parsed = plannerSchema.safeParse(parsedJson);
-    if (!parsed.success) {
-      throw new Error(parsed.error.message);
-    }
+
+    const plannerPayload: unknown = JSON.parse(raw);
+    const parsed = plannerSchema.parse(plannerPayload);
 
     return {
-      ideas: parsed.data.ideas,
-      debugNotes: parsed.data.debugNotes,
+      ideas: parsed.ideas,
+      debugNotes: parsed.debugNotes,
     };
   } catch (error) {
     console.warn(
@@ -235,13 +422,13 @@ async function runPlannerAgent({
       error,
     );
     return {
-      ideas: buildFallbackIdeas(summary, stats, venues),
+      ideas: buildFallbackIdeas(summary, stats, venues, liveSignals),
       debugNotes: ["planner-fallback"],
     };
   }
 }
 
-function computeGroupStats(
+export function computeGroupStats(
   preferences: EventGroupPreference[],
 ): GroupStatsExtended {
   const participantCount = preferences.length;
@@ -290,45 +477,85 @@ function buildSummarySignals(
   eventGroup: EventGroup & { preferences: EventGroupPreference[] },
   stats: GroupStatsExtended,
 ): SummarySignals {
+  const moodSignals = extractMoodSignals(eventGroup.preferences);
   const baseLocation =
     eventGroup.preferredLocation ??
     eventGroup.city ??
     "Espoo · Hype Areena radius";
-  const timeWindow =
-    eventGroup.targetTime ?? "Weekend afternoon & evening blocks (16:00-23:00)";
+  const timeWindow = describeTimeWindow(
+    eventGroup.targetTime,
+    moodSignals.timeAvailable,
+  );
   const vibeHint =
-    stats.energyLabel === "high"
+    deriveVibeHint(stats.energyLabel, moodSignals.currentEnergy) ??
+    (stats.energyLabel === "high"
       ? "competitive-high energy hang"
       : stats.energyLabel === "medium"
         ? "balanced social adventure"
-        : "cozy, conversation-first flow";
+        : "cozy, conversation-first flow");
 
-  const placeholderAnswers: PlaceholderAnswer[] = [
-    {
-      id: "budget",
-      question: "How much are you willing to spend?",
-      answer: stats.popularMoneyPreference,
-      confidence: stats.participantCount > 1 ? "high" : "medium",
-    },
-    {
+  const hungerLevel = describeHungerLevel(moodSignals.hungerLevel);
+
+  const placeholderAnswers: PlaceholderAnswer[] = [];
+
+  if (moodSignals.currentEnergy) {
+    placeholderAnswers.push({
+      id: "energy-live",
+      question: "Live energy ping",
+      answer: moodSignals.currentEnergy,
+      confidence: "high",
+    });
+  }
+  if (moodSignals.timeAvailable) {
+    placeholderAnswers.push({
+      id: "time-live",
+      question: "Live time estimate",
+      answer: moodSignals.timeAvailable,
+      confidence: "high",
+    });
+  }
+  if (moodSignals.hungerLevel) {
+    placeholderAnswers.push({
+      id: "hunger-live",
+      question: "Live hunger check",
+      answer: moodSignals.hungerLevel,
+      confidence: "high",
+    });
+  }
+
+  if (!moodSignals.currentEnergy) {
+    placeholderAnswers.push({
       id: "energy",
       question: "What's the vibe / energy level?",
       answer: stats.energyLabel,
       confidence: "medium",
-    },
-    {
+    });
+  }
+
+  if (!moodSignals.timeAvailable) {
+    placeholderAnswers.push({
       id: "time",
       question: "How much time do you have?",
       answer: timeWindow,
       confidence: "low",
-    },
-    {
+    });
+  }
+
+  if (!moodSignals.hungerLevel) {
+    placeholderAnswers.push({
       id: "hunger",
       question: "How hungry is the group?",
-      answer: "Medium hunger - open to bites or a full meal",
+      answer: hungerLevel,
       confidence: "low",
-    },
-  ];
+    });
+  }
+
+  placeholderAnswers.push({
+    id: "budget",
+    question: "How much are you willing to spend?",
+    answer: stats.popularMoneyPreference,
+    confidence: stats.participantCount > 1 ? "high" : "medium",
+  });
 
   return {
     groupId: eventGroup.id,
@@ -337,9 +564,10 @@ function buildSummarySignals(
     baseLocation,
     timeWindow,
     vibeHint,
-    hungerLevel: "Medium",
+    hungerLevel,
     stats,
     placeholderAnswers,
+    moodSignals,
   };
 }
 
@@ -407,6 +635,7 @@ function buildFallbackIdeas(
   summary: PreferenceSummary,
   stats: GroupStatsExtended,
   venues: DemoVenue[],
+  liveSignals?: MoodSignals,
 ): AdvisorIdea[] {
   const ranked = rankVenuesByBudget(summary.budgetTier, venues);
   const activity = ranked.activities[0];
@@ -414,13 +643,23 @@ function buildFallbackIdeas(
   const wildcard =
     ranked.wildcards[0] ?? ranked.activities[1] ?? ranked.dining[1];
 
+  const energyPreference = resolveEnergyFromSignals(
+    liveSignals,
+    stats.energyLabel,
+  );
+
   const ideas: AdvisorIdea[] = [];
 
   if (activity) {
     ideas.push(
       createIdeaFromVenue({
         venue: activity,
-        type: stats.energyLabel === "low" ? "balanced" : "active",
+        type:
+          energyPreference === "low"
+            ? "relaxed"
+            : energyPreference === "medium"
+              ? "balanced"
+              : "active",
         label: "Onsite play",
       }),
     );
@@ -440,7 +679,12 @@ function buildFallbackIdeas(
     ideas.push(
       createIdeaFromVenue({
         venue: wildcard,
-        type: stats.energyLabel === "low" ? "relaxed" : "balanced",
+        type:
+          energyPreference === "low"
+            ? "relaxed"
+            : energyPreference === "high"
+              ? "active"
+              : "balanced",
         label: "Wildcard",
       }),
     );
@@ -538,3 +782,115 @@ function createIdeaFromVenue({
     qrPayload: venue.enriched?.booking?.qrPayload,
   };
 }
+
+function extractMoodSignals(
+  preferences: EventGroupPreference[],
+): MoodSignals {
+  const signals: MoodSignals = {};
+  for (const pref of preferences) {
+    const responses = (pref as {
+      moodResponses?: Record<string, unknown>;
+    }).moodResponses;
+    if (!responses || typeof responses !== "object") continue;
+
+    for (const key of Object.keys(responses)) {
+      if (signals[key]) continue;
+      const value = responses[key];
+      if (typeof value === "string" && value.trim()) {
+        signals[key] = value.trim();
+      }
+    }
+  }
+  return signals;
+}
+
+function describeTimeWindow(
+  targetTime?: string | null,
+  timeSignal?: string,
+) {
+  if (timeSignal) {
+    switch (timeSignal) {
+      case "<1h":
+        return "Under an hour • sprint session";
+      case "1-2h":
+        return "About 1-2 hours • relaxed pace";
+      case "2h+":
+        return "2 hours or more • open evening";
+      default:
+        return `Group-mentioned time: ${timeSignal}`;
+    }
+  }
+
+  if (targetTime) {
+    return `Target time ${targetTime}`;
+  }
+
+  return "Weekend afternoon & evening blocks (16:00-23:00)";
+}
+
+function describeHungerLevel(hungerSignal?: string) {
+  if (!hungerSignal) {
+    return "Medium hunger - open to bites or a full meal";
+  }
+
+  const normalized = hungerSignal.toLowerCase();
+  if (normalized.includes("snack")) return "Snacky - tasting portions";
+  if (
+    normalized.includes("proper") ||
+    normalized.includes("meal") ||
+    normalized.includes("hungry")
+  ) {
+    return "Ready for a proper meal";
+  }
+  if (normalized.includes("stuffed") || normalized.includes("full")) {
+    return "Already full - focus on activities";
+  }
+  return hungerSignal;
+}
+
+function deriveVibeHint(
+  energyLabel: "low" | "medium" | "high",
+  energySignal?: string,
+) {
+  if (!energySignal) return undefined;
+  const normalized = energySignal.toLowerCase();
+  if (normalized.includes("chill") || normalized.includes("low")) {
+    return "cozy, conversation-first flow";
+  }
+  if (
+    normalized.includes("balanced") ||
+    normalized.includes("medium") ||
+    normalized.includes("normal")
+  ) {
+    return "balanced social adventure";
+  }
+  if (normalized.includes("hype") || normalized.includes("high")) {
+    return "competitive-high energy hang";
+  }
+  return undefined;
+}
+
+function resolveEnergyFromSignals(
+  liveSignals: MoodSignals | undefined,
+  fallback: "low" | "medium" | "high",
+): "low" | "medium" | "high" {
+  if (!liveSignals?.currentEnergy) {
+    return fallback;
+  }
+  const normalized = liveSignals.currentEnergy.toLowerCase();
+  if (normalized.includes("chill") || normalized.includes("low")) {
+    return "low";
+  }
+  if (
+    normalized.includes("balanced") ||
+    normalized.includes("medium") ||
+    normalized.includes("normal")
+  ) {
+    return "medium";
+  }
+  if (normalized.includes("hype") || normalized.includes("high")) {
+    return "high";
+  }
+  return fallback;
+}
+

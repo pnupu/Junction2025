@@ -76,10 +76,11 @@ export default function EventResultsPage() {
     popularMoneyPreference: string;
   } | null>(null);
   const [showQRDialog, setShowQRDialog] = useState<boolean>(false);
+  const [loadingDots, setLoadingDots] = useState(".");
 
   const eventQuery = api.event.get.useQuery(
     { id: eventId },
-    { enabled: !!eventId },
+    { enabled: !!eventId, refetchInterval: 2000 },
   );
   const rawEventData: unknown = eventQuery.data;
   const eventData = isEventDetails(rawEventData) ? rawEventData : undefined;
@@ -95,11 +96,42 @@ export default function EventResultsPage() {
   const { mutate: runRecommendations, isPending: isGenerating } =
     generateRecommendations;
 
+  // Animate loading dots when generating
   useEffect(() => {
-    if (eventId && !isGenerating && recommendations.length === 0) {
+    const status = (eventData as { status?: string })?.status;
+    const isCurrentlyGenerating = isGenerating || status === "generating";
+    
+    if (isCurrentlyGenerating) {
+      const interval = setInterval(() => {
+        setLoadingDots((prev) => {
+          if (prev === ".") return "..";
+          if (prev === "..") return "...";
+          return ".";
+        });
+      }, 500);
+      return () => clearInterval(interval);
+    } else {
+      setLoadingDots(".");
+    }
+  }, [isGenerating, eventData]);
+
+  useEffect(() => {
+    // Check if already generated or generating
+    const status = (eventData as { status?: string })?.status;
+    const isAlreadyGenerated = status === "generated";
+    const isAlreadyGenerating = status === "generating";
+    
+    // Only start generation if not already generating/generated and we have no recommendations
+    if (
+      eventId &&
+      !isGenerating &&
+      recommendations.length === 0 &&
+      !isAlreadyGenerated &&
+      !isAlreadyGenerating
+    ) {
       runRecommendations({ groupId: eventId });
     }
-  }, [eventId, isGenerating, recommendations.length, runRecommendations]);
+  }, [eventId, isGenerating, recommendations.length, runRecommendations, eventData]);
 
   const handleCopyLink = () => {
     const url = window.location.origin + `/event/${eventId}`;
@@ -132,13 +164,18 @@ export default function EventResultsPage() {
     }
   };
 
-  if (isGenerating) {
+  // Show loading if generating or if status is "generating" but we don't have recommendations yet
+  const status = (eventData as { status?: string })?.status;
+  const shouldShowLoading =
+    isGenerating || (status === "generating" && recommendations.length === 0);
+
+  if (shouldShowLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
           <div className="mb-4 text-6xl">🎨</div>
           <h2 className="mb-2 text-2xl font-semibold text-slate-900">
-            Generating recommendations...
+            Generating recommendations{loadingDots}
           </h2>
           <p className="text-slate-600">Analyzing preferences</p>
         </div>
