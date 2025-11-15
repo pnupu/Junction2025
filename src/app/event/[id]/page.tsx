@@ -10,6 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { api } from "@/trpc/react";
 import {
   ProfileModal,
@@ -353,6 +359,7 @@ export default function EventPage() {
         status === "generated";
       const isGenerating = status === "generating";
 
+
       // Redirect to results page if generating or generated
       if ((isGenerating || isGenerated) && eventData.id) {
         router.push(`/event/${eventData.id}/results`);
@@ -371,6 +378,7 @@ export default function EventPage() {
   // Sort participants by createdAt to ensure consistent ordering
   const participants = [...(eventData.preferences ?? [])].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
   const participantCount = participants.length;
 
@@ -387,6 +395,7 @@ export default function EventPage() {
         .moodResponses ?? {},
     ).length > 0;
 
+  console.log("currentUserPreference", currentUserPreference);
   console.log("currentUserPreference", currentUserPreference);
 
   return (
@@ -408,55 +417,68 @@ export default function EventPage() {
         isEnlarged={true}
         eventName={userProfile?.name ?? "Your"}
       />
-      <main className="min-h-screen bg-[#029DE2]">
+      <main className="min-h-screen bg-white">
         {/* Inline Map Preview - Full Width */}
-        {participantLocations.length > 0 && leafletLoaded && L && (
-          <div className="mb-6 overflow-hidden md:mx-auto md:max-w-3xl md:rounded-2xl md:px-6 md:pt-8">
-            <div className="overflow-hidden bg-white/10 backdrop-blur md:rounded-2xl">
-              <button
-                onClick={() => setShowMapModal(true)}
-                className="relative block h-64 w-full cursor-pointer transition-all hover:opacity-90 md:h-80"
-              >
-                {/* Title with shadow overlay */}
-                <div className="absolute top-0 right-0 left-0 z-10 bg-gradient-to-b from-black/70 via-black/40 to-transparent px-6 py-6 pb-12">
-                  <h1 className="text-2xl font-bold text-white drop-shadow-lg">
-                    {userProfile?.name ?? "Your"}&apos;s Event
-                  </h1>
-                </div>
-                <div className="relative z-1 h-full w-full">
-                  <MapContainer
-                    center={[
-                      participantLocations.reduce(
-                        (sum, p) => sum + p.latitude,
-                        0,
-                      ) / participantLocations.length,
-                      participantLocations.reduce(
-                        (sum, p) => sum + p.longitude,
-                        0,
-                      ) / participantLocations.length,
-                    ]}
-                    zoom={13}
-                    style={{ height: "100%", width: "100%" }}
-                    zoomControl={false}
-                    dragging={false}
-                    scrollWheelZoom={false}
-                    doubleClickZoom={false}
-                    touchZoom={false}
-                  >
-                    <TileLayer
-                      attribution="&copy; OpenStreetMap"
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    {groupedLocations.map((location, idx) => (
-                      <Marker
-                        key={idx}
-                        position={[location.latitude, location.longitude]}
-                        // @ts-expect-error - Leaflet divIcon return type doesn't match react-leaflet's expected type, but works at runtime
-                        icon={
-                          L
-                            ? L.divIcon({
-                                className: "custom-marker",
-                                html: `
+        {participantLocations.length > 0 && leafletLoaded && L ? (
+          <div className="relative h-64 w-full overflow-hidden">
+            <button
+              onClick={() => setShowMapModal(true)}
+              className="relative block h-full w-full cursor-pointer"
+            >
+              {/* Invite button overlay */}
+              <div className="absolute top-5 right-5 left-5 z-10 flex justify-center">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowInviteModal(true);
+                  }}
+                  className="h-12 w-full max-w-[500px] rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3]"
+                >
+                  Invite friends
+                </Button>
+              </div>
+
+              {/* Black gradient overlay */}
+              <div className="pointer-events-none absolute inset-0 z-2 bg-gradient-to-b from-black/50 to-black/0" />
+
+              <div className="relative z-1 h-full w-full">
+                <MapContainer
+                  center={
+                    participantLocations.length > 0
+                      ? [
+                          participantLocations.reduce(
+                            (sum, p) => sum + p.latitude,
+                            0,
+                          ) / participantLocations.length,
+                          participantLocations.reduce(
+                            (sum, p) => sum + p.longitude,
+                            0,
+                          ) / participantLocations.length,
+                        ]
+                      : [60.1695, 24.9354] // Default to Helsinki
+                  }
+                  zoom={13}
+                  style={{ height: "100%", width: "100%" }}
+                  zoomControl={false}
+                  dragging={false}
+                  scrollWheelZoom={false}
+                  doubleClickZoom={false}
+                  touchZoom={false}
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {groupedLocations.map((location, idx) => (
+                    <Marker
+                      key={idx}
+                      position={[location.latitude, location.longitude]}
+                      // @ts-expect-error - Leaflet divIcon return type doesn't match react-leaflet's expected type, but works at runtime
+                      icon={
+                        L
+                          ? L.divIcon({
+                              className: "custom-marker",
+                              html: `
                           <div style="position: relative; width: 32px; height: 32px;">
                             <div style="
                               position: absolute;
@@ -499,94 +521,104 @@ export default function EventPage() {
                             }
                           </style>
                         `,
-                                iconSize: [32, 32],
-                                iconAnchor: [16, 32],
-                              })
-                            : undefined
-                        }
-                      />
-                    ))}
-                  </MapContainer>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all hover:bg-black/10">
-                  <div className="rounded-lg bg-white/90 px-4 py-2 text-sm font-semibold text-[#029DE2] shadow-lg backdrop-blur">
-                    🗺️ Click to expand map
-                  </div>
-                </div>
-              </button>
+                              iconSize: [32, 32],
+                              iconAnchor: [16, 32],
+                            })
+                          : undefined
+                      }
+                    />
+                  ))}
+                </MapContainer>
+              </div>
+            </button>
+          </div>
+        ) : (
+          <div className="flex h-64 w-full items-center justify-center bg-slate-100">
+            <div className="px-6 text-center">
+              <h2 className="mb-4 text-xl font-semibold text-slate-600">
+                No locations yet
+              </h2>
+              <Button
+                onClick={() => setShowInviteModal(true)}
+                className="h-12 rounded-xl bg-[#029DE2] px-8 text-base font-semibold text-white hover:bg-[#0287C3]"
+              >
+                Invite friends
+              </Button>
             </div>
           </div>
         )}
 
         {/* Content Container - Max Width on Desktop */}
-        <div className="mx-auto max-w-[500px] px-6 py-2">
-          {/* Invite Section */}
-          <div className="mb-6">
-            <Button
-              onClick={() => setShowInviteModal(true)}
-              className="h-14 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90"
-            >
-              📨 Invite Friends
-            </Button>
+        <div className="mx-auto max-w-[500px] bg-white px-5 py-5 text-[#0F172B]">
+          {/* Event Name and Tabs Section */}
+          <div className="mb-4">
+            <h1 className="mb-2 text-4xl font-bold text-[#0F172B]">
+              {userProfile?.name ?? "Your"}&apos;s Event
+            </h1>
+
+            {/* Tabs */}
+            <div className="flex border-b border-slate-200">
+              <button className="flex-1 border-b-2 border-[#029DE2] px-3 py-4 text-base font-semibold text-[#029DE2]">
+                Participants ({participantCount})
+              </button>
+              <button className="flex-1 px-3 py-4 text-base text-[#0F172B]">
+                Event ideas (0)
+              </button>
+            </div>
           </div>
 
-          {/* Invite Modal */}
-          <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
-            <DialogContent className="border-none bg-white text-slate-900 sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle className="text-center text-2xl font-semibold text-[#0F172B]">
-                  Invite Friends
-                </DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col items-center gap-6 py-6">
-                {/* Event Code Section */}
-                <div className="w-full rounded-xl border-2 border-[#029DE2] bg-[#EDF7FF] p-4">
-                  <p className="mb-2 text-center text-xs font-medium tracking-wide text-[#62748E] uppercase">
-                    Event Code
-                  </p>
-                  <div className="flex items-center justify-center gap-2">
-                    <code className="rounded-lg bg-white px-4 py-2 text-center text-2xl font-bold tracking-wider text-[#029DE2]">
+          {/* Invite Modal - Drawer from Top */}
+          <Drawer
+            open={showInviteModal}
+            onOpenChange={setShowInviteModal}
+            direction="top"
+          >
+            <DrawerContent className="fixed inset-x-0 top-0 bottom-auto z-50 mx-auto flex h-auto max-w-[402px] flex-col rounded-b-[24px] border-none bg-[#029DE2]">
+              {/* Content */}
+              <div className="flex flex-col items-center gap-5 px-16 pt-16 pb-16">
+                <DrawerHeader className="w-full p-0">
+                  <DrawerTitle className="text-center text-[40px] leading-none font-bold text-white">
+                    Invite frends
+                  </DrawerTitle>
+                </DrawerHeader>
+
+                {/* White Container with QR Code and Event Code */}
+                <div className="flex w-full flex-col items-center gap-3 rounded-[24px] bg-white p-4">
+                  {/* Event Code */}
+                  <div className="text-center">
+                    <p className="mb-1 text-xs font-medium tracking-wide text-[#62748E] uppercase">
+                      Event Code
+                    </p>
+                    <code className="text-2xl font-bold tracking-wider text-[#029DE2]">
                       {eventData?.inviteCode ?? eventIdOrCode}
                     </code>
                   </div>
-                  <button
-                    onClick={() => void handleCopyCode()}
-                    className="mt-3 w-full rounded-lg bg-white px-4 py-2 text-sm font-medium text-[#029DE2] transition-colors hover:bg-[#029DE2] hover:text-white"
-                  >
-                    📋 Copy Code
-                  </button>
+
+                  {/* QR Code */}
+                  <div className="bg-white">
+                    <QRCodeSVG
+                      value={
+                        typeof window !== "undefined"
+                          ? window.location.href
+                          : ""
+                      }
+                      size={242}
+                      level="H"
+                      includeMargin={false}
+                    />
+                  </div>
                 </div>
 
-                {/* Divider */}
-                <div className="flex w-full items-center gap-3">
-                  <div className="h-px flex-1 bg-[#CAD5E2]"></div>
-                  <span className="text-xs text-[#62748E]">or</span>
-                  <div className="h-px flex-1 bg-[#CAD5E2]"></div>
-                </div>
-
-                {/* QR Code Section */}
-                <div className="rounded-2xl bg-white p-6 shadow-lg">
-                  <QRCodeSVG
-                    value={
-                      typeof window !== "undefined" ? window.location.href : ""
-                    }
-                    size={200}
-                    level="H"
-                    includeMargin={true}
-                  />
-                </div>
-                <p className="text-center text-sm text-[#62748E]">
-                  Scan QR code or share the link
-                </p>
-                <Button
+                {/* Copy Link Button */}
+                <button
                   onClick={() => void handleCopyLink()}
-                  className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#029DE2]/90"
+                  className="w-full rounded-[12px] bg-white px-6 py-3.5 text-base font-semibold text-[#029DE2] transition-colors hover:bg-white/90"
                 >
-                  📋 Copy Link
-                </Button>
+                  Copy link to clipboard
+                </button>
               </div>
-            </DialogContent>
-          </Dialog>
+            </DrawerContent>
+          </Drawer>
 
           {/* QR Code Dialog (enlarged) */}
           <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
@@ -633,31 +665,32 @@ export default function EventPage() {
                       ? currentEnergy
                       : `Activity level: ${participant.activityLevel}/5`;
 
-                  // Check if participant has answered mood questions
-                  const hasAnsweredMoodQuestions =
-                    moodResponses &&
-                    typeof moodResponses === "object" &&
-                    !Array.isArray(moodResponses) &&
-                    Object.keys(moodResponses).length > 0;
+                // Check if participant has answered mood questions
+                const hasAnsweredMoodQuestions =
+                  moodResponses &&
+                  typeof moodResponses === "object" &&
+                  !Array.isArray(moodResponses) &&
+                  Object.keys(moodResponses).length > 0;
 
-                  return (
-                    <div
-                      key={participant.id ?? participant.sessionId ?? idx}
-                      className="flex items-center justify-between rounded-xl bg-white/20 p-4 backdrop-blur"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/30 text-2xl backdrop-blur">
-                          👤
-                        </div>
-                        <div>
-                          <div className="font-medium text-white">
-                            {participant.userName ?? "Anonymous"}
-                          </div>
-                          <div className="text-xs text-white/70">
-                            {energyDisplay}
-                          </div>
-                        </div>
-                      </div>
+                // Determine task status circles (3 circles showing progress)
+                const isCreatorOfEvent = idx === 0; // First participant is creator
+
+                return (
+                  <div
+                    key={participant.id ?? participant.sessionId ?? idx}
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-3"
+                  >
+                    <p className="text-base text-[#0F172B]">
+                      {isCreatorOfEvent && "👑 "}
+                      {participant.userName ?? "Anonymous"}
+                    </p>
+                    <div className="flex gap-1">
+                      {/* Task status indicators - 3 circles */}
+                      <div
+                        className={`h-3 w-3 rounded-full border-[1.5px] border-[#029DE2] ${
+                          hasAnsweredMoodQuestions ? "bg-[#029DE2]" : "bg-white"
+                        }`}
+                      />
                       <div
                         className={`h-3 w-3 animate-ping rounded-full opacity-75 ${
                           hasAnsweredMoodQuestions

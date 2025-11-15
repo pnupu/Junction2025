@@ -29,6 +29,7 @@ interface ProfileModalProps {
   onClose: () => void;
   onSave: (profile: UserProfile) => void;
   showAsModal?: boolean; // If false, shows full screen on mobile
+  animate?: boolean; // Whether to show drop-in animation
 }
 
 export function ProfileModal({
@@ -36,6 +37,7 @@ export function ProfileModal({
   onClose,
   onSave,
   showAsModal = true,
+  animate = false,
 }: ProfileModalProps) {
   const [name, setName] = useState("");
   const [activityPreference, setActivityPreference] = useState<
@@ -184,32 +186,13 @@ export function ProfileModal({
   );
 
   if (showAsModal) {
-    // Desktop: Modal overlay
+    // Full screen with animation
     return (
-      <>
-        {/* Desktop modal */}
-        <div className="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4 md:flex">
-          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white px-5 py-6 shadow-xl">
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-[#62748E] hover:text-[#0F172B]"
-            >
-              ✕
-            </button>
-            {formContent}
-          </div>
-        </div>
-
-        {/* Mobile: Full screen */}
-        <div className="fixed inset-0 z-50 flex min-h-screen flex-col bg-white px-5 py-6 md:hidden">
-          <div className="flex flex-col gap-8">
-            {/* Top spacing */}
-            <div className="h-6" />
-            {formContent}
-          </div>
-        </div>
-      </>
+      <div
+        className={`fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-white px-5 py-6 ${animate ? "animate-drop-in" : ""}`}
+      >
+        <div className="w-full max-w-lg">{formContent}</div>
+      </div>
     );
   } else {
     // Full screen on all devices

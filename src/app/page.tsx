@@ -18,6 +18,7 @@ export default function Home() {
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [eventCode, setEventCode] = useState("");
+  const [isJumping, setIsJumping] = useState(false);
 
   useEffect(() => {
     const _profile = getUserProfile();
@@ -47,13 +48,17 @@ export default function Home() {
     );
   }
 
-  const profilePic = (
-    <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
+  const artPic = (
+    <div
+      className={`absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[700px] -translate-x-1/2 md:h-[50vh] md:max-w-[800px] lg:h-[55vh] ${
+        isJumping ? "animate-jump" : ""
+      }`}
+    >
       <Image
         src="/happy-times.png"
         alt=""
         fill
-        className="object-cover object-bottom"
+        className="object-cover object-bottom md:object-contain"
         priority
       />
     </div>
@@ -62,19 +67,13 @@ export default function Home() {
   // Render ProfileModal if shown
   if (showProfileForm) {
     return (
-      <>
-        {/* Background page for desktop */}
-        <main className="relative hidden min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12 md:flex">
-          {profilePic}
-        </main>
-
-        <ProfileModal
-          isOpen={showProfileForm}
-          onClose={() => setShowProfileForm(false)}
-          onSave={handleProfileSave}
-          showAsModal={true}
-        />
-      </>
+      <ProfileModal
+        isOpen={showProfileForm}
+        onClose={() => setShowProfileForm(false)}
+        onSave={handleProfileSave}
+        showAsModal={true}
+        animate={true}
+      />
     );
   }
 
@@ -82,7 +81,7 @@ export default function Home() {
   if (showJoinForm) {
     return (
       <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
-        {profilePic}
+        {artPic}
 
         {/* Content */}
         <div className="relative z-10 w-full max-w-md">
@@ -126,36 +125,59 @@ export default function Home() {
 
   // Main landing page
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
+    <main
+      className={`relative flex min-h-screen flex-col items-center justify-start px-6 py-12 ${hasProfile ? "bg-white" : "bg-[#029DE2]"}`}
+    >
       {/* Background image */}
-      {profilePic}
+      {artPic}
 
       {/* Content */}
       <div className="relative z-10 flex w-full max-w-md flex-col items-center gap-16">
-        <h1 className="mt-32 text-center text-5xl leading-none font-bold text-white">
-          Wolt Events
-        </h1>{" "}
+        {hasProfile ? (
+          <h1
+            className={`mt-32 text-center text-5xl leading-none font-bold ${hasProfile ? "text-[#029DE2]" : "text-white"}`}
+          >
+            Let's do something together
+          </h1>
+        ) : (
+          <Image
+            src="/wolt_meet.svg"
+            alt="Wolt Meet"
+            width={300}
+            height={51}
+            className={
+              hasProfile ? "brightness-0 saturate-100" : "brightness-0 invert"
+            }
+            priority
+          />
+        )}{" "}
         <div className="w-full space-y-6">
           {!hasProfile ? (
             <Button
-              onClick={() => setShowProfileForm(true)}
+              onClick={() => {
+                setIsJumping(true);
+                setTimeout(() => {
+                  setShowProfileForm(true);
+                  setIsJumping(false);
+                }, 200);
+              }}
               className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90"
             >
-              Create quick profile
+              Create DEMO profile
             </Button>
           ) : (
             <>
               <Link href="/create" className="block">
-                <Button className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90">
+                <Button className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3]">
                   Create Event
                 </Button>
               </Link>
 
               {/* OR Divider */}
               <div className="flex items-center gap-4">
-                <div className="h-px flex-1 bg-white/30"></div>
-                <span className="text-sm font-medium text-white/80">OR</span>
-                <div className="h-px flex-1 bg-white/30"></div>
+                <div className="h-px flex-1 bg-slate-300"></div>
+                <span className="text-sm font-medium text-slate-500">OR</span>
+                <div className="h-px flex-1 bg-slate-300"></div>
               </div>
 
               {/* Join with code */}
@@ -165,13 +187,13 @@ export default function Home() {
                   value={eventCode}
                   onChange={(e) => setEventCode(e.target.value.toUpperCase())}
                   placeholder="Enter event code"
-                  className="h-12 rounded-xl border-0 bg-black/10 text-center text-base text-white uppercase shadow-inner placeholder:text-white/50 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-12 rounded-xl border-0 bg-slate-100 text-center text-base text-slate-900 uppercase shadow-inner placeholder:text-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 <Button
                   onClick={handleJoinEvent}
                   disabled={!eventCode.trim()}
                   variant="outline"
-                  className="h-12 w-full rounded-xl border-2 border-white bg-transparent text-base font-semibold text-white hover:bg-white/10 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
+                  className="h-12 w-full rounded-xl border-2 border-[#029DE2] bg-white text-base font-semibold text-[#029DE2] transition-colors hover:bg-[#029DE2] hover:text-white focus-visible:ring-0 focus-visible:ring-offset-0 disabled:border-slate-300 disabled:text-slate-400 disabled:opacity-100 disabled:hover:bg-white disabled:hover:text-slate-400"
                 >
                   Join with Code
                 </Button>

@@ -127,12 +127,12 @@ export function MoodQuestions({
 
   if (isLoading && currentQuestions.length === 0) {
     return (
-      <div className="rounded-2xl bg-white/10 p-6 backdrop-blur">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
         <div className="text-center">
-          <div className="mb-2 text-lg font-semibold text-white">
+          <div className="mb-2 text-lg font-semibold text-[#0F172B]">
             Quick mood check 🎯
           </div>
-          <div className="text-sm text-white/70">
+          <div className="text-sm text-slate-600">
             Generating personalized questions{loadingDots}
           </div>
         </div>
@@ -145,8 +145,8 @@ export function MoodQuestions({
   }
 
   return (
-    <div className="mb-6 rounded-2xl bg-white/10 p-6 backdrop-blur">
-      <h2 className="mb-4 text-lg font-semibold text-white">
+    <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+      <h2 className="mb-4 text-lg font-semibold text-[#0F172B]">
         Quick mood check 🎯
       </h2>
       {followUp && <p className="mb-4 text-sm text-white/80">{followUp}</p>}
@@ -164,7 +164,7 @@ export function MoodQuestions({
         <Button
           onClick={handleSubmit}
           disabled={!allAnswered || isSubmitting}
-          className="flex-1 rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90 disabled:opacity-50"
+          className="flex-1 rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3] disabled:opacity-50"
         >
           {isSubmitting ? `Saving${loadingDots}` : "Continue"}
         </Button>
@@ -200,7 +200,7 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
 
       return (
         <div>
-          <label className="mb-3 block text-sm font-medium text-white">
+          <label className="mb-3 block text-sm font-medium text-[#0F172B]">
             {prompt}
           </label>
           <div className="flex gap-1.5">
@@ -217,8 +217,8 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
                       : "flex-1 px-3 py-2.5"
                   } ${
                     isSelected
-                      ? "bg-white text-[#029DE2] shadow-md"
-                      : "bg-white/20 text-white hover:bg-white/30"
+                      ? "bg-[#029DE2] text-white shadow-md"
+                      : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
                   }`}
                 >
                   {num}
@@ -233,7 +233,7 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
     // Handle scale with options (e.g., ["Chill", "Balanced", "Hype"])
     return (
       <div>
-        <label className="mb-3 block text-sm font-medium text-white">
+        <label className="mb-3 block text-sm font-medium text-[#0F172B]">
           {prompt}
         </label>
         <div className="flex gap-2">
@@ -246,8 +246,8 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
                 onClick={() => onChange(option)}
                 className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
                   isSelected
-                    ? "bg-white text-[#029DE2] shadow-md"
-                    : "bg-white/20 text-white hover:bg-white/30"
+                    ? "bg-[#029DE2] text-white shadow-md"
+                    : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
                 }`}
               >
                 {option}
@@ -262,7 +262,7 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
   if (type === "choice" && options) {
     return (
       <div>
-        <label className="mb-3 block text-sm font-medium text-white">
+        <label className="mb-3 block text-sm font-medium text-[#0F172B]">
           {prompt}
         </label>
         <div className="space-y-2">
@@ -275,8 +275,8 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
                 onClick={() => onChange(option)}
                 className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-all ${
                   isSelected
-                    ? "bg-white text-[#029DE2] shadow-md"
-                    : "bg-white/20 text-white hover:bg-white/30"
+                    ? "bg-[#029DE2] text-white shadow-md"
+                    : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
                 }`}
               >
                 {option}
