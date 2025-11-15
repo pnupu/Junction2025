@@ -79,4 +79,3 @@ export const demoVenues = demoVenuesJson as unknown as DemoVenue[];
 export function findDemoVenue(slug: string) {
   return demoVenues.find((venue) => venue.slug === slug);
 }
-

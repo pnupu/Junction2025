@@ -295,8 +295,7 @@ function buildSummarySignals(
     eventGroup.city ??
     "Espoo · Hype Areena radius";
   const timeWindow =
-    eventGroup.targetTime ??
-    "Weekend afternoon & evening blocks (16:00-23:00)";
+    eventGroup.targetTime ?? "Weekend afternoon & evening blocks (16:00-23:00)";
   const vibeHint =
     stats.energyLabel === "high"
       ? "competitive-high energy hang"
@@ -412,7 +411,8 @@ function buildFallbackIdeas(
   const ranked = rankVenuesByBudget(summary.budgetTier, venues);
   const activity = ranked.activities[0];
   const dining = ranked.dining[0];
-  const wildcard = ranked.wildcards[0] ?? ranked.activities[1] ?? ranked.dining[1];
+  const wildcard =
+    ranked.wildcards[0] ?? ranked.activities[1] ?? ranked.dining[1];
 
   const ideas: AdvisorIdea[] = [];
 
@@ -492,7 +492,8 @@ function createIdeaFromVenue({
 }): AdvisorIdea {
   const availabilityLabel = venue.enriched?.availability?.[0]?.label;
   const bookingLink =
-    venue.enriched?.booking?.link ?? venue.enriched?.availability?.[0]?.bookingLink;
+    venue.enriched?.booking?.link ??
+    venue.enriched?.availability?.[0]?.bookingLink;
   const pricePerPerson =
     venue.enriched?.availability?.[0]?.pricePerPerson ??
     (venue.enriched?.availability?.[0]?.priceTotal &&
@@ -526,15 +527,14 @@ function createIdeaFromVenue({
       venue.description ??
       "Gather the crew for an easy win inside Hype Areena.",
     type,
-    priceLevel: (venue.enriched?.budgetLevel as AdvisorIdea["priceLevel"]) ?? "moderate",
-    duration:
-      venue.enriched?.durationMinutes?.standard
-        ? `${venue.enriched?.durationMinutes?.standard} min`
-        : "Approx. 90 min",
+    priceLevel:
+      (venue.enriched?.budgetLevel as AdvisorIdea["priceLevel"]) ?? "moderate",
+    duration: venue.enriched?.durationMinutes?.standard
+      ? `${venue.enriched?.durationMinutes?.standard} min`
+      : "Approx. 90 min",
     highlights,
     venueSlugs: [venue.slug],
     bookingLink,
     qrPayload: venue.enriched?.booking?.qrPayload,
   };
 }
-

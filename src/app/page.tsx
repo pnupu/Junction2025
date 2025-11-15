@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ProfileModal, getUserProfile, type UserProfile } from "@/components/profile-modal";
+import {
+  ProfileModal,
+  getUserProfile,
+  type UserProfile,
+} from "@/components/profile-modal";
 
 export default function Home() {
   const router = useRouter();
@@ -40,21 +44,25 @@ export default function Home() {
     );
   }
 
+  const profilePic = (
+    <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
+      <img
+        src="/happy-times.png"
+        alt=""
+        className="h-full w-full object-cover object-bottom"
+      />
+    </div>
+  );
+
   // Render ProfileModal if shown
   if (showProfileForm) {
     return (
       <>
         {/* Background page for desktop */}
         <main className="relative hidden min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12 md:flex">
-          <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
-            <img
-              src="/happy-times.png"
-              alt=""
-              className="h-full w-full object-cover object-bottom"
-            />
-          </div>
+          {profilePic}
         </main>
-        
+
         <ProfileModal
           isOpen={showProfileForm}
           onClose={() => setShowProfileForm(false)}
@@ -69,14 +77,7 @@ export default function Home() {
   if (showJoinForm) {
     return (
       <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
-        {/* Background image */}
-        <div className="absolute bottom-0 left-1/2 h-[55vh] w-full -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
-          <img
-            src="/happy-times.png"
-            alt=""
-            className="h-full w-full object-cover object-bottom"
-          />
-        </div>
+        {profilePic}
 
         {/* Content */}
         <div className="relative z-10 w-full max-w-md">
@@ -94,7 +95,7 @@ export default function Home() {
                 value={eventCode}
                 onChange={(e) => setEventCode(e.target.value.toUpperCase())}
                 placeholder="Event code"
-                className="h-12 rounded-xl border-2 border-white/30 bg-white/10 text-center text-lg uppercase text-white placeholder:text-white/50"
+                className="h-12 rounded-xl border-2 border-white/30 bg-white/10 text-center text-lg text-white uppercase placeholder:text-white/50"
               />
             </div>
 
@@ -122,19 +123,14 @@ export default function Home() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-start bg-[#029DE2] px-6 py-12">
       {/* Background image */}
-      <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
-        <img
-          src="/happy-times.png"
-          alt=""
-          className="h-full w-full object-cover object-bottom overflow-visible"
-        />
-      </div>
+      {profilePic}
 
       {/* Content */}
       <div className="relative z-10 flex w-full max-w-md flex-col items-center gap-16">
-        <h1 className="mt-32 text-center text-5xl font-bold leading-none text-white">
+        <h1 className="mt-32 text-center text-5xl leading-none font-bold text-white">
           Wolt Events
-        </h1>        <div className="w-full space-y-4">
+        </h1>{" "}
+        <div className="w-full space-y-4">
           {!hasProfile ? (
             <Button
               onClick={() => setShowProfileForm(true)}

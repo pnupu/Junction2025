@@ -113,4 +113,3 @@ seedVenues()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

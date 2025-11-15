@@ -84,9 +84,7 @@ const systemPrompt = [
 
 const openaiApiKey = env.OPENAI_API_KEY;
 
-const openaiClient = openaiApiKey
-  ? new OpenAI({ apiKey: openaiApiKey })
-  : null;
+const openaiClient = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
 
 export async function generateRecommendations(
   input: RecommendationRequest,
@@ -188,4 +186,3 @@ function buildPrompt({ name, city, selections }: RecommendationRequest) {
 
   return lines.join("\n");
 }
-

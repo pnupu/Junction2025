@@ -44,7 +44,10 @@ function isEventDetails(data: unknown): data is EventDetails {
 
   const prefsAreValid = candidate.preferences.every((pref) => {
     if (!pref || typeof pref !== "object") return false;
-    const prefCandidate = pref as { userIcon?: unknown; activityLevel?: unknown };
+    const prefCandidate = pref as {
+      userIcon?: unknown;
+      activityLevel?: unknown;
+    };
     return (
       typeof prefCandidate.userIcon === "string" &&
       typeof prefCandidate.activityLevel === "number"
@@ -81,13 +84,16 @@ export default function EventResultsPage() {
   const rawEventData: unknown = eventQuery.data;
   const eventData = isEventDetails(rawEventData) ? rawEventData : undefined;
 
-  const generateRecommendations = api.event.generateRecommendations.useMutation({
-    onSuccess: (data) => {
-      setRecommendations(data.recommendations as Recommendation[]);
-      setGroupStats(data.groupStats);
+  const generateRecommendations = api.event.generateRecommendations.useMutation(
+    {
+      onSuccess: (data) => {
+        setRecommendations(data.recommendations as Recommendation[]);
+        setGroupStats(data.groupStats);
+      },
     },
-  });
-  const { mutate: runRecommendations, isPending: isGenerating } = generateRecommendations;
+  );
+  const { mutate: runRecommendations, isPending: isGenerating } =
+    generateRecommendations;
 
   useEffect(() => {
     if (eventId && !isGenerating && recommendations.length === 0) {
@@ -153,7 +159,9 @@ export default function EventResultsPage() {
               <p className="text-slate-600">
                 {eventData?.city && `${eventData.city} • `}
                 {groupStats?.participantCount}{" "}
-                {groupStats?.participantCount === 1 ? "participant" : "participants"}
+                {groupStats?.participantCount === 1
+                  ? "participant"
+                  : "participants"}
               </p>
             </div>
             <div className="flex gap-2">
@@ -178,12 +186,18 @@ export default function EventResultsPage() {
           <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
             <DialogContent className="border-slate-200 bg-white text-slate-900 sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-center text-slate-900">Invite More People</DialogTitle>
+                <DialogTitle className="text-center text-slate-900">
+                  Invite More People
+                </DialogTitle>
               </DialogHeader>
               <div className="flex flex-col items-center gap-4 py-6">
                 <div className="rounded-2xl bg-white p-6 shadow-lg">
                   <QRCodeSVG
-                    value={typeof window !== "undefined" ? window.location.origin + `/event/${eventId}` : ""}
+                    value={
+                      typeof window !== "undefined"
+                        ? window.location.origin + `/event/${eventId}`
+                        : ""
+                    }
                     size={256}
                     level="H"
                     includeMargin={true}
@@ -220,8 +234,10 @@ export default function EventResultsPage() {
                 <div className="text-xs text-slate-600">Avg Activity</div>
               </div>
               <div className="text-center">
-                <div className="mb-1 text-3xl">{getPriceLevelEmoji(groupStats.popularMoneyPreference)}</div>
-                <div className="text-2xl font-semibold capitalize text-slate-900">
+                <div className="mb-1 text-3xl">
+                  {getPriceLevelEmoji(groupStats.popularMoneyPreference)}
+                </div>
+                <div className="text-2xl font-semibold text-slate-900 capitalize">
                   {groupStats.popularMoneyPreference}
                 </div>
                 <div className="text-xs text-slate-600">Budget</div>
@@ -245,13 +261,19 @@ export default function EventResultsPage() {
                   <div className="flex-1">
                     <div className="mb-2 flex items-center gap-3">
                       <span className="text-4xl">{getTypeEmoji(rec.type)}</span>
-                      <h3 className="text-2xl font-semibold text-slate-900">{rec.title}</h3>
+                      <h3 className="text-2xl font-semibold text-slate-900">
+                        {rec.title}
+                      </h3>
                     </div>
                     <p className="mb-4 text-slate-700">{rec.description}</p>
                   </div>
                   <div className="ml-4 flex flex-col items-end gap-2">
-                    <span className="text-3xl">{getPriceLevelEmoji(rec.priceLevel)}</span>
-                    <span className="text-sm text-slate-600">{rec.duration}</span>
+                    <span className="text-3xl">
+                      {getPriceLevelEmoji(rec.priceLevel)}
+                    </span>
+                    <span className="text-sm text-slate-600">
+                      {rec.duration}
+                    </span>
                   </div>
                 </div>
 
@@ -260,7 +282,7 @@ export default function EventResultsPage() {
                   {rec.highlights.map((highlight, hIdx) => (
                     <span
                       key={hIdx}
-                      className="rounded-full bg-white border border-slate-200 px-3 py-1 text-xs text-slate-700"
+                      className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700"
                     >
                       {highlight}
                     </span>
@@ -269,7 +291,7 @@ export default function EventResultsPage() {
 
                 {/* Action Button */}
                 <Button
-                  className="w-full rounded-xl bg-[#029DE2] text-white transition-all hover:bg-[#029DE2]/90 group-hover:scale-105"
+                  className="w-full rounded-xl bg-[#029DE2] text-white transition-all group-hover:scale-105 hover:bg-[#029DE2]/90"
                   size="lg"
                 >
                   Select This Option
@@ -288,7 +310,7 @@ export default function EventResultsPage() {
             <div className="flex gap-3">
               {eventData.preferences.map((pref, idx) => (
                 <div key={idx} className="flex flex-col items-center gap-1">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white border-2 border-slate-200 text-2xl">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-2xl">
                     {pref.userIcon}
                   </div>
                   <span className="text-xs text-slate-600">

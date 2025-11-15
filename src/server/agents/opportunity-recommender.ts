@@ -1,7 +1,4 @@
-import type {
-  InfrastructureVenue,
-  PrismaClient,
-} from "@prisma/client";
+import type { InfrastructureVenue, PrismaClient } from "@prisma/client";
 import OpenAI from "openai";
 import { z } from "zod";
 
@@ -56,10 +53,7 @@ export async function runOpportunityRecommendationAgent({
           }
         : undefined,
     },
-    orderBy: [
-      { priorityScore: "desc" },
-      { createdAt: "desc" },
-    ],
+    orderBy: [{ priorityScore: "desc" }, { createdAt: "desc" }],
     include: {
       venues: {
         include: {
@@ -129,8 +123,8 @@ export async function runOpportunityRecommendationAgent({
     }),
   );
 
-  const filtered = joined.filter(
-    (item): item is NonNullable<typeof item> => Boolean(item),
+  const filtered = joined.filter((item): item is NonNullable<typeof item> =>
+    Boolean(item),
   );
 
   return {
@@ -231,7 +225,6 @@ function buildRecommendationPrompt(
     "Crew profile:",
     ...profileLines,
     "",
-    "Select the top 3 opportunities and respond as JSON with shape {\"recommendations\":[{opportunitySlug,title,summary,whyItWorks,activationPlan,matchScore}]}",
+    'Select the top 3 opportunities and respond as JSON with shape {"recommendations":[{opportunitySlug,title,summary,whyItWorks,activationPlan,matchScore}]}',
   ].join("\n");
 }
-

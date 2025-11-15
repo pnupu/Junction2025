@@ -40,15 +40,16 @@ export default function StartPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-8 lg:py-16">
         <div className="flex flex-col gap-4 border-b border-slate-800 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">
+            <p className="text-xs tracking-[0.4em] text-slate-500 uppercase">
               Start a new plan
             </p>
             <h1 className="text-4xl font-semibold text-white">
               Rapid onboarding for your city crew
             </h1>
             <p className="max-w-2xl text-base text-slate-300">
-              Give us a name and gut-feel preferences. We’ll capture signals for the AI
-              engine and spin up a shareable space with QR + short code invites.
+              Give us a name and gut-feel preferences. We’ll capture signals for
+              the AI engine and spin up a shareable space with QR + short code
+              invites.
             </p>
           </div>
           <Link
@@ -68,10 +69,12 @@ export default function StartPage() {
               key={step.title}
               className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5"
             >
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+              <p className="text-xs tracking-[0.35em] text-slate-500 uppercase">
                 {step.tag}
               </p>
-              <h2 className="mt-2 text-2xl font-semibold text-white">{step.title}</h2>
+              <h2 className="mt-2 text-2xl font-semibold text-white">
+                {step.title}
+              </h2>
               <p className="mt-2 text-sm text-slate-400">{step.description}</p>
               <Link
                 href={step.href}
@@ -89,4 +92,3 @@ export default function StartPage() {
     </main>
   );
 }
-

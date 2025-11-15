@@ -12,9 +12,9 @@ import { env } from "@/env";
 const opportunityIdeaSchema = z.object({
   title: z.string(),
   summary: z.string(),
-  locationType: z.enum(["existing-venue", "pop-up", "hybrid"]).default(
-    "existing-venue",
-  ),
+  locationType: z
+    .enum(["existing-venue", "pop-up", "hybrid"])
+    .default("existing-venue"),
   locationDetails: z.string().optional(),
   opportunityType: z.string(),
   woltContribution: z.string(),
@@ -62,10 +62,7 @@ export async function runEventScoutAgent({
         mode: "insensitive",
       },
     },
-    orderBy: [
-      { woltPartnerTier: "desc" },
-      { updatedAt: "desc" },
-    ],
+    orderBy: [{ woltPartnerTier: "desc" }, { updatedAt: "desc" }],
     take: 8,
   });
 
@@ -112,8 +109,8 @@ export async function runEventScoutAgent({
   );
 
   return {
-    opportunities: saved.filter(
-      (record): record is EventOpportunity => Boolean(record),
+    opportunities: saved.filter((record): record is EventOpportunity =>
+      Boolean(record),
     ),
     meta: {
       total: saved.length,
@@ -181,11 +178,7 @@ async function upsertOpportunity(
       ? idea.partnerVenues
       : [venue.name],
     keywords: Array.from(
-      new Set([
-        venue.type,
-        venue.city,
-        ...(idea.keywords ?? []),
-      ]),
+      new Set([venue.type, venue.city, ...(idea.keywords ?? [])]),
     ).slice(0, 10),
     estimatedBudget: idea.estimatedBudget,
     idealUseCase: idea.idealUseCase,
@@ -231,9 +224,7 @@ async function linkOpportunityToVenue(
   });
 }
 
-function buildFallbackIdeas(
-  venues: InfrastructureVenue[],
-): OpportunityIdea[] {
+function buildFallbackIdeas(venues: InfrastructureVenue[]): OpportunityIdea[] {
   return venues.slice(0, 3).map((venue, index) => ({
     title: `${venue.name} takeover`,
     summary: `Activate ${venue.name} with a Wolt-powered ${venue.type.replace(/_/g, " ")} program.`,
@@ -288,4 +279,3 @@ function createSlug(text: string) {
     .replace(/(^-|-$)+/g, "")
     .slice(0, 60);
 }
-

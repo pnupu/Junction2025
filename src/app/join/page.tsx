@@ -9,15 +9,16 @@ export default function JoinPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-8 lg:py-16">
         <div className="flex flex-col gap-4 border-b border-slate-800 pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">
+            <p className="text-xs tracking-[0.4em] text-slate-500 uppercase">
               Join an existing group
             </p>
             <h1 className="text-4xl font-semibold text-white">
               Drop a code or scan the QR to sync instantly
             </h1>
             <p className="max-w-3xl text-base text-slate-300">
-              Every crew gets a short invite code and QR. Enter it here to answer the same
-              preference questions and watch the experience feed adapt in real time.
+              Every crew gets a short invite code and QR. Enter it here to
+              answer the same preference questions and watch the experience feed
+              adapt in real time.
             </p>
           </div>
           <Link
@@ -30,9 +31,7 @@ export default function JoinPage() {
             Start a new plan
           </Link>
         </div>
-
       </div>
     </main>
   );
 }
-

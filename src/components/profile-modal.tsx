@@ -29,10 +29,19 @@ interface ProfileModalProps {
   showAsModal?: boolean; // If false, shows full screen on mobile
 }
 
-export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: ProfileModalProps) {
+export function ProfileModal({
+  isOpen,
+  onClose,
+  onSave,
+  showAsModal = true,
+}: ProfileModalProps) {
   const [name, setName] = useState("");
-  const [activityPreference, setActivityPreference] = useState<UserProfile["activityPreference"] | null>(null);
-  const [foodPreference, setFoodPreference] = useState<UserProfile["foodPreference"] | null>(null);
+  const [activityPreference, setActivityPreference] = useState<
+    UserProfile["activityPreference"] | null
+  >(null);
+  const [foodPreference, setFoodPreference] = useState<
+    UserProfile["foodPreference"] | null
+  >(null);
 
   // Load existing profile if available
   useEffect(() => {
@@ -53,13 +62,13 @@ export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: Pr
 
   const handleSave = () => {
     if (!name || !activityPreference || !foodPreference) return;
-    
+
     const profile: UserProfile = {
       name,
       activityPreference,
       foodPreference,
     };
-    
+
     sessionStorage.setItem("userProfile", JSON.stringify(profile));
     onSave(profile);
   };
@@ -68,9 +77,7 @@ export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: Pr
 
   const formContent = (
     <div className="flex flex-col gap-8">
-      <h1 className="text-4xl font-semibold text-[#0F172B]">
-        Profile
-      </h1>
+      <h1 className="text-4xl font-semibold text-[#0F172B]">Profile</h1>
 
       {/* Name Input */}
       <div>
@@ -93,14 +100,11 @@ export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: Pr
             <button
               key={option.id}
               onClick={() => setActivityPreference(option.id)}
-              className={`
-                flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all
-                ${
-                  activityPreference === option.id
-                    ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
-                    : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
-                }
-              `}
+              className={`flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all ${
+                activityPreference === option.id
+                  ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
+                  : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
+              } `}
             >
               <span className="text-xl font-semibold">{option.emoji}</span>
             </button>
@@ -118,14 +122,11 @@ export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: Pr
             <button
               key={option.id}
               onClick={() => setFoodPreference(option.id)}
-              className={`
-                flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all
-                ${
-                  foodPreference === option.id
-                    ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
-                    : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
-                }
-              `}
+              className={`flex grow basis-0 items-center justify-center rounded-xl border-[1.5px] px-4 py-8 transition-all ${
+                foodPreference === option.id
+                  ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
+                  : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
+              } `}
             >
               <span className="text-xl font-semibold">{option.emoji}</span>
             </button>
@@ -152,11 +153,11 @@ export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: Pr
       <>
         {/* Desktop modal */}
         <div className="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4 md:flex">
-          <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white px-5 py-6 shadow-xl">
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white px-5 py-6 shadow-xl">
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute right-4 top-4 text-[#62748E] hover:text-[#0F172B]"
+              className="absolute top-4 right-4 text-[#62748E] hover:text-[#0F172B]"
             >
               ✕
             </button>
@@ -190,10 +191,10 @@ export function ProfileModal({ isOpen, onClose, onSave, showAsModal = true }: Pr
 
 export function getUserProfile(): UserProfile | null {
   if (typeof window === "undefined") return null;
-  
+
   const profileStr = sessionStorage.getItem("userProfile");
   if (!profileStr) return null;
-  
+
   try {
     return JSON.parse(profileStr) as UserProfile;
   } catch (e) {

@@ -4,4 +4,3 @@ export declare const env: {
   OPENAI_MODEL: string;
   NODE_ENV: "development" | "test" | "production";
 };
-

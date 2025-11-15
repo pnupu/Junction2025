@@ -71,7 +71,10 @@ export function AgentConsole({ cityOptions }: { cityOptions: CityOption[] }) {
 
   const handleScoutRun = () => {
     if (!selectedProfile) return;
-    const mergedNotes = [selectedProfile.notes, notes].filter(Boolean).join(" ").trim();
+    const mergedNotes = [selectedProfile.notes, notes]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
     scoutMutation.mutate({
       city: selectedProfile.city,
       country: selectedProfile.country,
@@ -89,13 +92,14 @@ export function AgentConsole({ cityOptions }: { cityOptions: CityOption[] }) {
     <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
       <Card className="border-slate-800 bg-slate-900/60">
         <CardHeader>
-          <CardDescription className="text-xs uppercase tracking-[0.3em] text-slate-400">
+          <CardDescription className="text-xs tracking-[0.3em] text-slate-400 uppercase">
             Agent 01
           </CardDescription>
           <CardTitle>Scout city opportunities</CardTitle>
           <CardDescription>
-            Runs the Event Scout agent per city profile. Populates the `EventOpportunity`
-            table with structured concepts ready for downstream matching.
+            Runs the Event Scout agent per city profile. Populates the
+            `EventOpportunity` table with structured concepts ready for
+            downstream matching.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -156,13 +160,13 @@ export function AgentConsole({ cityOptions }: { cityOptions: CityOption[] }) {
 
       <Card className="border-slate-800 bg-slate-900/60">
         <CardHeader>
-          <CardDescription className="text-xs uppercase tracking-[0.3em] text-slate-400">
+          <CardDescription className="text-xs tracking-[0.3em] text-slate-400 uppercase">
             Agent 02
           </CardDescription>
           <CardTitle>Match stored opportunities</CardTitle>
           <CardDescription>
-            Pulls the best saved ideas for a crew profile. Useful for QA before wiring
-            into the onboarding flow.
+            Pulls the best saved ideas for a crew profile. Useful for QA before
+            wiring into the onboarding flow.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -257,11 +261,11 @@ export function AgentConsole({ cityOptions }: { cityOptions: CityOption[] }) {
             )}
           </div>
           <p>
-            Showing {recommendationsQuery.data?.recommendations.length ?? 0} matches
+            Showing {recommendationsQuery.data?.recommendations.length ?? 0}{" "}
+            matches
           </p>
         </CardFooter>
       </Card>
     </div>
   );
 }
-

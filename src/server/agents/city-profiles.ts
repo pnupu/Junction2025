@@ -11,7 +11,11 @@ export const CITY_SCOUT_PROFILES: CityScoutProfile[] = [
     slug: "helsinki-core",
     city: "Helsinki",
     country: "Finland",
-    focusAreas: ["tennis courts", "floating saunas", "design district rooftops"],
+    focusAreas: [
+      "tennis courts",
+      "floating saunas",
+      "design district rooftops",
+    ],
     includeExistingSpaces: true,
     notes:
       "Highlight Wolt Market drops at Taivallahti tennis courts, Löyly sea decks, and rooftop sauna crawls.",
@@ -29,4 +33,3 @@ export const CITY_SCOUT_PROFILES: CityScoutProfile[] = [
 ];
 
 export const DEFAULT_SCOUT_CITY = CITY_SCOUT_PROFILES[0];
-

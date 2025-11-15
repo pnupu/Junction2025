@@ -9,7 +9,7 @@ export const eventRouter = createTRPCRouter({
     // Generate a unique short code
     let inviteCode: string;
     let isUnique = false;
-    
+
     while (!isUnique) {
       inviteCode = generateShortCode(6); // 6-character code
       const existing = await ctx.db.eventGroup.findUnique({

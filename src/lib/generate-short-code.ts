@@ -4,4 +4,3 @@ export function generateShortCode(length = 3) {
     .map(() => alphabet[Math.floor(Math.random() * alphabet.length)])
     .join("");
 }
-
