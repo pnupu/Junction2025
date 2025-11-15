@@ -486,6 +486,25 @@ export const eventRouter = createTRPCRouter({
       return myVotes;
     }),
 
+  // Close voting for an event group
+  closeVoting: publicProcedure
+    .input(
+      z.object({
+        groupId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Update event group status to "completed" to indicate voting is closed
+      const eventGroup = await ctx.db.eventGroup.update({
+        where: { id: input.groupId },
+        data: {
+          status: "completed",
+        },
+      });
+
+      return { success: true, status: eventGroup.status };
+    }),
+
   // Add or update preferences for an event
   addPreferences: publicProcedure
     .input(

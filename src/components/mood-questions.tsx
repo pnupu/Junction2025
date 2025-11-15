@@ -244,13 +244,13 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
                 key={idx}
                 type="button"
                 onClick={() => onChange(option)}
-                className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                className={`min-w-0 flex-1 max-w-[100px] rounded-lg px-2 py-3 text-xs font-medium transition-all ${
                   isSelected
                     ? "bg-[#029DE2] text-white shadow-md"
                     : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
                 }`}
               >
-                {option}
+                <span className="block truncate text-center">{option}</span>
               </button>
             );
           })}
