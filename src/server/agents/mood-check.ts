@@ -22,7 +22,7 @@ const questionSchema = z.object({
   prompt: z.string(),
   type: z.enum(["scale", "choice"]),
   signalKey: z.string(),
-  options: z.array(z.string()).optional(),
+  options: z.array(z.string()).max(3).optional(),
   suggestedResponse: z.string().optional(),
   reason: z.string().optional(),
 });
@@ -254,7 +254,7 @@ export async function runMoodCheckAgent(
         {
           role: "system",
           content:
-            "Wolt Advisor Mood Agent. Generate 1-3 concise questions to match groups to venues. ALL questions MUST be multiple choice - use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Provide options array for all questions. For preference questions (e.g., 'active or laid-back'), use 'choice' type with descriptive options like ['More active', 'Laid-back']. Use slider/emoji/short-choice formats. Analyze venue differences and create natural questions. NEVER mention venue names/types. Each question must be DISTINCTLY different - varied vocabulary, different structures. Cover different aspects (atmosphere, time, hunger, social).",
+            "Wolt Advisor Mood Agent. Generate 1-3 concise questions to match groups to venues. ALL questions MUST be multiple choice - use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Provide options array for all questions with a MAXIMUM of 3 options per question. For preference questions (e.g., 'active or laid-back'), use 'choice' type with descriptive options like ['More active', 'Laid-back']. Use slider/emoji/short-choice formats. Analyze venue differences and create natural questions. NEVER mention venue names/types. Each question must be DISTINCTLY different - varied vocabulary, different structures. Cover different aspects (atmosphere, time, hunger, social).",
         },
         {
           role: "user",
@@ -275,7 +275,7 @@ export async function runMoodCheckAgent(
     const moodPayload: unknown = JSON.parse(raw);
     const parsed = moodAgentResponseSchema.parse(moodPayload);
 
-    // Safety check: Ensure all questions have options
+    // Safety check: Ensure all questions have options and limit to max 3
     const validatedQuestions = parsed.questions.map((q) => {
       // Ensure scale and choice questions have options
       if (
@@ -288,6 +288,10 @@ export async function runMoodCheckAgent(
         } else {
           q.options = ["Option 1", "Option 2"];
         }
+      }
+      // Limit options to maximum of 3
+      if (q.options && q.options.length > 3) {
+        q.options = q.options.slice(0, 3);
       }
       return q;
     });
@@ -504,7 +508,7 @@ function buildPromptPayload(input: MoodAgentInput) {
       instructions: [
         "Keep tone playful and short.",
         "Return 1-3 questions that help narrow down which venues would be best for this group.",
-        "CRITICAL: ALL questions MUST be multiple choice. Use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Always provide an options array with at least 2 choices. For preference questions (choosing between options), use 'choice' type with descriptive option labels, NOT binary yes/no.",
+        "CRITICAL: ALL questions MUST be multiple choice. Use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Always provide an options array with at least 2 choices and a MAXIMUM of 3 options per question. For preference questions (choosing between options), use 'choice' type with descriptive option labels, NOT binary yes/no.",
         "VARIETY IS CRITICAL: Each question must be completely different from the others. Use different vocabulary, different question structures, and cover different aspects. Avoid repeating similar words or phrases across questions.",
         "Question structure variety: Mix scales and multiple choice formats. Don't use the same 'X or Y' pattern for multiple questions. For preference questions, use 'choice' type with descriptive options (e.g., ['More active', 'Laid-back']), not binary yes/no.",
         "Vocabulary variety: If one question uses 'cozy', don't use 'cozy' again. If one uses 'energetic', use different energy-related terms in other questions.",
