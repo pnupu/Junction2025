@@ -48,7 +48,7 @@ export function ProfileModal({
   // Load existing profile if available
   useEffect(() => {
     if (isOpen) {
-      const existingProfile = sessionStorage.getItem("userProfile");
+      const existingProfile = localStorage.getItem("userProfile");
       if (existingProfile) {
         try {
           const profile = JSON.parse(existingProfile) as UserProfile;
@@ -84,7 +84,7 @@ export function ProfileModal({
       } catch (error) {
         console.log("Location permission denied or unavailable", error);
         // Continue without location - try to preserve old location if it exists
-        const existingProfile = sessionStorage.getItem("userProfile");
+        const existingProfile = localStorage.getItem("userProfile");
         if (existingProfile) {
           try {
             const oldProfile = JSON.parse(existingProfile) as UserProfile;
@@ -105,7 +105,7 @@ export function ProfileModal({
       longitude,
     };
 
-    sessionStorage.setItem("userProfile", JSON.stringify(profile));
+    localStorage.setItem("userProfile", JSON.stringify(profile));
     onSave(profile);
   };
 
@@ -228,7 +228,7 @@ export function ProfileModal({
 export function getUserProfile(): UserProfile | null {
   if (typeof window === "undefined") return null;
 
-  const profileStr = sessionStorage.getItem("userProfile");
+  const profileStr = localStorage.getItem("userProfile");
   if (!profileStr) return null;
 
   try {
