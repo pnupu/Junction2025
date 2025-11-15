@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,11 +20,11 @@ export default function Home() {
   const [eventCode, setEventCode] = useState("");
 
   useEffect(() => {
-    const profile = getUserProfile();
-    setHasProfile(!!profile);
+    const _profile = getUserProfile();
+    setHasProfile(!!_profile);
   }, []);
 
-  const handleProfileSave = (profile: UserProfile) => {
+  const handleProfileSave = (_profile: UserProfile) => {
     setHasProfile(true);
     setShowProfileForm(false);
   };
@@ -46,10 +47,12 @@ export default function Home() {
 
   const profilePic = (
     <div className="absolute bottom-0 left-1/2 h-[55vh] w-full max-w-[800px] -translate-x-1/2 md:h-[50vh] lg:h-[55vh]">
-      <img
+      <Image
         src="/happy-times.png"
         alt=""
-        className="h-full w-full object-cover object-bottom"
+        fill
+        className="object-cover object-bottom"
+        priority
       />
     </div>
   );

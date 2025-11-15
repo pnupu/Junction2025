@@ -53,7 +53,7 @@ export function ProfileModal({
           setName(profile.name);
           setActivityPreference(profile.activityPreference);
           setFoodPreference(profile.foodPreference);
-        } catch (e) {
+        } catch (_e) {
           // Invalid profile, ignore
         }
       }
@@ -197,7 +197,7 @@ export function getUserProfile(): UserProfile | null {
 
   try {
     return JSON.parse(profileStr) as UserProfile;
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 }

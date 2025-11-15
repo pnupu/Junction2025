@@ -122,7 +122,7 @@ export default function EventPage() {
         autoJoinEvent(userProfile, sessionId);
       }
     }
-  }, [eventData, userProfile, hasJoined, sessionId, eventIdOrCode]);
+  }, [eventData, userProfile, hasJoined, sessionId, eventIdOrCode, autoJoinEvent]);
 
   const handleProfileSave = (profile: UserProfile) => {
     setUserProfile(profile);
