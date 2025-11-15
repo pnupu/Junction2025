@@ -445,23 +445,6 @@ export default function EventPage() {
 
     return Array.from(locationMap.values());
   }, [participantLocations]);
-
-  // Check if recommendations are being generated or have been generated, and redirect
-  useEffect(() => {
-    if (eventData) {
-      const status = (eventData as { status?: string }).status;
-      const isGenerated =
-        (eventData as { isGenerated?: boolean }).isGenerated ??
-        status === "generated";
-      const isGenerating = status === "generating";
-
-      // Redirect to results page if generating or generated
-      if ((isGenerating || isGenerated) && eventData.id) {
-        router.push(`/event/${eventData.id}/results`);
-      }
-    }
-  }, [eventData, router]);
-
   // Sort participants by createdAt to ensure consistent ordering
   const participants = [...(eventData?.preferences ?? [])].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
@@ -1027,8 +1010,7 @@ export default function EventPage() {
 
           {/* Creator Action Button - Only visible to event creator and when ideas haven't been generated */}
           {isCreator &&
-          hasJoined &&
-          eventStatus === "ready_to_generate" ? (
+          hasJoined && eventStatus === "collecting_preferences" ? (
             <div className="mt-8">
               <Button
                 onClick={handleGenerateEvent}
