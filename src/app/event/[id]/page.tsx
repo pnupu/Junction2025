@@ -378,7 +378,6 @@ export default function EventPage() {
   // Sort participants by createdAt to ensure consistent ordering
   const participants = [...(eventData.preferences ?? [])].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
   const participantCount = participants.length;
 
@@ -421,7 +420,7 @@ export default function EventPage() {
         {/* Inline Map Preview - Full Width */}
         {participantLocations.length > 0 && leafletLoaded && L ? (
           <div className="relative h-64 w-full overflow-hidden">
-            <button
+            <div
               onClick={() => setShowMapModal(true)}
               className="relative block h-full w-full cursor-pointer"
             >
@@ -530,7 +529,7 @@ export default function EventPage() {
                   ))}
                 </MapContainer>
               </div>
-            </button>
+            </div>
           </div>
         ) : (
           <div className="flex h-64 w-full items-center justify-center bg-slate-100">
@@ -699,8 +698,9 @@ export default function EventPage() {
                         }`}
                       ></div>
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
               </div>
             </>
           )}
