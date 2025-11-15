@@ -11,7 +11,6 @@ import type { FilteredVenue } from "@/server/agents/venue-filter";
 import {
   type GroupStatsExtended,
   type PreferenceSummary,
-  computeGroupStats,
 } from "@/server/agents/advisor-pipeline";
 
 const openaiClient =
@@ -68,7 +67,7 @@ function sanitizeSchemaForOpenAI(
   if (sanitized.type === "array" || sanitized.items) {
     sanitized.type = "array";
     if (sanitized.items && typeof sanitized.items === "object") {
-      sanitized.items = sanitizeSchemaForOpenAI(sanitized.items);
+      sanitized.items = sanitizeSchemaForOpenAI(sanitized.items as JsonSchema);
     }
   }
   
@@ -103,7 +102,7 @@ export async function generateEventRecommendations(
   }>;
   debugNotes?: string[];
 }> {
-  const { eventGroup, filteredVenues, summary, stats, moodResponses } = input;
+  const { filteredVenues, summary, stats, moodResponses } = input;
 
   if (filteredVenues.length === 0) {
     return {
@@ -205,7 +204,7 @@ export async function generateEventRecommendations(
 function generateFallbackRecommendations(
   filteredVenues: FilteredVenue[],
   stats: GroupStatsExtended,
-  moodResponses: Record<string, unknown>,
+  _moodResponses: Record<string, unknown>,
 ): {
   recommendations: Array<{
     venueId: string;

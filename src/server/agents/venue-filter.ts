@@ -1,4 +1,4 @@
-import type { InfrastructureVenue, EventGroupPreference, UserPreference } from "@prisma/client";
+import type { InfrastructureVenue, EventGroupPreference, UserPreference, Prisma } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
 import { calculateDistance } from "@/lib/utils";
 
@@ -50,7 +50,7 @@ export async function filterInfrastructureVenues(
   }
 
   // Build query filters
-  const where: Parameters<typeof db.infrastructureVenue.findMany>[0]["where"] = {};
+  const where: Prisma.InfrastructureVenueWhereInput = {};
 
   if (city) {
     where.city = {

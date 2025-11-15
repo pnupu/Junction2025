@@ -105,7 +105,7 @@ export default function EventResultsPage() {
   const generateRecommendations = api.event.generateRecommendations.useMutation(
     {
       onSuccess: (data) => {
-        setRecommendations(data.recommendations as Recommendation[]);
+        setRecommendations(data.recommendations as unknown as Recommendation[]);
         setGroupStats(data.groupStats);
       },
     },

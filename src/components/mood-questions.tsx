@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import type { MoodQuestion } from "@/server/agents/mood-check";
 
@@ -288,56 +287,6 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
     );
   }
 
-  if (type === "binary") {
-    return (
-      <div>
-        <label className="mb-3 block text-sm font-medium text-white">
-          {prompt}
-        </label>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => onChange("yes")}
-            className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-              value === "yes"
-                ? "bg-white text-[#029DE2] shadow-md"
-                : "bg-white/20 text-white hover:bg-white/30"
-            }`}
-          >
-            Yes
-          </button>
-          <button
-            type="button"
-            onClick={() => onChange("no")}
-            className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-              value === "no"
-                ? "bg-white text-[#029DE2] shadow-md"
-                : "bg-white/20 text-white hover:bg-white/30"
-            }`}
-          >
-            No
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (type === "text") {
-    return (
-      <div>
-        <label className="mb-3 block text-sm font-medium text-white">
-          {prompt}
-        </label>
-        <Input
-          type="text"
-          value={value as string | undefined}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Type your answer..."
-          className="bg-white/20 text-white placeholder:text-white/50 focus:bg-white/30"
-        />
-      </div>
-    );
-  }
 
   return null;
 }
