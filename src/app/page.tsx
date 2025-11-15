@@ -91,18 +91,15 @@ export default function Home() {
           <h1
             className={`mt-32 text-center text-5xl leading-none font-bold ${hasProfile ? "text-[#029DE2]" : "text-white"}`}
           >
-            Let&apos;s do something together 
+            Let&apos;s do something together
           </h1>
-          
         ) : (
           <Image
             src="/wolt_meet.svg"
             alt="Wolt Meet"
             width={300}
             height={51}
-            className={
-              hasProfile ? "brightness-0 saturate-100" : "brightness-0 invert"
-            }
+            className={"mt-16"}
             priority
           />
         )}{" "}

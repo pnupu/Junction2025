@@ -230,9 +230,13 @@ export default function EventPage() {
     // Replace history state to prevent going back to /create
     if (typeof window !== "undefined" && window.history.state) {
       window.history.replaceState(
-        { ...window.history.state, as: `/event/${eventIdOrCode}`, url: `/event/${eventIdOrCode}` },
+        {
+          ...window.history.state,
+          as: `/event/${eventIdOrCode}`,
+          url: `/event/${eventIdOrCode}`,
+        },
         "",
-        `/event/${eventIdOrCode}`
+        `/event/${eventIdOrCode}`,
       );
     }
   }, [eventIdOrCode]);
@@ -368,7 +372,6 @@ export default function EventPage() {
         status === "generated";
       const isGenerating = status === "generating";
 
-
       // Redirect to results page if generating or generated
       if ((isGenerating || isGenerated) && eventData.id) {
         router.push(`/event/${eventData.id}/results`);
@@ -430,7 +433,7 @@ export default function EventPage() {
         <div className="absolute top-4 left-4 z-20">
           <button
             onClick={() => router.push("/")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:scale-110"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-white"
             aria-label="Go to home"
           >
             <svg
@@ -696,43 +699,45 @@ export default function EventPage() {
                       ? currentEnergy
                       : `Activity level: ${participant.activityLevel}/5`;
 
-                // Check if participant has answered mood questions
-                const hasAnsweredMoodQuestions =
-                  moodResponses &&
-                  typeof moodResponses === "object" &&
-                  !Array.isArray(moodResponses) &&
-                  Object.keys(moodResponses).length > 0;
+                  // Check if participant has answered mood questions
+                  const hasAnsweredMoodQuestions =
+                    moodResponses &&
+                    typeof moodResponses === "object" &&
+                    !Array.isArray(moodResponses) &&
+                    Object.keys(moodResponses).length > 0;
 
-                // Determine task status circles (3 circles showing progress)
-                const isCreatorOfEvent = idx === 0; // First participant is creator
+                  // Determine task status circles (3 circles showing progress)
+                  const isCreatorOfEvent = idx === 0; // First participant is creator
 
-                return (
-                  <div
-                    key={participant.id ?? participant.sessionId ?? idx}
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-3"
-                  >
-                    <p className="text-base text-[#0F172B]">
-                      {isCreatorOfEvent && "👑 "}
-                      {participant.userName ?? "Anonymous"}
-                    </p>
-                    <div className="flex gap-1">
-                      {/* Task status indicators - 3 circles */}
-                      <div
-                        className={`h-3 w-3 rounded-full border-[1.5px] border-[#029DE2] ${
-                          hasAnsweredMoodQuestions ? "bg-[#029DE2]" : "bg-white"
-                        }`}
-                      />
-                      <div
-                        className={`h-3 w-3 animate-ping rounded-full opacity-75 ${
-                          hasAnsweredMoodQuestions
-                            ? "bg-green-400"
-                            : "bg-yellow-400"
-                        }`}
-                      ></div>
+                  return (
+                    <div
+                      key={participant.id ?? participant.sessionId ?? idx}
+                      className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-3"
+                    >
+                      <p className="text-base text-[#0F172B]">
+                        {isCreatorOfEvent && "👑 "}
+                        {participant.userName ?? "Anonymous"}
+                      </p>
+                      <div className="flex gap-1">
+                        {/* Task status indicators - 3 circles */}
+                        <div
+                          className={`h-3 w-3 rounded-full border-[1.5px] border-[#029DE2] ${
+                            hasAnsweredMoodQuestions
+                              ? "bg-[#029DE2]"
+                              : "bg-white"
+                          }`}
+                        />
+                        <div
+                          className={`h-3 w-3 animate-ping rounded-full opacity-75 ${
+                            hasAnsweredMoodQuestions
+                              ? "bg-green-400"
+                              : "bg-yellow-400"
+                          }`}
+                        ></div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
               </div>
             </>
           )}
