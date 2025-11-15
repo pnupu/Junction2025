@@ -36,7 +36,7 @@ export function GenerateUsersButton({
         throw new Error("Failed to load demo users");
       }
       
-      const demoUsers: DemoUser[] = await response.json();
+      const demoUsers: DemoUser[] = await response.json() as DemoUser[];
       
       // Add all demo users to the event in parallel
       await onAddUsers(demoUsers);
