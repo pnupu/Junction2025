@@ -89,7 +89,6 @@ export function GroupStepPanel() {
     [normalizedSelections],
   );
 
-  const createCrew = api.onboarding.createCrew.useMutation();
   const payload = useMemo(
     () => ({
       name: name || "City Explorer",
@@ -100,9 +99,9 @@ export function GroupStepPanel() {
 
   useEffect(() => {
     if (!hasSelectionData) return;
-    if (createCrew.isPending || createCrew.isSuccess) return;
-    createCrew.mutate(payload);
-  }, [createCrew, hasSelectionData, payload]);
+    if (createEvent.isPending || createEvent.isSuccess) return;
+    createEvent.mutate(payload);
+  }, [createEvent, hasSelectionData, payload]);
 
   const [origin, setOrigin] = useState("");
   useEffect(() => {
@@ -112,7 +111,7 @@ export function GroupStepPanel() {
   }, []);
 
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
-  const inviteData = createCrew.data;
+  const inviteData = createEvent.data;
   const groupName =
     inviteData?.groupName ?? (name ? `${name.split(" ")[0]}'s City Crew` : "New City Crew");
   const shareUrl = inviteData ? `${origin}${inviteData.joinPath}` : "";

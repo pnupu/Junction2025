@@ -258,14 +258,28 @@ exports.Prisma.EventGroupScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  joinCode: 'joinCode',
+  inviteCode: 'inviteCode',
+  creatorId: 'creatorId',
   targetDate: 'targetDate',
   targetTime: 'targetTime',
   budgetRange: 'budgetRange',
   preferredLocation: 'preferredLocation',
-  selectionSnapshot: 'selectionSnapshot',
+  city: 'city',
   status: 'status',
-  createdById: 'createdById',
+  isGenerated: 'isGenerated',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventGroupPreferenceScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  userName: 'userName',
+  userIcon: 'userIcon',
+  moneyPreference: 'moneyPreference',
+  activityLevel: 'activityLevel',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -356,6 +370,7 @@ exports.Prisma.ModelName = {
   OpportunityVenueRef: 'OpportunityVenueRef',
   EventCategory: 'EventCategory',
   EventGroup: 'EventGroup',
+  EventGroupPreference: 'EventGroupPreference',
   EventGroupParticipant: 'EventGroupParticipant',
   EventGroupEvent: 'EventGroupEvent',
   EventRecommendation: 'EventRecommendation',

@@ -64,6 +64,11 @@ export type EventCategory = $Result.DefaultSelection<Prisma.$EventCategoryPayloa
  */
 export type EventGroup = $Result.DefaultSelection<Prisma.$EventGroupPayload>
 /**
+ * Model EventGroupPreference
+ * 
+ */
+export type EventGroupPreference = $Result.DefaultSelection<Prisma.$EventGroupPreferencePayload>
+/**
  * Model EventGroupParticipant
  * 
  */
@@ -301,6 +306,16 @@ export class PrismaClient<
     * ```
     */
   get eventGroup(): Prisma.EventGroupDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.eventGroupPreference`: Exposes CRUD operations for the **EventGroupPreference** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EventGroupPreferences
+    * const eventGroupPreferences = await prisma.eventGroupPreference.findMany()
+    * ```
+    */
+  get eventGroupPreference(): Prisma.EventGroupPreferenceDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.eventGroupParticipant`: Exposes CRUD operations for the **EventGroupParticipant** model.
@@ -792,6 +807,7 @@ export namespace Prisma {
     OpportunityVenueRef: 'OpportunityVenueRef',
     EventCategory: 'EventCategory',
     EventGroup: 'EventGroup',
+    EventGroupPreference: 'EventGroupPreference',
     EventGroupParticipant: 'EventGroupParticipant',
     EventGroupEvent: 'EventGroupEvent',
     EventRecommendation: 'EventRecommendation',
@@ -814,7 +830,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "userPreference" | "category" | "venue" | "event" | "eventOpportunity" | "infrastructureVenue" | "opportunityVenueRef" | "eventCategory" | "eventGroup" | "eventGroupParticipant" | "eventGroupEvent" | "eventRecommendation" | "userFeedback"
+      modelProps: "user" | "userPreference" | "category" | "venue" | "event" | "eventOpportunity" | "infrastructureVenue" | "opportunityVenueRef" | "eventCategory" | "eventGroup" | "eventGroupPreference" | "eventGroupParticipant" | "eventGroupEvent" | "eventRecommendation" | "userFeedback"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1558,6 +1574,80 @@ export namespace Prisma {
           }
         }
       }
+      EventGroupPreference: {
+        payload: Prisma.$EventGroupPreferencePayload<ExtArgs>
+        fields: Prisma.EventGroupPreferenceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EventGroupPreferenceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EventGroupPreferenceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>
+          }
+          findFirst: {
+            args: Prisma.EventGroupPreferenceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EventGroupPreferenceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>
+          }
+          findMany: {
+            args: Prisma.EventGroupPreferenceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>[]
+          }
+          create: {
+            args: Prisma.EventGroupPreferenceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>
+          }
+          createMany: {
+            args: Prisma.EventGroupPreferenceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EventGroupPreferenceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>[]
+          }
+          delete: {
+            args: Prisma.EventGroupPreferenceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>
+          }
+          update: {
+            args: Prisma.EventGroupPreferenceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>
+          }
+          deleteMany: {
+            args: Prisma.EventGroupPreferenceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EventGroupPreferenceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EventGroupPreferenceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>[]
+          }
+          upsert: {
+            args: Prisma.EventGroupPreferenceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventGroupPreferencePayload>
+          }
+          aggregate: {
+            args: Prisma.EventGroupPreferenceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEventGroupPreference>
+          }
+          groupBy: {
+            args: Prisma.EventGroupPreferenceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EventGroupPreferenceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EventGroupPreferenceCountArgs<ExtArgs>
+            result: $Utils.Optional<EventGroupPreferenceCountAggregateOutputType> | number
+          }
+        }
+      }
       EventGroupParticipant: {
         payload: Prisma.$EventGroupParticipantPayload<ExtArgs>
         fields: Prisma.EventGroupParticipantFieldRefs
@@ -1960,6 +2050,7 @@ export namespace Prisma {
     opportunityVenueRef?: OpportunityVenueRefOmit
     eventCategory?: EventCategoryOmit
     eventGroup?: EventGroupOmit
+    eventGroupPreference?: EventGroupPreferenceOmit
     eventGroupParticipant?: EventGroupParticipantOmit
     eventGroupEvent?: EventGroupEventOmit
     eventRecommendation?: EventRecommendationOmit
@@ -2305,12 +2396,14 @@ export namespace Prisma {
     participants: number
     events: number
     recommendations: number
+    preferences: number
   }
 
   export type EventGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     participants?: boolean | EventGroupCountOutputTypeCountParticipantsArgs
     events?: boolean | EventGroupCountOutputTypeCountEventsArgs
     recommendations?: boolean | EventGroupCountOutputTypeCountRecommendationsArgs
+    preferences?: boolean | EventGroupCountOutputTypeCountPreferencesArgs
   }
 
   // Custom InputTypes
@@ -2343,6 +2436,13 @@ export namespace Prisma {
    */
   export type EventGroupCountOutputTypeCountRecommendationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EventRecommendationWhereInput
+  }
+
+  /**
+   * EventGroupCountOutputType without action
+   */
+  export type EventGroupCountOutputTypeCountPreferencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventGroupPreferenceWhereInput
   }
 
 
@@ -13242,13 +13342,15 @@ export namespace Prisma {
     id: string | null
     name: string | null
     description: string | null
-    joinCode: string | null
+    inviteCode: string | null
+    creatorId: string | null
     targetDate: Date | null
     targetTime: string | null
     budgetRange: string | null
     preferredLocation: string | null
+    city: string | null
     status: string | null
-    createdById: string | null
+    isGenerated: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13257,13 +13359,15 @@ export namespace Prisma {
     id: string | null
     name: string | null
     description: string | null
-    joinCode: string | null
+    inviteCode: string | null
+    creatorId: string | null
     targetDate: Date | null
     targetTime: string | null
     budgetRange: string | null
     preferredLocation: string | null
+    city: string | null
     status: string | null
-    createdById: string | null
+    isGenerated: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13272,14 +13376,15 @@ export namespace Prisma {
     id: number
     name: number
     description: number
-    joinCode: number
+    inviteCode: number
+    creatorId: number
     targetDate: number
     targetTime: number
     budgetRange: number
     preferredLocation: number
-    selectionSnapshot: number
+    city: number
     status: number
-    createdById: number
+    isGenerated: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -13290,13 +13395,15 @@ export namespace Prisma {
     id?: true
     name?: true
     description?: true
-    joinCode?: true
+    inviteCode?: true
+    creatorId?: true
     targetDate?: true
     targetTime?: true
     budgetRange?: true
     preferredLocation?: true
+    city?: true
     status?: true
-    createdById?: true
+    isGenerated?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13305,13 +13412,15 @@ export namespace Prisma {
     id?: true
     name?: true
     description?: true
-    joinCode?: true
+    inviteCode?: true
+    creatorId?: true
     targetDate?: true
     targetTime?: true
     budgetRange?: true
     preferredLocation?: true
+    city?: true
     status?: true
-    createdById?: true
+    isGenerated?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13320,14 +13429,15 @@ export namespace Prisma {
     id?: true
     name?: true
     description?: true
-    joinCode?: true
+    inviteCode?: true
+    creatorId?: true
     targetDate?: true
     targetTime?: true
     budgetRange?: true
     preferredLocation?: true
-    selectionSnapshot?: true
+    city?: true
     status?: true
-    createdById?: true
+    isGenerated?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -13409,14 +13519,15 @@ export namespace Prisma {
     id: string
     name: string | null
     description: string | null
-    joinCode: string
+    inviteCode: string
+    creatorId: string | null
     targetDate: Date | null
     targetTime: string | null
     budgetRange: string | null
     preferredLocation: string | null
-    selectionSnapshot: JsonValue | null
+    city: string | null
     status: string
-    createdById: string | null
+    isGenerated: boolean
     createdAt: Date
     updatedAt: Date
     _count: EventGroupCountAggregateOutputType | null
@@ -13442,20 +13553,22 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     description?: boolean
-    joinCode?: boolean
+    inviteCode?: boolean
+    creatorId?: boolean
     targetDate?: boolean
     targetTime?: boolean
     budgetRange?: boolean
     preferredLocation?: boolean
-    selectionSnapshot?: boolean
+    city?: boolean
     status?: boolean
-    createdById?: boolean
+    isGenerated?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean | EventGroup$createdByArgs<ExtArgs>
     participants?: boolean | EventGroup$participantsArgs<ExtArgs>
     events?: boolean | EventGroup$eventsArgs<ExtArgs>
     recommendations?: boolean | EventGroup$recommendationsArgs<ExtArgs>
+    preferences?: boolean | EventGroup$preferencesArgs<ExtArgs>
     _count?: boolean | EventGroupCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["eventGroup"]>
 
@@ -13463,14 +13576,15 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     description?: boolean
-    joinCode?: boolean
+    inviteCode?: boolean
+    creatorId?: boolean
     targetDate?: boolean
     targetTime?: boolean
     budgetRange?: boolean
     preferredLocation?: boolean
-    selectionSnapshot?: boolean
+    city?: boolean
     status?: boolean
-    createdById?: boolean
+    isGenerated?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean | EventGroup$createdByArgs<ExtArgs>
@@ -13480,14 +13594,15 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     description?: boolean
-    joinCode?: boolean
+    inviteCode?: boolean
+    creatorId?: boolean
     targetDate?: boolean
     targetTime?: boolean
     budgetRange?: boolean
     preferredLocation?: boolean
-    selectionSnapshot?: boolean
+    city?: boolean
     status?: boolean
-    createdById?: boolean
+    isGenerated?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean | EventGroup$createdByArgs<ExtArgs>
@@ -13497,24 +13612,26 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     description?: boolean
-    joinCode?: boolean
+    inviteCode?: boolean
+    creatorId?: boolean
     targetDate?: boolean
     targetTime?: boolean
     budgetRange?: boolean
     preferredLocation?: boolean
-    selectionSnapshot?: boolean
+    city?: boolean
     status?: boolean
-    createdById?: boolean
+    isGenerated?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type EventGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "joinCode" | "targetDate" | "targetTime" | "budgetRange" | "preferredLocation" | "selectionSnapshot" | "status" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["eventGroup"]>
+  export type EventGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "inviteCode" | "creatorId" | "targetDate" | "targetTime" | "budgetRange" | "preferredLocation" | "city" | "status" | "isGenerated" | "createdAt" | "updatedAt", ExtArgs["result"]["eventGroup"]>
   export type EventGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     createdBy?: boolean | EventGroup$createdByArgs<ExtArgs>
     participants?: boolean | EventGroup$participantsArgs<ExtArgs>
     events?: boolean | EventGroup$eventsArgs<ExtArgs>
     recommendations?: boolean | EventGroup$recommendationsArgs<ExtArgs>
+    preferences?: boolean | EventGroup$preferencesArgs<ExtArgs>
     _count?: boolean | EventGroupCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type EventGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13531,19 +13648,21 @@ export namespace Prisma {
       participants: Prisma.$EventGroupParticipantPayload<ExtArgs>[]
       events: Prisma.$EventGroupEventPayload<ExtArgs>[]
       recommendations: Prisma.$EventRecommendationPayload<ExtArgs>[]
+      preferences: Prisma.$EventGroupPreferencePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string | null
       description: string | null
-      joinCode: string
+      inviteCode: string
+      creatorId: string | null
       targetDate: Date | null
       targetTime: string | null
       budgetRange: string | null
       preferredLocation: string | null
-      selectionSnapshot: Prisma.JsonValue | null
+      city: string | null
       status: string
-      createdById: string | null
+      isGenerated: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["eventGroup"]>
@@ -13944,6 +14063,7 @@ export namespace Prisma {
     participants<T extends EventGroup$participantsArgs<ExtArgs> = {}>(args?: Subset<T, EventGroup$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventGroupParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     events<T extends EventGroup$eventsArgs<ExtArgs> = {}>(args?: Subset<T, EventGroup$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventGroupEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     recommendations<T extends EventGroup$recommendationsArgs<ExtArgs> = {}>(args?: Subset<T, EventGroup$recommendationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventRecommendationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    preferences<T extends EventGroup$preferencesArgs<ExtArgs> = {}>(args?: Subset<T, EventGroup$preferencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13976,14 +14096,15 @@ export namespace Prisma {
     readonly id: FieldRef<"EventGroup", 'String'>
     readonly name: FieldRef<"EventGroup", 'String'>
     readonly description: FieldRef<"EventGroup", 'String'>
-    readonly joinCode: FieldRef<"EventGroup", 'String'>
+    readonly inviteCode: FieldRef<"EventGroup", 'String'>
+    readonly creatorId: FieldRef<"EventGroup", 'String'>
     readonly targetDate: FieldRef<"EventGroup", 'DateTime'>
     readonly targetTime: FieldRef<"EventGroup", 'String'>
     readonly budgetRange: FieldRef<"EventGroup", 'String'>
     readonly preferredLocation: FieldRef<"EventGroup", 'String'>
-    readonly selectionSnapshot: FieldRef<"EventGroup", 'Json'>
+    readonly city: FieldRef<"EventGroup", 'String'>
     readonly status: FieldRef<"EventGroup", 'String'>
-    readonly createdById: FieldRef<"EventGroup", 'String'>
+    readonly isGenerated: FieldRef<"EventGroup", 'Boolean'>
     readonly createdAt: FieldRef<"EventGroup", 'DateTime'>
     readonly updatedAt: FieldRef<"EventGroup", 'DateTime'>
   }
@@ -14473,6 +14594,30 @@ export namespace Prisma {
   }
 
   /**
+   * EventGroup.preferences
+   */
+  export type EventGroup$preferencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    where?: EventGroupPreferenceWhereInput
+    orderBy?: EventGroupPreferenceOrderByWithRelationInput | EventGroupPreferenceOrderByWithRelationInput[]
+    cursor?: EventGroupPreferenceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: EventGroupPreferenceScalarFieldEnum | EventGroupPreferenceScalarFieldEnum[]
+  }
+
+  /**
    * EventGroup without action
    */
   export type EventGroupDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -14488,6 +14633,1163 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: EventGroupInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model EventGroupPreference
+   */
+
+  export type AggregateEventGroupPreference = {
+    _count: EventGroupPreferenceCountAggregateOutputType | null
+    _avg: EventGroupPreferenceAvgAggregateOutputType | null
+    _sum: EventGroupPreferenceSumAggregateOutputType | null
+    _min: EventGroupPreferenceMinAggregateOutputType | null
+    _max: EventGroupPreferenceMaxAggregateOutputType | null
+  }
+
+  export type EventGroupPreferenceAvgAggregateOutputType = {
+    activityLevel: number | null
+  }
+
+  export type EventGroupPreferenceSumAggregateOutputType = {
+    activityLevel: number | null
+  }
+
+  export type EventGroupPreferenceMinAggregateOutputType = {
+    id: string | null
+    groupId: string | null
+    userId: string | null
+    sessionId: string | null
+    userName: string | null
+    userIcon: string | null
+    moneyPreference: string | null
+    activityLevel: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EventGroupPreferenceMaxAggregateOutputType = {
+    id: string | null
+    groupId: string | null
+    userId: string | null
+    sessionId: string | null
+    userName: string | null
+    userIcon: string | null
+    moneyPreference: string | null
+    activityLevel: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EventGroupPreferenceCountAggregateOutputType = {
+    id: number
+    groupId: number
+    userId: number
+    sessionId: number
+    userName: number
+    userIcon: number
+    moneyPreference: number
+    activityLevel: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type EventGroupPreferenceAvgAggregateInputType = {
+    activityLevel?: true
+  }
+
+  export type EventGroupPreferenceSumAggregateInputType = {
+    activityLevel?: true
+  }
+
+  export type EventGroupPreferenceMinAggregateInputType = {
+    id?: true
+    groupId?: true
+    userId?: true
+    sessionId?: true
+    userName?: true
+    userIcon?: true
+    moneyPreference?: true
+    activityLevel?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EventGroupPreferenceMaxAggregateInputType = {
+    id?: true
+    groupId?: true
+    userId?: true
+    sessionId?: true
+    userName?: true
+    userIcon?: true
+    moneyPreference?: true
+    activityLevel?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EventGroupPreferenceCountAggregateInputType = {
+    id?: true
+    groupId?: true
+    userId?: true
+    sessionId?: true
+    userName?: true
+    userIcon?: true
+    moneyPreference?: true
+    activityLevel?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type EventGroupPreferenceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventGroupPreference to aggregate.
+     */
+    where?: EventGroupPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventGroupPreferences to fetch.
+     */
+    orderBy?: EventGroupPreferenceOrderByWithRelationInput | EventGroupPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EventGroupPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventGroupPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventGroupPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EventGroupPreferences
+    **/
+    _count?: true | EventGroupPreferenceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: EventGroupPreferenceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: EventGroupPreferenceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EventGroupPreferenceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EventGroupPreferenceMaxAggregateInputType
+  }
+
+  export type GetEventGroupPreferenceAggregateType<T extends EventGroupPreferenceAggregateArgs> = {
+        [P in keyof T & keyof AggregateEventGroupPreference]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEventGroupPreference[P]>
+      : GetScalarType<T[P], AggregateEventGroupPreference[P]>
+  }
+
+
+
+
+  export type EventGroupPreferenceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventGroupPreferenceWhereInput
+    orderBy?: EventGroupPreferenceOrderByWithAggregationInput | EventGroupPreferenceOrderByWithAggregationInput[]
+    by: EventGroupPreferenceScalarFieldEnum[] | EventGroupPreferenceScalarFieldEnum
+    having?: EventGroupPreferenceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EventGroupPreferenceCountAggregateInputType | true
+    _avg?: EventGroupPreferenceAvgAggregateInputType
+    _sum?: EventGroupPreferenceSumAggregateInputType
+    _min?: EventGroupPreferenceMinAggregateInputType
+    _max?: EventGroupPreferenceMaxAggregateInputType
+  }
+
+  export type EventGroupPreferenceGroupByOutputType = {
+    id: string
+    groupId: string
+    userId: string | null
+    sessionId: string
+    userName: string | null
+    userIcon: string
+    moneyPreference: string
+    activityLevel: number
+    createdAt: Date
+    updatedAt: Date
+    _count: EventGroupPreferenceCountAggregateOutputType | null
+    _avg: EventGroupPreferenceAvgAggregateOutputType | null
+    _sum: EventGroupPreferenceSumAggregateOutputType | null
+    _min: EventGroupPreferenceMinAggregateOutputType | null
+    _max: EventGroupPreferenceMaxAggregateOutputType | null
+  }
+
+  type GetEventGroupPreferenceGroupByPayload<T extends EventGroupPreferenceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EventGroupPreferenceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EventGroupPreferenceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EventGroupPreferenceGroupByOutputType[P]>
+            : GetScalarType<T[P], EventGroupPreferenceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EventGroupPreferenceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    groupId?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    userName?: boolean
+    userIcon?: boolean
+    moneyPreference?: boolean
+    activityLevel?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    group?: boolean | EventGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["eventGroupPreference"]>
+
+  export type EventGroupPreferenceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    groupId?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    userName?: boolean
+    userIcon?: boolean
+    moneyPreference?: boolean
+    activityLevel?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    group?: boolean | EventGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["eventGroupPreference"]>
+
+  export type EventGroupPreferenceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    groupId?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    userName?: boolean
+    userIcon?: boolean
+    moneyPreference?: boolean
+    activityLevel?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    group?: boolean | EventGroupDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["eventGroupPreference"]>
+
+  export type EventGroupPreferenceSelectScalar = {
+    id?: boolean
+    groupId?: boolean
+    userId?: boolean
+    sessionId?: boolean
+    userName?: boolean
+    userIcon?: boolean
+    moneyPreference?: boolean
+    activityLevel?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type EventGroupPreferenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "groupId" | "userId" | "sessionId" | "userName" | "userIcon" | "moneyPreference" | "activityLevel" | "createdAt" | "updatedAt", ExtArgs["result"]["eventGroupPreference"]>
+  export type EventGroupPreferenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    group?: boolean | EventGroupDefaultArgs<ExtArgs>
+  }
+  export type EventGroupPreferenceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    group?: boolean | EventGroupDefaultArgs<ExtArgs>
+  }
+  export type EventGroupPreferenceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    group?: boolean | EventGroupDefaultArgs<ExtArgs>
+  }
+
+  export type $EventGroupPreferencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EventGroupPreference"
+    objects: {
+      group: Prisma.$EventGroupPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      groupId: string
+      userId: string | null
+      sessionId: string
+      userName: string | null
+      userIcon: string
+      moneyPreference: string
+      activityLevel: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["eventGroupPreference"]>
+    composites: {}
+  }
+
+  type EventGroupPreferenceGetPayload<S extends boolean | null | undefined | EventGroupPreferenceDefaultArgs> = $Result.GetResult<Prisma.$EventGroupPreferencePayload, S>
+
+  type EventGroupPreferenceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EventGroupPreferenceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EventGroupPreferenceCountAggregateInputType | true
+    }
+
+  export interface EventGroupPreferenceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EventGroupPreference'], meta: { name: 'EventGroupPreference' } }
+    /**
+     * Find zero or one EventGroupPreference that matches the filter.
+     * @param {EventGroupPreferenceFindUniqueArgs} args - Arguments to find a EventGroupPreference
+     * @example
+     * // Get one EventGroupPreference
+     * const eventGroupPreference = await prisma.eventGroupPreference.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EventGroupPreferenceFindUniqueArgs>(args: SelectSubset<T, EventGroupPreferenceFindUniqueArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one EventGroupPreference that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EventGroupPreferenceFindUniqueOrThrowArgs} args - Arguments to find a EventGroupPreference
+     * @example
+     * // Get one EventGroupPreference
+     * const eventGroupPreference = await prisma.eventGroupPreference.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EventGroupPreferenceFindUniqueOrThrowArgs>(args: SelectSubset<T, EventGroupPreferenceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EventGroupPreference that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupPreferenceFindFirstArgs} args - Arguments to find a EventGroupPreference
+     * @example
+     * // Get one EventGroupPreference
+     * const eventGroupPreference = await prisma.eventGroupPreference.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EventGroupPreferenceFindFirstArgs>(args?: SelectSubset<T, EventGroupPreferenceFindFirstArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EventGroupPreference that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupPreferenceFindFirstOrThrowArgs} args - Arguments to find a EventGroupPreference
+     * @example
+     * // Get one EventGroupPreference
+     * const eventGroupPreference = await prisma.eventGroupPreference.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EventGroupPreferenceFindFirstOrThrowArgs>(args?: SelectSubset<T, EventGroupPreferenceFindFirstOrThrowArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more EventGroupPreferences that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupPreferenceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EventGroupPreferences
+     * const eventGroupPreferences = await prisma.eventGroupPreference.findMany()
+     * 
+     * // Get first 10 EventGroupPreferences
+     * const eventGroupPreferences = await prisma.eventGroupPreference.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const eventGroupPreferenceWithIdOnly = await prisma.eventGroupPreference.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EventGroupPreferenceFindManyArgs>(args?: SelectSubset<T, EventGroupPreferenceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a EventGroupPreference.
+     * @param {EventGroupPreferenceCreateArgs} args - Arguments to create a EventGroupPreference.
+     * @example
+     * // Create one EventGroupPreference
+     * const EventGroupPreference = await prisma.eventGroupPreference.create({
+     *   data: {
+     *     // ... data to create a EventGroupPreference
+     *   }
+     * })
+     * 
+     */
+    create<T extends EventGroupPreferenceCreateArgs>(args: SelectSubset<T, EventGroupPreferenceCreateArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many EventGroupPreferences.
+     * @param {EventGroupPreferenceCreateManyArgs} args - Arguments to create many EventGroupPreferences.
+     * @example
+     * // Create many EventGroupPreferences
+     * const eventGroupPreference = await prisma.eventGroupPreference.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EventGroupPreferenceCreateManyArgs>(args?: SelectSubset<T, EventGroupPreferenceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EventGroupPreferences and returns the data saved in the database.
+     * @param {EventGroupPreferenceCreateManyAndReturnArgs} args - Arguments to create many EventGroupPreferences.
+     * @example
+     * // Create many EventGroupPreferences
+     * const eventGroupPreference = await prisma.eventGroupPreference.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EventGroupPreferences and only return the `id`
+     * const eventGroupPreferenceWithIdOnly = await prisma.eventGroupPreference.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EventGroupPreferenceCreateManyAndReturnArgs>(args?: SelectSubset<T, EventGroupPreferenceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a EventGroupPreference.
+     * @param {EventGroupPreferenceDeleteArgs} args - Arguments to delete one EventGroupPreference.
+     * @example
+     * // Delete one EventGroupPreference
+     * const EventGroupPreference = await prisma.eventGroupPreference.delete({
+     *   where: {
+     *     // ... filter to delete one EventGroupPreference
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EventGroupPreferenceDeleteArgs>(args: SelectSubset<T, EventGroupPreferenceDeleteArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one EventGroupPreference.
+     * @param {EventGroupPreferenceUpdateArgs} args - Arguments to update one EventGroupPreference.
+     * @example
+     * // Update one EventGroupPreference
+     * const eventGroupPreference = await prisma.eventGroupPreference.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EventGroupPreferenceUpdateArgs>(args: SelectSubset<T, EventGroupPreferenceUpdateArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more EventGroupPreferences.
+     * @param {EventGroupPreferenceDeleteManyArgs} args - Arguments to filter EventGroupPreferences to delete.
+     * @example
+     * // Delete a few EventGroupPreferences
+     * const { count } = await prisma.eventGroupPreference.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EventGroupPreferenceDeleteManyArgs>(args?: SelectSubset<T, EventGroupPreferenceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EventGroupPreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupPreferenceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EventGroupPreferences
+     * const eventGroupPreference = await prisma.eventGroupPreference.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EventGroupPreferenceUpdateManyArgs>(args: SelectSubset<T, EventGroupPreferenceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EventGroupPreferences and returns the data updated in the database.
+     * @param {EventGroupPreferenceUpdateManyAndReturnArgs} args - Arguments to update many EventGroupPreferences.
+     * @example
+     * // Update many EventGroupPreferences
+     * const eventGroupPreference = await prisma.eventGroupPreference.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EventGroupPreferences and only return the `id`
+     * const eventGroupPreferenceWithIdOnly = await prisma.eventGroupPreference.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EventGroupPreferenceUpdateManyAndReturnArgs>(args: SelectSubset<T, EventGroupPreferenceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one EventGroupPreference.
+     * @param {EventGroupPreferenceUpsertArgs} args - Arguments to update or create a EventGroupPreference.
+     * @example
+     * // Update or create a EventGroupPreference
+     * const eventGroupPreference = await prisma.eventGroupPreference.upsert({
+     *   create: {
+     *     // ... data to create a EventGroupPreference
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EventGroupPreference we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EventGroupPreferenceUpsertArgs>(args: SelectSubset<T, EventGroupPreferenceUpsertArgs<ExtArgs>>): Prisma__EventGroupPreferenceClient<$Result.GetResult<Prisma.$EventGroupPreferencePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of EventGroupPreferences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupPreferenceCountArgs} args - Arguments to filter EventGroupPreferences to count.
+     * @example
+     * // Count the number of EventGroupPreferences
+     * const count = await prisma.eventGroupPreference.count({
+     *   where: {
+     *     // ... the filter for the EventGroupPreferences we want to count
+     *   }
+     * })
+    **/
+    count<T extends EventGroupPreferenceCountArgs>(
+      args?: Subset<T, EventGroupPreferenceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EventGroupPreferenceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EventGroupPreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupPreferenceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EventGroupPreferenceAggregateArgs>(args: Subset<T, EventGroupPreferenceAggregateArgs>): Prisma.PrismaPromise<GetEventGroupPreferenceAggregateType<T>>
+
+    /**
+     * Group by EventGroupPreference.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupPreferenceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EventGroupPreferenceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EventGroupPreferenceGroupByArgs['orderBy'] }
+        : { orderBy?: EventGroupPreferenceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EventGroupPreferenceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEventGroupPreferenceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EventGroupPreference model
+   */
+  readonly fields: EventGroupPreferenceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EventGroupPreference.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EventGroupPreferenceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    group<T extends EventGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, EventGroupDefaultArgs<ExtArgs>>): Prisma__EventGroupClient<$Result.GetResult<Prisma.$EventGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EventGroupPreference model
+   */
+  interface EventGroupPreferenceFieldRefs {
+    readonly id: FieldRef<"EventGroupPreference", 'String'>
+    readonly groupId: FieldRef<"EventGroupPreference", 'String'>
+    readonly userId: FieldRef<"EventGroupPreference", 'String'>
+    readonly sessionId: FieldRef<"EventGroupPreference", 'String'>
+    readonly userName: FieldRef<"EventGroupPreference", 'String'>
+    readonly userIcon: FieldRef<"EventGroupPreference", 'String'>
+    readonly moneyPreference: FieldRef<"EventGroupPreference", 'String'>
+    readonly activityLevel: FieldRef<"EventGroupPreference", 'Int'>
+    readonly createdAt: FieldRef<"EventGroupPreference", 'DateTime'>
+    readonly updatedAt: FieldRef<"EventGroupPreference", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EventGroupPreference findUnique
+   */
+  export type EventGroupPreferenceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventGroupPreference to fetch.
+     */
+    where: EventGroupPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventGroupPreference findUniqueOrThrow
+   */
+  export type EventGroupPreferenceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventGroupPreference to fetch.
+     */
+    where: EventGroupPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventGroupPreference findFirst
+   */
+  export type EventGroupPreferenceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventGroupPreference to fetch.
+     */
+    where?: EventGroupPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventGroupPreferences to fetch.
+     */
+    orderBy?: EventGroupPreferenceOrderByWithRelationInput | EventGroupPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventGroupPreferences.
+     */
+    cursor?: EventGroupPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventGroupPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventGroupPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventGroupPreferences.
+     */
+    distinct?: EventGroupPreferenceScalarFieldEnum | EventGroupPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * EventGroupPreference findFirstOrThrow
+   */
+  export type EventGroupPreferenceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventGroupPreference to fetch.
+     */
+    where?: EventGroupPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventGroupPreferences to fetch.
+     */
+    orderBy?: EventGroupPreferenceOrderByWithRelationInput | EventGroupPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventGroupPreferences.
+     */
+    cursor?: EventGroupPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventGroupPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventGroupPreferences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventGroupPreferences.
+     */
+    distinct?: EventGroupPreferenceScalarFieldEnum | EventGroupPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * EventGroupPreference findMany
+   */
+  export type EventGroupPreferenceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter, which EventGroupPreferences to fetch.
+     */
+    where?: EventGroupPreferenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventGroupPreferences to fetch.
+     */
+    orderBy?: EventGroupPreferenceOrderByWithRelationInput | EventGroupPreferenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EventGroupPreferences.
+     */
+    cursor?: EventGroupPreferenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventGroupPreferences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventGroupPreferences.
+     */
+    skip?: number
+    distinct?: EventGroupPreferenceScalarFieldEnum | EventGroupPreferenceScalarFieldEnum[]
+  }
+
+  /**
+   * EventGroupPreference create
+   */
+  export type EventGroupPreferenceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a EventGroupPreference.
+     */
+    data: XOR<EventGroupPreferenceCreateInput, EventGroupPreferenceUncheckedCreateInput>
+  }
+
+  /**
+   * EventGroupPreference createMany
+   */
+  export type EventGroupPreferenceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EventGroupPreferences.
+     */
+    data: EventGroupPreferenceCreateManyInput | EventGroupPreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EventGroupPreference createManyAndReturn
+   */
+  export type EventGroupPreferenceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * The data used to create many EventGroupPreferences.
+     */
+    data: EventGroupPreferenceCreateManyInput | EventGroupPreferenceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * EventGroupPreference update
+   */
+  export type EventGroupPreferenceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a EventGroupPreference.
+     */
+    data: XOR<EventGroupPreferenceUpdateInput, EventGroupPreferenceUncheckedUpdateInput>
+    /**
+     * Choose, which EventGroupPreference to update.
+     */
+    where: EventGroupPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventGroupPreference updateMany
+   */
+  export type EventGroupPreferenceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EventGroupPreferences.
+     */
+    data: XOR<EventGroupPreferenceUpdateManyMutationInput, EventGroupPreferenceUncheckedUpdateManyInput>
+    /**
+     * Filter which EventGroupPreferences to update
+     */
+    where?: EventGroupPreferenceWhereInput
+    /**
+     * Limit how many EventGroupPreferences to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EventGroupPreference updateManyAndReturn
+   */
+  export type EventGroupPreferenceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * The data used to update EventGroupPreferences.
+     */
+    data: XOR<EventGroupPreferenceUpdateManyMutationInput, EventGroupPreferenceUncheckedUpdateManyInput>
+    /**
+     * Filter which EventGroupPreferences to update
+     */
+    where?: EventGroupPreferenceWhereInput
+    /**
+     * Limit how many EventGroupPreferences to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * EventGroupPreference upsert
+   */
+  export type EventGroupPreferenceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the EventGroupPreference to update in case it exists.
+     */
+    where: EventGroupPreferenceWhereUniqueInput
+    /**
+     * In case the EventGroupPreference found by the `where` argument doesn't exist, create a new EventGroupPreference with this data.
+     */
+    create: XOR<EventGroupPreferenceCreateInput, EventGroupPreferenceUncheckedCreateInput>
+    /**
+     * In case the EventGroupPreference was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EventGroupPreferenceUpdateInput, EventGroupPreferenceUncheckedUpdateInput>
+  }
+
+  /**
+   * EventGroupPreference delete
+   */
+  export type EventGroupPreferenceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
+    /**
+     * Filter which EventGroupPreference to delete.
+     */
+    where: EventGroupPreferenceWhereUniqueInput
+  }
+
+  /**
+   * EventGroupPreference deleteMany
+   */
+  export type EventGroupPreferenceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventGroupPreferences to delete
+     */
+    where?: EventGroupPreferenceWhereInput
+    /**
+     * Limit how many EventGroupPreferences to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * EventGroupPreference without action
+   */
+  export type EventGroupPreferenceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventGroupPreference
+     */
+    select?: EventGroupPreferenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventGroupPreference
+     */
+    omit?: EventGroupPreferenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventGroupPreferenceInclude<ExtArgs> | null
   }
 
 
@@ -19297,19 +20599,36 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     description: 'description',
-    joinCode: 'joinCode',
+    inviteCode: 'inviteCode',
+    creatorId: 'creatorId',
     targetDate: 'targetDate',
     targetTime: 'targetTime',
     budgetRange: 'budgetRange',
     preferredLocation: 'preferredLocation',
-    selectionSnapshot: 'selectionSnapshot',
+    city: 'city',
     status: 'status',
-    createdById: 'createdById',
+    isGenerated: 'isGenerated',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type EventGroupScalarFieldEnum = (typeof EventGroupScalarFieldEnum)[keyof typeof EventGroupScalarFieldEnum]
+
+
+  export const EventGroupPreferenceScalarFieldEnum: {
+    id: 'id',
+    groupId: 'groupId',
+    userId: 'userId',
+    sessionId: 'sessionId',
+    userName: 'userName',
+    userIcon: 'userIcon',
+    moneyPreference: 'moneyPreference',
+    activityLevel: 'activityLevel',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type EventGroupPreferenceScalarFieldEnum = (typeof EventGroupPreferenceScalarFieldEnum)[keyof typeof EventGroupPreferenceScalarFieldEnum]
 
 
   export const EventGroupParticipantScalarFieldEnum: {
@@ -20357,77 +21676,84 @@ export namespace Prisma {
     id?: StringFilter<"EventGroup"> | string
     name?: StringNullableFilter<"EventGroup"> | string | null
     description?: StringNullableFilter<"EventGroup"> | string | null
-    joinCode?: StringFilter<"EventGroup"> | string
+    inviteCode?: StringFilter<"EventGroup"> | string
+    creatorId?: StringNullableFilter<"EventGroup"> | string | null
     targetDate?: DateTimeNullableFilter<"EventGroup"> | Date | string | null
     targetTime?: StringNullableFilter<"EventGroup"> | string | null
     budgetRange?: StringNullableFilter<"EventGroup"> | string | null
     preferredLocation?: StringNullableFilter<"EventGroup"> | string | null
-    selectionSnapshot?: JsonNullableFilter<"EventGroup">
+    city?: StringNullableFilter<"EventGroup"> | string | null
     status?: StringFilter<"EventGroup"> | string
-    createdById?: StringNullableFilter<"EventGroup"> | string | null
+    isGenerated?: BoolFilter<"EventGroup"> | boolean
     createdAt?: DateTimeFilter<"EventGroup"> | Date | string
     updatedAt?: DateTimeFilter<"EventGroup"> | Date | string
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     participants?: EventGroupParticipantListRelationFilter
     events?: EventGroupEventListRelationFilter
     recommendations?: EventRecommendationListRelationFilter
+    preferences?: EventGroupPreferenceListRelationFilter
   }
 
   export type EventGroupOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
-    joinCode?: SortOrder
+    inviteCode?: SortOrder
+    creatorId?: SortOrderInput | SortOrder
     targetDate?: SortOrderInput | SortOrder
     targetTime?: SortOrderInput | SortOrder
     budgetRange?: SortOrderInput | SortOrder
     preferredLocation?: SortOrderInput | SortOrder
-    selectionSnapshot?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
     status?: SortOrder
-    createdById?: SortOrderInput | SortOrder
+    isGenerated?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: UserOrderByWithRelationInput
     participants?: EventGroupParticipantOrderByRelationAggregateInput
     events?: EventGroupEventOrderByRelationAggregateInput
     recommendations?: EventRecommendationOrderByRelationAggregateInput
+    preferences?: EventGroupPreferenceOrderByRelationAggregateInput
   }
 
   export type EventGroupWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    joinCode?: string
+    inviteCode?: string
     AND?: EventGroupWhereInput | EventGroupWhereInput[]
     OR?: EventGroupWhereInput[]
     NOT?: EventGroupWhereInput | EventGroupWhereInput[]
     name?: StringNullableFilter<"EventGroup"> | string | null
     description?: StringNullableFilter<"EventGroup"> | string | null
+    creatorId?: StringNullableFilter<"EventGroup"> | string | null
     targetDate?: DateTimeNullableFilter<"EventGroup"> | Date | string | null
     targetTime?: StringNullableFilter<"EventGroup"> | string | null
     budgetRange?: StringNullableFilter<"EventGroup"> | string | null
     preferredLocation?: StringNullableFilter<"EventGroup"> | string | null
-    selectionSnapshot?: JsonNullableFilter<"EventGroup">
+    city?: StringNullableFilter<"EventGroup"> | string | null
     status?: StringFilter<"EventGroup"> | string
-    createdById?: StringNullableFilter<"EventGroup"> | string | null
+    isGenerated?: BoolFilter<"EventGroup"> | boolean
     createdAt?: DateTimeFilter<"EventGroup"> | Date | string
     updatedAt?: DateTimeFilter<"EventGroup"> | Date | string
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     participants?: EventGroupParticipantListRelationFilter
     events?: EventGroupEventListRelationFilter
     recommendations?: EventRecommendationListRelationFilter
-  }, "id" | "joinCode">
+    preferences?: EventGroupPreferenceListRelationFilter
+  }, "id" | "inviteCode">
 
   export type EventGroupOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
-    joinCode?: SortOrder
+    inviteCode?: SortOrder
+    creatorId?: SortOrderInput | SortOrder
     targetDate?: SortOrderInput | SortOrder
     targetTime?: SortOrderInput | SortOrder
     budgetRange?: SortOrderInput | SortOrder
     preferredLocation?: SortOrderInput | SortOrder
-    selectionSnapshot?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
     status?: SortOrder
-    createdById?: SortOrderInput | SortOrder
+    isGenerated?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: EventGroupCountOrderByAggregateInput
@@ -20442,16 +21768,100 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"EventGroup"> | string
     name?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
     description?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
-    joinCode?: StringWithAggregatesFilter<"EventGroup"> | string
+    inviteCode?: StringWithAggregatesFilter<"EventGroup"> | string
+    creatorId?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
     targetDate?: DateTimeNullableWithAggregatesFilter<"EventGroup"> | Date | string | null
     targetTime?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
     budgetRange?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
     preferredLocation?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
-    selectionSnapshot?: JsonNullableWithAggregatesFilter<"EventGroup">
+    city?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
     status?: StringWithAggregatesFilter<"EventGroup"> | string
-    createdById?: StringNullableWithAggregatesFilter<"EventGroup"> | string | null
+    isGenerated?: BoolWithAggregatesFilter<"EventGroup"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"EventGroup"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"EventGroup"> | Date | string
+  }
+
+  export type EventGroupPreferenceWhereInput = {
+    AND?: EventGroupPreferenceWhereInput | EventGroupPreferenceWhereInput[]
+    OR?: EventGroupPreferenceWhereInput[]
+    NOT?: EventGroupPreferenceWhereInput | EventGroupPreferenceWhereInput[]
+    id?: StringFilter<"EventGroupPreference"> | string
+    groupId?: StringFilter<"EventGroupPreference"> | string
+    userId?: StringNullableFilter<"EventGroupPreference"> | string | null
+    sessionId?: StringFilter<"EventGroupPreference"> | string
+    userName?: StringNullableFilter<"EventGroupPreference"> | string | null
+    userIcon?: StringFilter<"EventGroupPreference"> | string
+    moneyPreference?: StringFilter<"EventGroupPreference"> | string
+    activityLevel?: IntFilter<"EventGroupPreference"> | number
+    createdAt?: DateTimeFilter<"EventGroupPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"EventGroupPreference"> | Date | string
+    group?: XOR<EventGroupScalarRelationFilter, EventGroupWhereInput>
+  }
+
+  export type EventGroupPreferenceOrderByWithRelationInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    sessionId?: SortOrder
+    userName?: SortOrderInput | SortOrder
+    userIcon?: SortOrder
+    moneyPreference?: SortOrder
+    activityLevel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    group?: EventGroupOrderByWithRelationInput
+  }
+
+  export type EventGroupPreferenceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    groupId_sessionId?: EventGroupPreferenceGroupIdSessionIdCompoundUniqueInput
+    AND?: EventGroupPreferenceWhereInput | EventGroupPreferenceWhereInput[]
+    OR?: EventGroupPreferenceWhereInput[]
+    NOT?: EventGroupPreferenceWhereInput | EventGroupPreferenceWhereInput[]
+    groupId?: StringFilter<"EventGroupPreference"> | string
+    userId?: StringNullableFilter<"EventGroupPreference"> | string | null
+    sessionId?: StringFilter<"EventGroupPreference"> | string
+    userName?: StringNullableFilter<"EventGroupPreference"> | string | null
+    userIcon?: StringFilter<"EventGroupPreference"> | string
+    moneyPreference?: StringFilter<"EventGroupPreference"> | string
+    activityLevel?: IntFilter<"EventGroupPreference"> | number
+    createdAt?: DateTimeFilter<"EventGroupPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"EventGroupPreference"> | Date | string
+    group?: XOR<EventGroupScalarRelationFilter, EventGroupWhereInput>
+  }, "id" | "groupId_sessionId">
+
+  export type EventGroupPreferenceOrderByWithAggregationInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    sessionId?: SortOrder
+    userName?: SortOrderInput | SortOrder
+    userIcon?: SortOrder
+    moneyPreference?: SortOrder
+    activityLevel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: EventGroupPreferenceCountOrderByAggregateInput
+    _avg?: EventGroupPreferenceAvgOrderByAggregateInput
+    _max?: EventGroupPreferenceMaxOrderByAggregateInput
+    _min?: EventGroupPreferenceMinOrderByAggregateInput
+    _sum?: EventGroupPreferenceSumOrderByAggregateInput
+  }
+
+  export type EventGroupPreferenceScalarWhereWithAggregatesInput = {
+    AND?: EventGroupPreferenceScalarWhereWithAggregatesInput | EventGroupPreferenceScalarWhereWithAggregatesInput[]
+    OR?: EventGroupPreferenceScalarWhereWithAggregatesInput[]
+    NOT?: EventGroupPreferenceScalarWhereWithAggregatesInput | EventGroupPreferenceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"EventGroupPreference"> | string
+    groupId?: StringWithAggregatesFilter<"EventGroupPreference"> | string
+    userId?: StringNullableWithAggregatesFilter<"EventGroupPreference"> | string | null
+    sessionId?: StringWithAggregatesFilter<"EventGroupPreference"> | string
+    userName?: StringNullableWithAggregatesFilter<"EventGroupPreference"> | string | null
+    userIcon?: StringWithAggregatesFilter<"EventGroupPreference"> | string
+    moneyPreference?: StringWithAggregatesFilter<"EventGroupPreference"> | string
+    activityLevel?: IntWithAggregatesFilter<"EventGroupPreference"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"EventGroupPreference"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"EventGroupPreference"> | Date | string
   }
 
   export type EventGroupParticipantWhereInput = {
@@ -21766,90 +23176,99 @@ export namespace Prisma {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: UserCreateNestedOneWithoutCreatedGroupsInput
     participants?: EventGroupParticipantCreateNestedManyWithoutGroupInput
     events?: EventGroupEventCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupUncheckedCreateInput = {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
+    creatorId?: string | null
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
-    createdById?: string | null
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: EventGroupParticipantUncheckedCreateNestedManyWithoutGroupInput
     events?: EventGroupEventUncheckedCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationUncheckedCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceUncheckedCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneWithoutCreatedGroupsNestedInput
     participants?: EventGroupParticipantUpdateManyWithoutGroupNestedInput
     events?: EventGroupEventUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUpdateManyWithoutGroupNestedInput
   }
 
   export type EventGroupUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
+    creatorId?: NullableStringFieldUpdateOperationsInput | string | null
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: EventGroupParticipantUncheckedUpdateManyWithoutGroupNestedInput
     events?: EventGroupEventUncheckedUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUncheckedUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUncheckedUpdateManyWithoutGroupNestedInput
   }
 
   export type EventGroupCreateManyInput = {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
+    creatorId?: string | null
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
-    createdById?: string | null
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21858,13 +23277,14 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21873,14 +23293,105 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
+    creatorId?: NullableStringFieldUpdateOperationsInput | string | null
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventGroupPreferenceCreateInput = {
+    id?: string
+    userId?: string | null
+    sessionId: string
+    userName?: string | null
+    userIcon: string
+    moneyPreference: string
+    activityLevel: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    group: EventGroupCreateNestedOneWithoutPreferencesInput
+  }
+
+  export type EventGroupPreferenceUncheckedCreateInput = {
+    id?: string
+    groupId: string
+    userId?: string | null
+    sessionId: string
+    userName?: string | null
+    userIcon: string
+    moneyPreference: string
+    activityLevel: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventGroupPreferenceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    userIcon?: StringFieldUpdateOperationsInput | string
+    moneyPreference?: StringFieldUpdateOperationsInput | string
+    activityLevel?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    group?: EventGroupUpdateOneRequiredWithoutPreferencesNestedInput
+  }
+
+  export type EventGroupPreferenceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    userIcon?: StringFieldUpdateOperationsInput | string
+    moneyPreference?: StringFieldUpdateOperationsInput | string
+    activityLevel?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventGroupPreferenceCreateManyInput = {
+    id?: string
+    groupId: string
+    userId?: string | null
+    sessionId: string
+    userName?: string | null
+    userIcon: string
+    moneyPreference: string
+    activityLevel: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventGroupPreferenceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    userIcon?: StringFieldUpdateOperationsInput | string
+    moneyPreference?: StringFieldUpdateOperationsInput | string
+    activityLevel?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventGroupPreferenceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    groupId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    userIcon?: StringFieldUpdateOperationsInput | string
+    moneyPreference?: StringFieldUpdateOperationsInput | string
+    activityLevel?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23064,18 +24575,29 @@ export namespace Prisma {
     isNot?: UserWhereInput | null
   }
 
+  export type EventGroupPreferenceListRelationFilter = {
+    every?: EventGroupPreferenceWhereInput
+    some?: EventGroupPreferenceWhereInput
+    none?: EventGroupPreferenceWhereInput
+  }
+
+  export type EventGroupPreferenceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type EventGroupCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    joinCode?: SortOrder
+    inviteCode?: SortOrder
+    creatorId?: SortOrder
     targetDate?: SortOrder
     targetTime?: SortOrder
     budgetRange?: SortOrder
     preferredLocation?: SortOrder
-    selectionSnapshot?: SortOrder
+    city?: SortOrder
     status?: SortOrder
-    createdById?: SortOrder
+    isGenerated?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23084,13 +24606,15 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    joinCode?: SortOrder
+    inviteCode?: SortOrder
+    creatorId?: SortOrder
     targetDate?: SortOrder
     targetTime?: SortOrder
     budgetRange?: SortOrder
     preferredLocation?: SortOrder
+    city?: SortOrder
     status?: SortOrder
-    createdById?: SortOrder
+    isGenerated?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23099,20 +24623,101 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    joinCode?: SortOrder
+    inviteCode?: SortOrder
+    creatorId?: SortOrder
     targetDate?: SortOrder
     targetTime?: SortOrder
     budgetRange?: SortOrder
     preferredLocation?: SortOrder
+    city?: SortOrder
     status?: SortOrder
-    createdById?: SortOrder
+    isGenerated?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type EventGroupScalarRelationFilter = {
     is?: EventGroupWhereInput
     isNot?: EventGroupWhereInput
+  }
+
+  export type EventGroupPreferenceGroupIdSessionIdCompoundUniqueInput = {
+    groupId: string
+    sessionId: string
+  }
+
+  export type EventGroupPreferenceCountOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    userId?: SortOrder
+    sessionId?: SortOrder
+    userName?: SortOrder
+    userIcon?: SortOrder
+    moneyPreference?: SortOrder
+    activityLevel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EventGroupPreferenceAvgOrderByAggregateInput = {
+    activityLevel?: SortOrder
+  }
+
+  export type EventGroupPreferenceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    userId?: SortOrder
+    sessionId?: SortOrder
+    userName?: SortOrder
+    userIcon?: SortOrder
+    moneyPreference?: SortOrder
+    activityLevel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EventGroupPreferenceMinOrderByAggregateInput = {
+    id?: SortOrder
+    groupId?: SortOrder
+    userId?: SortOrder
+    sessionId?: SortOrder
+    userName?: SortOrder
+    userIcon?: SortOrder
+    moneyPreference?: SortOrder
+    activityLevel?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EventGroupPreferenceSumOrderByAggregateInput = {
+    activityLevel?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type EventGroupParticipantGroupIdUserIdCompoundUniqueInput = {
@@ -24180,6 +25785,13 @@ export namespace Prisma {
     connect?: EventRecommendationWhereUniqueInput | EventRecommendationWhereUniqueInput[]
   }
 
+  export type EventGroupPreferenceCreateNestedManyWithoutGroupInput = {
+    create?: XOR<EventGroupPreferenceCreateWithoutGroupInput, EventGroupPreferenceUncheckedCreateWithoutGroupInput> | EventGroupPreferenceCreateWithoutGroupInput[] | EventGroupPreferenceUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: EventGroupPreferenceCreateOrConnectWithoutGroupInput | EventGroupPreferenceCreateOrConnectWithoutGroupInput[]
+    createMany?: EventGroupPreferenceCreateManyGroupInputEnvelope
+    connect?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+  }
+
   export type EventGroupParticipantUncheckedCreateNestedManyWithoutGroupInput = {
     create?: XOR<EventGroupParticipantCreateWithoutGroupInput, EventGroupParticipantUncheckedCreateWithoutGroupInput> | EventGroupParticipantCreateWithoutGroupInput[] | EventGroupParticipantUncheckedCreateWithoutGroupInput[]
     connectOrCreate?: EventGroupParticipantCreateOrConnectWithoutGroupInput | EventGroupParticipantCreateOrConnectWithoutGroupInput[]
@@ -24199,6 +25811,13 @@ export namespace Prisma {
     connectOrCreate?: EventRecommendationCreateOrConnectWithoutGroupInput | EventRecommendationCreateOrConnectWithoutGroupInput[]
     createMany?: EventRecommendationCreateManyGroupInputEnvelope
     connect?: EventRecommendationWhereUniqueInput | EventRecommendationWhereUniqueInput[]
+  }
+
+  export type EventGroupPreferenceUncheckedCreateNestedManyWithoutGroupInput = {
+    create?: XOR<EventGroupPreferenceCreateWithoutGroupInput, EventGroupPreferenceUncheckedCreateWithoutGroupInput> | EventGroupPreferenceCreateWithoutGroupInput[] | EventGroupPreferenceUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: EventGroupPreferenceCreateOrConnectWithoutGroupInput | EventGroupPreferenceCreateOrConnectWithoutGroupInput[]
+    createMany?: EventGroupPreferenceCreateManyGroupInputEnvelope
+    connect?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
   }
 
   export type UserUpdateOneWithoutCreatedGroupsNestedInput = {
@@ -24253,6 +25872,20 @@ export namespace Prisma {
     deleteMany?: EventRecommendationScalarWhereInput | EventRecommendationScalarWhereInput[]
   }
 
+  export type EventGroupPreferenceUpdateManyWithoutGroupNestedInput = {
+    create?: XOR<EventGroupPreferenceCreateWithoutGroupInput, EventGroupPreferenceUncheckedCreateWithoutGroupInput> | EventGroupPreferenceCreateWithoutGroupInput[] | EventGroupPreferenceUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: EventGroupPreferenceCreateOrConnectWithoutGroupInput | EventGroupPreferenceCreateOrConnectWithoutGroupInput[]
+    upsert?: EventGroupPreferenceUpsertWithWhereUniqueWithoutGroupInput | EventGroupPreferenceUpsertWithWhereUniqueWithoutGroupInput[]
+    createMany?: EventGroupPreferenceCreateManyGroupInputEnvelope
+    set?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    disconnect?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    delete?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    connect?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    update?: EventGroupPreferenceUpdateWithWhereUniqueWithoutGroupInput | EventGroupPreferenceUpdateWithWhereUniqueWithoutGroupInput[]
+    updateMany?: EventGroupPreferenceUpdateManyWithWhereWithoutGroupInput | EventGroupPreferenceUpdateManyWithWhereWithoutGroupInput[]
+    deleteMany?: EventGroupPreferenceScalarWhereInput | EventGroupPreferenceScalarWhereInput[]
+  }
+
   export type EventGroupParticipantUncheckedUpdateManyWithoutGroupNestedInput = {
     create?: XOR<EventGroupParticipantCreateWithoutGroupInput, EventGroupParticipantUncheckedCreateWithoutGroupInput> | EventGroupParticipantCreateWithoutGroupInput[] | EventGroupParticipantUncheckedCreateWithoutGroupInput[]
     connectOrCreate?: EventGroupParticipantCreateOrConnectWithoutGroupInput | EventGroupParticipantCreateOrConnectWithoutGroupInput[]
@@ -24293,6 +25926,42 @@ export namespace Prisma {
     update?: EventRecommendationUpdateWithWhereUniqueWithoutGroupInput | EventRecommendationUpdateWithWhereUniqueWithoutGroupInput[]
     updateMany?: EventRecommendationUpdateManyWithWhereWithoutGroupInput | EventRecommendationUpdateManyWithWhereWithoutGroupInput[]
     deleteMany?: EventRecommendationScalarWhereInput | EventRecommendationScalarWhereInput[]
+  }
+
+  export type EventGroupPreferenceUncheckedUpdateManyWithoutGroupNestedInput = {
+    create?: XOR<EventGroupPreferenceCreateWithoutGroupInput, EventGroupPreferenceUncheckedCreateWithoutGroupInput> | EventGroupPreferenceCreateWithoutGroupInput[] | EventGroupPreferenceUncheckedCreateWithoutGroupInput[]
+    connectOrCreate?: EventGroupPreferenceCreateOrConnectWithoutGroupInput | EventGroupPreferenceCreateOrConnectWithoutGroupInput[]
+    upsert?: EventGroupPreferenceUpsertWithWhereUniqueWithoutGroupInput | EventGroupPreferenceUpsertWithWhereUniqueWithoutGroupInput[]
+    createMany?: EventGroupPreferenceCreateManyGroupInputEnvelope
+    set?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    disconnect?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    delete?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    connect?: EventGroupPreferenceWhereUniqueInput | EventGroupPreferenceWhereUniqueInput[]
+    update?: EventGroupPreferenceUpdateWithWhereUniqueWithoutGroupInput | EventGroupPreferenceUpdateWithWhereUniqueWithoutGroupInput[]
+    updateMany?: EventGroupPreferenceUpdateManyWithWhereWithoutGroupInput | EventGroupPreferenceUpdateManyWithWhereWithoutGroupInput[]
+    deleteMany?: EventGroupPreferenceScalarWhereInput | EventGroupPreferenceScalarWhereInput[]
+  }
+
+  export type EventGroupCreateNestedOneWithoutPreferencesInput = {
+    create?: XOR<EventGroupCreateWithoutPreferencesInput, EventGroupUncheckedCreateWithoutPreferencesInput>
+    connectOrCreate?: EventGroupCreateOrConnectWithoutPreferencesInput
+    connect?: EventGroupWhereUniqueInput
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type EventGroupUpdateOneRequiredWithoutPreferencesNestedInput = {
+    create?: XOR<EventGroupCreateWithoutPreferencesInput, EventGroupUncheckedCreateWithoutPreferencesInput>
+    connectOrCreate?: EventGroupCreateOrConnectWithoutPreferencesInput
+    upsert?: EventGroupUpsertWithoutPreferencesInput
+    connect?: EventGroupWhereUniqueInput
+    update?: XOR<XOR<EventGroupUpdateToOneWithWhereWithoutPreferencesInput, EventGroupUpdateWithoutPreferencesInput>, EventGroupUncheckedUpdateWithoutPreferencesInput>
   }
 
   export type EventGroupCreateNestedOneWithoutParticipantsInput = {
@@ -24687,6 +26356,22 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
   export type NestedBoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
@@ -24775,36 +26460,40 @@ export namespace Prisma {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: EventGroupParticipantCreateNestedManyWithoutGroupInput
     events?: EventGroupEventCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupUncheckedCreateWithoutCreatedByInput = {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: EventGroupParticipantUncheckedCreateNestedManyWithoutGroupInput
     events?: EventGroupEventUncheckedCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationUncheckedCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceUncheckedCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupCreateOrConnectWithoutCreatedByInput = {
@@ -24990,14 +26679,15 @@ export namespace Prisma {
     id?: StringFilter<"EventGroup"> | string
     name?: StringNullableFilter<"EventGroup"> | string | null
     description?: StringNullableFilter<"EventGroup"> | string | null
-    joinCode?: StringFilter<"EventGroup"> | string
+    inviteCode?: StringFilter<"EventGroup"> | string
+    creatorId?: StringNullableFilter<"EventGroup"> | string | null
     targetDate?: DateTimeNullableFilter<"EventGroup"> | Date | string | null
     targetTime?: StringNullableFilter<"EventGroup"> | string | null
     budgetRange?: StringNullableFilter<"EventGroup"> | string | null
     preferredLocation?: StringNullableFilter<"EventGroup"> | string | null
-    selectionSnapshot?: JsonNullableFilter<"EventGroup">
+    city?: StringNullableFilter<"EventGroup"> | string | null
     status?: StringFilter<"EventGroup"> | string
-    createdById?: StringNullableFilter<"EventGroup"> | string | null
+    isGenerated?: BoolFilter<"EventGroup"> | boolean
     createdAt?: DateTimeFilter<"EventGroup"> | Date | string
     updatedAt?: DateTimeFilter<"EventGroup"> | Date | string
   }
@@ -26408,6 +28098,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type EventGroupPreferenceCreateWithoutGroupInput = {
+    id?: string
+    userId?: string | null
+    sessionId: string
+    userName?: string | null
+    userIcon: string
+    moneyPreference: string
+    activityLevel: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventGroupPreferenceUncheckedCreateWithoutGroupInput = {
+    id?: string
+    userId?: string | null
+    sessionId: string
+    userName?: string | null
+    userIcon: string
+    moneyPreference: string
+    activityLevel: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EventGroupPreferenceCreateOrConnectWithoutGroupInput = {
+    where: EventGroupPreferenceWhereUniqueInput
+    create: XOR<EventGroupPreferenceCreateWithoutGroupInput, EventGroupPreferenceUncheckedCreateWithoutGroupInput>
+  }
+
+  export type EventGroupPreferenceCreateManyGroupInputEnvelope = {
+    data: EventGroupPreferenceCreateManyGroupInput | EventGroupPreferenceCreateManyGroupInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutCreatedGroupsInput = {
     update: XOR<UserUpdateWithoutCreatedGroupsInput, UserUncheckedUpdateWithoutCreatedGroupsInput>
     create: XOR<UserCreateWithoutCreatedGroupsInput, UserUncheckedCreateWithoutCreatedGroupsInput>
@@ -26491,40 +28215,172 @@ export namespace Prisma {
     data: XOR<EventRecommendationUpdateManyMutationInput, EventRecommendationUncheckedUpdateManyWithoutGroupInput>
   }
 
-  export type EventGroupCreateWithoutParticipantsInput = {
+  export type EventGroupPreferenceUpsertWithWhereUniqueWithoutGroupInput = {
+    where: EventGroupPreferenceWhereUniqueInput
+    update: XOR<EventGroupPreferenceUpdateWithoutGroupInput, EventGroupPreferenceUncheckedUpdateWithoutGroupInput>
+    create: XOR<EventGroupPreferenceCreateWithoutGroupInput, EventGroupPreferenceUncheckedCreateWithoutGroupInput>
+  }
+
+  export type EventGroupPreferenceUpdateWithWhereUniqueWithoutGroupInput = {
+    where: EventGroupPreferenceWhereUniqueInput
+    data: XOR<EventGroupPreferenceUpdateWithoutGroupInput, EventGroupPreferenceUncheckedUpdateWithoutGroupInput>
+  }
+
+  export type EventGroupPreferenceUpdateManyWithWhereWithoutGroupInput = {
+    where: EventGroupPreferenceScalarWhereInput
+    data: XOR<EventGroupPreferenceUpdateManyMutationInput, EventGroupPreferenceUncheckedUpdateManyWithoutGroupInput>
+  }
+
+  export type EventGroupPreferenceScalarWhereInput = {
+    AND?: EventGroupPreferenceScalarWhereInput | EventGroupPreferenceScalarWhereInput[]
+    OR?: EventGroupPreferenceScalarWhereInput[]
+    NOT?: EventGroupPreferenceScalarWhereInput | EventGroupPreferenceScalarWhereInput[]
+    id?: StringFilter<"EventGroupPreference"> | string
+    groupId?: StringFilter<"EventGroupPreference"> | string
+    userId?: StringNullableFilter<"EventGroupPreference"> | string | null
+    sessionId?: StringFilter<"EventGroupPreference"> | string
+    userName?: StringNullableFilter<"EventGroupPreference"> | string | null
+    userIcon?: StringFilter<"EventGroupPreference"> | string
+    moneyPreference?: StringFilter<"EventGroupPreference"> | string
+    activityLevel?: IntFilter<"EventGroupPreference"> | number
+    createdAt?: DateTimeFilter<"EventGroupPreference"> | Date | string
+    updatedAt?: DateTimeFilter<"EventGroupPreference"> | Date | string
+  }
+
+  export type EventGroupCreateWithoutPreferencesInput = {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
+    isGenerated?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    createdBy?: UserCreateNestedOneWithoutCreatedGroupsInput
+    participants?: EventGroupParticipantCreateNestedManyWithoutGroupInput
+    events?: EventGroupEventCreateNestedManyWithoutGroupInput
+    recommendations?: EventRecommendationCreateNestedManyWithoutGroupInput
+  }
+
+  export type EventGroupUncheckedCreateWithoutPreferencesInput = {
+    id?: string
+    name?: string | null
+    description?: string | null
+    inviteCode?: string
+    creatorId?: string | null
+    targetDate?: Date | string | null
+    targetTime?: string | null
+    budgetRange?: string | null
+    preferredLocation?: string | null
+    city?: string | null
+    status?: string
+    isGenerated?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    participants?: EventGroupParticipantUncheckedCreateNestedManyWithoutGroupInput
+    events?: EventGroupEventUncheckedCreateNestedManyWithoutGroupInput
+    recommendations?: EventRecommendationUncheckedCreateNestedManyWithoutGroupInput
+  }
+
+  export type EventGroupCreateOrConnectWithoutPreferencesInput = {
+    where: EventGroupWhereUniqueInput
+    create: XOR<EventGroupCreateWithoutPreferencesInput, EventGroupUncheckedCreateWithoutPreferencesInput>
+  }
+
+  export type EventGroupUpsertWithoutPreferencesInput = {
+    update: XOR<EventGroupUpdateWithoutPreferencesInput, EventGroupUncheckedUpdateWithoutPreferencesInput>
+    create: XOR<EventGroupCreateWithoutPreferencesInput, EventGroupUncheckedCreateWithoutPreferencesInput>
+    where?: EventGroupWhereInput
+  }
+
+  export type EventGroupUpdateToOneWithWhereWithoutPreferencesInput = {
+    where?: EventGroupWhereInput
+    data: XOR<EventGroupUpdateWithoutPreferencesInput, EventGroupUncheckedUpdateWithoutPreferencesInput>
+  }
+
+  export type EventGroupUpdateWithoutPreferencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    inviteCode?: StringFieldUpdateOperationsInput | string
+    targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    targetTime?: NullableStringFieldUpdateOperationsInput | string | null
+    budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
+    preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: UserUpdateOneWithoutCreatedGroupsNestedInput
+    participants?: EventGroupParticipantUpdateManyWithoutGroupNestedInput
+    events?: EventGroupEventUpdateManyWithoutGroupNestedInput
+    recommendations?: EventRecommendationUpdateManyWithoutGroupNestedInput
+  }
+
+  export type EventGroupUncheckedUpdateWithoutPreferencesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    inviteCode?: StringFieldUpdateOperationsInput | string
+    creatorId?: NullableStringFieldUpdateOperationsInput | string | null
+    targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    targetTime?: NullableStringFieldUpdateOperationsInput | string | null
+    budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
+    preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    participants?: EventGroupParticipantUncheckedUpdateManyWithoutGroupNestedInput
+    events?: EventGroupEventUncheckedUpdateManyWithoutGroupNestedInput
+    recommendations?: EventRecommendationUncheckedUpdateManyWithoutGroupNestedInput
+  }
+
+  export type EventGroupCreateWithoutParticipantsInput = {
+    id?: string
+    name?: string | null
+    description?: string | null
+    inviteCode?: string
+    targetDate?: Date | string | null
+    targetTime?: string | null
+    budgetRange?: string | null
+    preferredLocation?: string | null
+    city?: string | null
+    status?: string
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: UserCreateNestedOneWithoutCreatedGroupsInput
     events?: EventGroupEventCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupUncheckedCreateWithoutParticipantsInput = {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
+    creatorId?: string | null
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
-    createdById?: string | null
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     events?: EventGroupEventUncheckedCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationUncheckedCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceUncheckedCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupCreateOrConnectWithoutParticipantsInput = {
@@ -26576,36 +28432,40 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneWithoutCreatedGroupsNestedInput
     events?: EventGroupEventUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUpdateManyWithoutGroupNestedInput
   }
 
   export type EventGroupUncheckedUpdateWithoutParticipantsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
+    creatorId?: NullableStringFieldUpdateOperationsInput | string | null
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     events?: EventGroupEventUncheckedUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUncheckedUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUncheckedUpdateManyWithoutGroupNestedInput
   }
 
   export type UserUpsertWithoutEventGroupsInput = {
@@ -26647,36 +28507,40 @@ export namespace Prisma {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: UserCreateNestedOneWithoutCreatedGroupsInput
     participants?: EventGroupParticipantCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupUncheckedCreateWithoutEventsInput = {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
+    creatorId?: string | null
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
-    createdById?: string | null
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: EventGroupParticipantUncheckedCreateNestedManyWithoutGroupInput
     recommendations?: EventRecommendationUncheckedCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceUncheckedCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupCreateOrConnectWithoutEventsInput = {
@@ -26748,36 +28612,40 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneWithoutCreatedGroupsNestedInput
     participants?: EventGroupParticipantUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUpdateManyWithoutGroupNestedInput
   }
 
   export type EventGroupUncheckedUpdateWithoutEventsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
+    creatorId?: NullableStringFieldUpdateOperationsInput | string | null
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: EventGroupParticipantUncheckedUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUncheckedUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUncheckedUpdateManyWithoutGroupNestedInput
   }
 
   export type EventUpsertWithoutEventGroupsInput = {
@@ -26888,36 +28756,40 @@ export namespace Prisma {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: UserCreateNestedOneWithoutCreatedGroupsInput
     participants?: EventGroupParticipantCreateNestedManyWithoutGroupInput
     events?: EventGroupEventCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupUncheckedCreateWithoutRecommendationsInput = {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
+    creatorId?: string | null
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
-    createdById?: string | null
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: EventGroupParticipantUncheckedCreateNestedManyWithoutGroupInput
     events?: EventGroupEventUncheckedCreateNestedManyWithoutGroupInput
+    preferences?: EventGroupPreferenceUncheckedCreateNestedManyWithoutGroupInput
   }
 
   export type EventGroupCreateOrConnectWithoutRecommendationsInput = {
@@ -27081,36 +28953,40 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: UserUpdateOneWithoutCreatedGroupsNestedInput
     participants?: EventGroupParticipantUpdateManyWithoutGroupNestedInput
     events?: EventGroupEventUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUpdateManyWithoutGroupNestedInput
   }
 
   export type EventGroupUncheckedUpdateWithoutRecommendationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
+    creatorId?: NullableStringFieldUpdateOperationsInput | string | null
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: EventGroupParticipantUncheckedUpdateManyWithoutGroupNestedInput
     events?: EventGroupEventUncheckedUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUncheckedUpdateManyWithoutGroupNestedInput
   }
 
   export type UserUpsertWithoutRecommendationsInput = {
@@ -27392,13 +29268,14 @@ export namespace Prisma {
     id?: string
     name?: string | null
     description?: string | null
-    joinCode: string
+    inviteCode?: string
     targetDate?: Date | string | null
     targetTime?: string | null
     budgetRange?: string | null
     preferredLocation?: string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: string | null
     status?: string
+    isGenerated?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -27460,49 +29337,54 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: EventGroupParticipantUpdateManyWithoutGroupNestedInput
     events?: EventGroupEventUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUpdateManyWithoutGroupNestedInput
   }
 
   export type EventGroupUncheckedUpdateWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: EventGroupParticipantUncheckedUpdateManyWithoutGroupNestedInput
     events?: EventGroupEventUncheckedUpdateManyWithoutGroupNestedInput
     recommendations?: EventRecommendationUncheckedUpdateManyWithoutGroupNestedInput
+    preferences?: EventGroupPreferenceUncheckedUpdateManyWithoutGroupNestedInput
   }
 
   export type EventGroupUncheckedUpdateManyWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    joinCode?: StringFieldUpdateOperationsInput | string
+    inviteCode?: StringFieldUpdateOperationsInput | string
     targetDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     targetTime?: NullableStringFieldUpdateOperationsInput | string | null
     budgetRange?: NullableStringFieldUpdateOperationsInput | string | null
     preferredLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    selectionSnapshot?: NullableJsonNullValueInput | InputJsonValue
+    city?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    isGenerated?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -28095,6 +29977,18 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type EventGroupPreferenceCreateManyGroupInput = {
+    id?: string
+    userId?: string | null
+    sessionId: string
+    userName?: string | null
+    userIcon: string
+    moneyPreference: string
+    activityLevel: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type EventGroupParticipantUpdateWithoutGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
     role?: StringFieldUpdateOperationsInput | string
@@ -28187,6 +30081,42 @@ export namespace Prisma {
     modelVersion?: NullableStringFieldUpdateOperationsInput | string | null
     features?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventGroupPreferenceUpdateWithoutGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    userIcon?: StringFieldUpdateOperationsInput | string
+    moneyPreference?: StringFieldUpdateOperationsInput | string
+    activityLevel?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventGroupPreferenceUncheckedUpdateWithoutGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    userIcon?: StringFieldUpdateOperationsInput | string
+    moneyPreference?: StringFieldUpdateOperationsInput | string
+    activityLevel?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventGroupPreferenceUncheckedUpdateManyWithoutGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    userName?: NullableStringFieldUpdateOperationsInput | string | null
+    userIcon?: StringFieldUpdateOperationsInput | string
+    moneyPreference?: StringFieldUpdateOperationsInput | string
+    activityLevel?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
