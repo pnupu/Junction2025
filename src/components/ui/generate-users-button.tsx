@@ -3,27 +3,52 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
+export type DemoUser = {
+  name: string;
+  userIcon: string;
+  moneyPreference: "budget" | "moderate" | "premium";
+  activityLevel: number;
+  latitude?: number;
+  longitude?: number;
+  dietaryRestrictions?: string;
+  healthConsciousness?: string;
+};
+
 interface GenerateUsersButtonProps {
   onGenerateUsers?: (count: number) => void;
+  onAddUsers: (users: DemoUser[]) => Promise<void>;
 }
 
-export function GenerateUsersButton({ onGenerateUsers }: GenerateUsersButtonProps) {
+export function GenerateUsersButton({ 
+  onGenerateUsers,
+  onAddUsers 
+}: GenerateUsersButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock: Generate 3-5 demo users
-    const userCount = Math.floor(Math.random() * 3) + 3;
-    
-    if (onGenerateUsers) {
-      onGenerateUsers(userCount);
+    try {
+      // Load demo users from JSON file
+      const response = await fetch("/data/demo-users.json");
+      if (!response.ok) {
+        throw new Error("Failed to load demo users");
+      }
+      
+      const demoUsers: DemoUser[] = await response.json();
+      
+      // Add all demo users to the event in parallel
+      await onAddUsers(demoUsers);
+      
+      if (onGenerateUsers) {
+        onGenerateUsers(demoUsers.length);
+      }
+    } catch (error) {
+      console.error("Error generating demo users:", error);
+      alert("Failed to add demo users. Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
-    
-    setIsGenerating(false);
   };
 
   return (
@@ -37,7 +62,7 @@ export function GenerateUsersButton({ onGenerateUsers }: GenerateUsersButtonProp
           disabled={isGenerating}
           className="h-auto w-full rounded-xl bg-white px-6 py-3.5 text-base font-semibold text-[#9810FA] hover:bg-white/90 disabled:opacity-50"
         >
-          {isGenerating ? "Generating..." : "Populate with demo users"}
+          {isGenerating ? "Adding users..." : "Populate with demo users"}
         </Button>
       </div>
     </div>

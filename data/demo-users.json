@@ -1,0 +1,43 @@
+[
+  {
+    "name": "Alex",
+    "userIcon": "👨",
+    "moneyPreference": "moderate",
+    "activityLevel": 4,
+    "latitude": 60.1695,
+    "longitude": 24.9354,
+    "dietaryRestrictions": "none",
+    "healthConsciousness": "moderate"
+  },
+  {
+    "name": "Emma",
+    "userIcon": "👩",
+    "moneyPreference": "premium",
+    "activityLevel": 3,
+    "latitude": 60.1772,
+    "longitude": 24.8025,
+    "dietaryRestrictions": "vegan-vege",
+    "healthConsciousness": "very"
+  },
+  {
+    "name": "Mika",
+    "userIcon": "🧑",
+    "moneyPreference": "budget",
+    "activityLevel": 5,
+    "latitude": 60.1620,
+    "longitude": 24.9380,
+    "dietaryRestrictions": "none",
+    "healthConsciousness": "little"
+  },
+  {
+    "name": "Sofia",
+    "userIcon": "👱‍♀️",
+    "moneyPreference": "moderate",
+    "activityLevel": 2,
+    "latitude": 60.1850,
+    "longitude": 24.8200,
+    "dietaryRestrictions": "gluten-free",
+    "healthConsciousness": "moderate"
+  }
+]
+

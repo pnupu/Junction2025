@@ -26,7 +26,7 @@ import {
   EventMapModal,
   type ParticipantLocation,
 } from "@/components/event-map-modal";
-import { GenerateUsersButton } from "@/components/ui/generate-users-button";
+import { GenerateUsersButton, type DemoUser } from "@/components/ui/generate-users-button";
 import { OpinionModal } from "@/components/opinion-modal";
 import { useMoodQuestionsFlow } from "@/components/mood-questions-flow";
 import { MoodQuestionCard } from "@/components/mood-question-card";
@@ -77,6 +77,7 @@ export default function EventPage() {
   const params = useParams();
   const router = useRouter();
   const eventIdOrCode = params.id as string;
+  const utils = api.useUtils();
 
   const [sessionId, setSessionId] = useState<string>("");
   const [isCreator, setIsCreator] = useState<boolean>(false);
@@ -141,6 +142,8 @@ export default function EventPage() {
       void refetch();
     },
   });
+
+  const saveMoodResponses = api.event.saveMoodResponses.useMutation();
 
   // Get group ID from event data
   const groupId = eventData?.id ?? eventIdOrCode;
@@ -424,6 +427,10 @@ export default function EventPage() {
   };
 
   const handleGenerateEvent = () => {
+    // Prevent multiple clicks
+    if (generateRecommendations.isPending || eventStatus === "generating" || eventStatus === "generated") {
+      return;
+    }
     if (eventData?.id) {
       generateRecommendations.mutate({ groupId: eventData.id });
     }
@@ -1085,10 +1092,15 @@ export default function EventPage() {
             <div className="mt-8">
               <Button
                 onClick={handleGenerateEvent}
-                disabled={participantCount === 0}
+                disabled={
+                  participantCount === 0 ||
+                  generateRecommendations.isPending
+                }
                 className="h-16 w-full rounded-xl bg-white text-lg font-bold text-[#029DE2] hover:scale-105 hover:bg-white/90 disabled:opacity-50 disabled:hover:scale-100"
               >
-                🎉 Let&apos;s cook some events!
+                {generateRecommendations.isPending
+                  ? "Cooking events..."
+                  : "🎉 Let's cook some events!"}
               </Button>
               {participantCount === 0 && (
                 <p className="mt-2 text-center text-sm text-white/70">
@@ -1111,8 +1123,172 @@ export default function EventPage() {
               <GenerateUsersButton
                 onGenerateUsers={(count) => {
                   console.log(`Generated ${count} demo users`);
-                  // TODO: Implement actual demo user generation
                   void refetch();
+                }}
+                onAddUsers={async (users: DemoUser[]) => {
+                  const eventId = eventData?.id ?? groupId;
+                  
+                  // Generate unique sessionIds for all users
+                  const usersWithSessionIds = users.map(user => ({
+                    user,
+                    sessionId: `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${user.name}`,
+                  }));
+
+                  // Step 1: Add all user preferences in parallel
+                  await Promise.all(
+                    usersWithSessionIds.map(({ user, sessionId }) =>
+                      addPreferences.mutateAsync({
+                        groupId: eventId,
+                        sessionId,
+                        userName: user.name,
+                        userIcon: user.userIcon,
+                        moneyPreference: user.moneyPreference,
+                        activityLevel: user.activityLevel,
+                        latitude: user.latitude,
+                        longitude: user.longitude,
+                      })
+                    )
+                  );
+
+                  // Step 2: Wait a bit for preferences to be saved
+                  await new Promise(resolve => setTimeout(resolve, 300));
+
+                  // Step 3: Fetch all mood questions in parallel
+                  const moodQuestionsResults = await Promise.all(
+                    usersWithSessionIds.map(({ user, sessionId }) =>
+                      utils.event.getMoodQuestions.fetch({
+                        groupId: eventId,
+                        sessionId,
+                        participantName: user.name,
+                      }).then(questions => ({ user, sessionId, questions }))
+                    )
+                  );
+
+                  // Step 4: Generate answers for all users and save in parallel
+                  await Promise.all(
+                    moodQuestionsResults.map(({ user, sessionId, questions }) => {
+                      const responses: Record<string, string | number> = {};
+                      
+                      for (const question of questions.questions) {
+                        let answer: string | number;
+                        
+                        // Map answers based on signalKey and user profile
+                        switch (question.signalKey) {
+                          case "currentEnergy":
+                            // Map activityLevel (1-5) to energy responses
+                            if (user.activityLevel >= 4) {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("high") || 
+                                opt.toLowerCase().includes("hype") || 
+                                opt.toLowerCase().includes("pumped")
+                              ) ?? question.options?.[question.options.length - 1] ?? "High";
+                            } else if (user.activityLevel <= 2) {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("low") || 
+                                opt.toLowerCase().includes("chill") || 
+                                opt.toLowerCase().includes("mellow")
+                              ) ?? question.options?.[0] ?? "Low";
+                            } else {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("medium") || 
+                                opt.toLowerCase().includes("moderate") || 
+                                opt.toLowerCase().includes("balanced")
+                              ) ?? question.options?.[Math.floor(question.options.length / 2)] ?? "Medium";
+                            }
+                            break;
+                          
+                          case "indoorOutdoorPreference":
+                            // Prefer outdoor for active users, indoor for less active
+                            if (user.activityLevel >= 4) {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("outdoor") || 
+                                opt.toLowerCase().includes("air") || 
+                                opt.toLowerCase().includes("outside")
+                              ) ?? question.options?.[1] ?? "Get some air";
+                            } else {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("indoor") || 
+                                opt.toLowerCase().includes("inside")
+                              ) ?? question.options?.[0] ?? "Stay inside";
+                            }
+                            break;
+                          
+                          case "timeAvailable":
+                            // Premium users might want longer time, budget users shorter
+                            if (user.moneyPreference === "premium") {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("evening") || 
+                                opt.toLowerCase().includes("long") || 
+                                opt.toLowerCase().includes("all")
+                              ) ?? question.options?.[question.options.length - 1] ?? "All evening";
+                            } else if (user.moneyPreference === "budget") {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("quick") || 
+                                opt.toLowerCase().includes("short")
+                              ) ?? question.options?.[0] ?? "Quick";
+                            } else {
+                              answer = question.options?.[Math.floor(question.options.length / 2)] ?? "Moderate";
+                            }
+                            break;
+                          
+                          case "activityPace":
+                            // Map directly from activity level
+                            if (user.activityLevel >= 4) {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("all out") || 
+                                opt.toLowerCase().includes("active") || 
+                                opt.toLowerCase().includes("high")
+                              ) ?? question.options?.[question.options.length - 1] ?? "Go all out";
+                            } else if (user.activityLevel <= 2) {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("low") || 
+                                opt.toLowerCase().includes("key") || 
+                                opt.toLowerCase().includes("chill")
+                              ) ?? question.options?.[0] ?? "Low-key";
+                            } else {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("mix") || 
+                                opt.toLowerCase().includes("moderate")
+                              ) ?? question.options?.[Math.floor(question.options.length / 2)] ?? "Mix it up";
+                            }
+                            break;
+                          
+                          case "hungerLevel":
+                            // Health conscious users might prefer lighter options
+                            if (user.healthConsciousness === "very") {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("light") || 
+                                opt.toLowerCase().includes("bites")
+                              ) ?? question.options?.[0] ?? "Light bites";
+                            } else {
+                              answer = question.options?.find(opt => 
+                                opt.toLowerCase().includes("full") || 
+                                opt.toLowerCase().includes("meal")
+                              ) ?? question.options?.[1] ?? "Full meal";
+                            }
+                            break;
+                          
+                          default:
+                            // Default: pick middle option or first option
+                            answer = question.options?.[Math.floor(question.options.length / 2)] ?? 
+                                     question.options?.[0] ?? 
+                                     (question.type === "scale" ? 2 : "Option 1");
+                        }
+                        
+                        responses[question.signalKey] = answer;
+                      }
+
+                      // Save mood responses
+                      if (Object.keys(responses).length > 0) {
+                        return saveMoodResponses.mutateAsync({
+                          groupId: eventId,
+                          sessionId,
+                          responses,
+                        });
+                      }
+                      return Promise.resolve();
+                    })
+                  );
                 }}
               />
             </div>
