@@ -16,13 +16,29 @@ const userIcons = [
   { emoji: "🦉", name: "Wise Owl" },
 ];
 
-const moneyPreferences = [
-  { id: "budget", label: "Budget", emoji: "💰" },
-  { id: "moderate", label: "Moderate", emoji: "💵" },
-  { id: "premium", label: "Premium", emoji: "💎" },
+const moodOptions = [
+  { id: "chill", label: "Chill", emoji: "😌" },
+  { id: "celebratory", label: "Celebratory", emoji: "🎉" },
+  { id: "active", label: "Active", emoji: "⚡" },
 ];
 
-const activityLabels = ["Laidback", "Relaxed", "Balanced", "Active", "Very Active"];
+const activityTypeOptions = [
+  { id: "food", label: "Food", emoji: "🍽️" },
+  { id: "culture", label: "Culture", emoji: "🎨" },
+  { id: "activity", label: "Activity", emoji: "🏃" },
+];
+
+const foodLimitOptions = [
+  { id: "no-limit", label: "No limit", emoji: "✨" },
+  { id: "veg", label: "Vegetarian", emoji: "🥗" },
+  { id: "gluten", label: "Gluten-free", emoji: "🌾" },
+];
+
+const budgetOptions = [
+  { id: "free", label: "Free", emoji: "🆓" },
+  { id: "under-10", label: "<10€/person", emoji: "💰" },
+  { id: "no-limit", label: "No limit", emoji: "💎" },
+];
 
 export default function EventPage() {
   const params = useParams();
@@ -32,8 +48,10 @@ export default function EventPage() {
   const [sessionId, setSessionId] = useState<string>("");
   const [step, setStep] = useState<"icon" | "preferences" | "complete">("icon");
   const [selectedIcon, setSelectedIcon] = useState<{ emoji: string; name: string } | null>(null);
-  const [moneyPreference, setMoneyPreference] = useState<"budget" | "moderate" | "premium" | null>(null);
-  const [activityLevel, setActivityLevel] = useState<number>(3);
+  const [mood, setMood] = useState<string | null>(null);
+  const [activityType, setActivityType] = useState<string | null>(null);
+  const [foodLimit, setFoodLimit] = useState<string | null>(null);
+  const [budget, setBudget] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState<boolean>(false);
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
 
@@ -80,15 +98,22 @@ export default function EventPage() {
   };
 
   const handleSubmitPreferences = () => {
-    if (!selectedIcon || !moneyPreference || !sessionId) return;
+    if (!selectedIcon || !mood || !activityType || !foodLimit || !budget || !sessionId) return;
+
+    // Map budget to legacy moneyPreference format
+    const moneyPreferenceMap: Record<string, "budget" | "moderate" | "premium"> = {
+      "free": "budget",
+      "under-10": "moderate",
+      "no-limit": "premium",
+    };
 
     addPreferences.mutate({
       groupId: eventId,
       sessionId,
       userName: selectedIcon.name,
       userIcon: selectedIcon.emoji,
-      moneyPreference,
-      activityLevel,
+      moneyPreference: moneyPreferenceMap[budget] || "moderate",
+      activityLevel: mood === "active" ? 5 : mood === "celebratory" ? 3 : 1,
     });
 
     sessionStorage.setItem(`event_${eventId}_submitted`, "true");
@@ -203,58 +228,105 @@ export default function EventPage() {
               </div>
             </div>
 
-            {/* Money Preference */}
+            {/* 1. Mood */}
             <div>
-              <h3 className="mb-3 text-lg font-medium text-white">Budget</h3>
+              <h3 className="mb-3 text-lg font-medium text-white">1. What is the mood?</h3>
               <div className="grid grid-cols-3 gap-3">
-                {moneyPreferences.map((pref) => (
+                {moodOptions.map((option) => (
                   <button
-                    key={pref.id}
-                    onClick={() => setMoneyPreference(pref.id as "budget" | "moderate" | "premium")}
+                    key={option.id}
+                    onClick={() => setMood(option.id)}
                     className={`
                       flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
                       ${
-                        moneyPreference === pref.id
+                        mood === option.id
                           ? "scale-105 border-white bg-white/10"
                           : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
                       }
                     `}
                   >
-                    <span className="mb-2 text-3xl">{pref.emoji}</span>
-                    <span className="text-sm font-medium text-white">{pref.label}</span>
+                    <span className="mb-2 text-3xl">{option.emoji}</span>
+                    <span className="text-sm font-medium text-white">{option.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Activity Level */}
+            {/* 2. Activity Type */}
             <div>
-              <h3 className="mb-3 text-lg font-medium text-white">Activity Level</h3>
-              <div className="space-y-4">
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={activityLevel}
-                  onChange={(e) => setActivityLevel(Number(e.target.value))}
-                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700"
-                  style={{
-                    background: `linear-gradient(to right, white ${(activityLevel - 1) * 25}%, rgb(51 65 85) ${(activityLevel - 1) * 25}%)`,
-                  }}
-                />
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Laidback</span>
-                  <span className="font-medium text-white">
-                    {activityLabels[activityLevel - 1]}
-                  </span>
-                  <span className="text-slate-400">Active</span>
-                </div>
+              <h3 className="mb-3 text-lg font-medium text-white">2. Activity type?</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {activityTypeOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setActivityType(option.id)}
+                    className={`
+                      flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
+                      ${
+                        activityType === option.id
+                          ? "scale-105 border-white bg-white/10"
+                          : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+                      }
+                    `}
+                  >
+                    <span className="mb-2 text-3xl">{option.emoji}</span>
+                    <span className="text-sm font-medium text-white">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Food Limits */}
+            <div>
+              <h3 className="mb-3 text-lg font-medium text-white">3. Food limits?</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {foodLimitOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setFoodLimit(option.id)}
+                    className={`
+                      flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
+                      ${
+                        foodLimit === option.id
+                          ? "scale-105 border-white bg-white/10"
+                          : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+                      }
+                    `}
+                  >
+                    <span className="mb-2 text-3xl">{option.emoji}</span>
+                    <span className="text-sm font-medium text-white">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. Budget */}
+            <div>
+              <h3 className="mb-3 text-lg font-medium text-white">4. Budget</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {budgetOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setBudget(option.id)}
+                    className={`
+                      flex flex-col items-center justify-center rounded-2xl border-2 p-6 transition-all
+                      ${
+                        budget === option.id
+                          ? "scale-105 border-white bg-white/10"
+                          : "border-slate-700 bg-slate-800/50 hover:border-slate-500"
+                      }
+                    `}
+                  >
+                    <span className="mb-2 text-3xl">{option.emoji}</span>
+                    <span className="text-sm font-medium text-white">{option.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
             <Button
               onClick={handleSubmitPreferences}
-              disabled={!moneyPreference || addPreferences.isPending}
+              disabled={!mood || !activityType || !foodLimit || !budget || addPreferences.isPending}
               className="h-14 w-full rounded-full bg-white text-lg font-semibold text-slate-950 transition-all hover:scale-105 hover:bg-white/90 disabled:opacity-40 disabled:hover:scale-100"
             >
               {addPreferences.isPending ? "Submitting..." : "Submit"}
