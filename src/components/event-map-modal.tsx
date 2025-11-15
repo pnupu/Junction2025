@@ -9,6 +9,36 @@ import {
 } from "@/components/ui/dialog";
 import dynamic from "next/dynamic";
 
+// Type for Leaflet module (only what we need)
+type LeafletModule = {
+  Icon: {
+    Default: {
+      prototype: { _getIconUrl?: unknown };
+      mergeOptions: (options: {
+        iconRetinaUrl: string;
+        iconUrl: string;
+        shadowUrl: string;
+      }) => void;
+    };
+  };
+  divIcon: (options: {
+    className: string;
+    html: string;
+    iconSize: [number, number];
+    iconAnchor: [number, number];
+    popupAnchor?: [number, number];
+  }) => unknown;
+};
+
+// Type for map instance
+type MapInstance = {
+  setView: (
+    latlng: [number, number],
+    zoom: number,
+    options?: { animate?: boolean; duration?: number },
+  ) => void;
+};
+
 // Dynamically import React Leaflet components to avoid SSR issues
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -54,20 +84,21 @@ export function EventMapModal({
   eventName,
 }: EventMapModalProps) {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [L, setL] = useState<typeof import("leaflet") | null>(null);
+  const [L, setL] = useState<LeafletModule | null>(null);
   const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
-  const [mapInstance, setMapInstance] = useState<any>(null);
+  const [mapInstance, setMapInstance] = useState<MapInstance | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       // Load Leaflet CSS and library
-      void import("leaflet").then((leaflet) => {
+      void import("leaflet").then((leafletModule) => {
+        // Handle both default export and named exports
+        const leaflet = (leafletModule.default ?? leafletModule) as LeafletModule;
         setL(leaflet);
         setLeafletLoaded(true);
 
         // Fix default marker icon issue
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        delete (leaflet.Icon.Default.prototype as any)._getIconUrl;
+        delete leaflet.Icon.Default.prototype._getIconUrl;
         leaflet.Icon.Default.mergeOptions({
           iconRetinaUrl: "/leaflet/marker-icon-2x.png",
           iconUrl: "/leaflet/marker-icon.png",
@@ -125,7 +156,7 @@ export function EventMapModal({
       : 24.9354;
 
   // Create custom marker icons with initials or count
-  const createCustomIcon = (display: string, isHighlighted: boolean = false) => {
+  const createCustomIcon = (display: string, isHighlighted = false) => {
     if (!L) return undefined;
 
     return L.divIcon({
@@ -183,13 +214,17 @@ export function EventMapModal({
     setSelectedParticipant(userName === selectedParticipant ? null : userName);
     
     // Find the participant's location
-    const participant = participants.find(p => p.userName === userName);
+    const participant = participants.find((p) => p.userName === userName);
     if (participant && mapInstance) {
       // Center and zoom to the participant
-      mapInstance.setView([participant.latitude, participant.longitude], 15, {
-        animate: true,
-        duration: 0.5,
-      });
+      mapInstance.setView(
+        [participant.latitude, participant.longitude],
+        15,
+        {
+          animate: true,
+          duration: 0.5,
+        },
+      );
     }
   };
 
@@ -204,7 +239,11 @@ export function EventMapModal({
             width: "100%",
             borderRadius: isEnlarged ? "0" : "12px",
           }}
-          ref={setMapInstance}
+          ref={(map) => {
+            if (map) {
+              setMapInstance(map as MapInstance);
+            }
+          }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -216,6 +255,7 @@ export function EventMapModal({
               <Marker
                 key={idx}
                 position={[location.latitude, location.longitude]}
+                // @ts-expect-error - Leaflet divIcon return type doesn't match react-leaflet's expected type, but works at runtime
                 icon={createCustomIcon(
                   location.count > 1 ? String(location.count) : location.initials,
                   isHighlighted,
