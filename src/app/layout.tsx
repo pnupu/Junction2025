@@ -26,9 +26,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://use.typekit.net/tzf7dwe.css" />
       </head>
       <body>
-        <TRPCReactProvider>
-          {children}
-        </TRPCReactProvider>
+        <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
   );

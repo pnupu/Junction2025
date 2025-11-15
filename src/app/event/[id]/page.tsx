@@ -26,13 +26,17 @@ import {
   EventMapModal,
   type ParticipantLocation,
 } from "@/components/event-map-modal";
-import { GenerateUsersButton, type DemoUser } from "@/components/ui/generate-users-button";
+import {
+  GenerateUsersButton,
+  type DemoUser,
+} from "@/components/ui/generate-users-button";
 import { OpinionModal } from "@/components/opinion-modal";
 import { useMoodQuestionsFlow } from "@/components/mood-questions-flow";
 import { MoodQuestionCard } from "@/components/mood-question-card";
 import dynamic from "next/dynamic";
 
-type RecommendationItem = RouterOutputs["event"]["getRecommendations"]["recommendations"][number];
+type RecommendationItem =
+  RouterOutputs["event"]["getRecommendations"]["recommendations"][number];
 
 // Type for Leaflet module (only what we need)
 type LeafletModule = {
@@ -90,14 +94,20 @@ export default function EventPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [L, setL] = useState<LeafletModule | null>(null);
-  const [activeTab, setActiveTab] = useState<"participants" | "ideas">("participants");
+  const [activeTab, setActiveTab] = useState<"participants" | "ideas">(
+    "participants",
+  );
 
   // Try to get event by invite code first (if it looks like a code), otherwise by ID
   const isLikelyInviteCode =
     eventIdOrCode.length <= 10 && /^[A-Z0-9]+$/i.test(eventIdOrCode);
 
   // Smart polling: only poll when something is actively happening
-  const { data: eventData, refetch, isLoading } = api.event.get.useQuery(
+  const {
+    data: eventData,
+    refetch,
+    isLoading,
+  } = api.event.get.useQuery(
     isLikelyInviteCode
       ? { inviteCode: eventIdOrCode.toUpperCase() }
       : { id: eventIdOrCode },
@@ -159,7 +169,9 @@ export default function EventPage() {
   const recommendationsQuery = api.event.getRecommendations.useQuery(
     { groupId },
     {
-      enabled: !!groupId && (eventStatus === "generated" || eventStatus === "completed"),
+      enabled:
+        !!groupId &&
+        (eventStatus === "generated" || eventStatus === "completed"),
       staleTime: 10000,
       refetchInterval: 5000, // Poll every 5 seconds to update vote counts
     },
@@ -204,13 +216,15 @@ export default function EventPage() {
   };
 
   // Generate recommendations mutation
-  const generateRecommendations = api.event.generateRecommendations.useMutation({
-    onSuccess: () => {
-      void recommendationsQuery.refetch();
-      void refetch();
-      setActiveTab("ideas");
+  const generateRecommendations = api.event.generateRecommendations.useMutation(
+    {
+      onSuccess: () => {
+        void recommendationsQuery.refetch();
+        void refetch();
+        setActiveTab("ideas");
+      },
     },
-  });
+  );
 
   // Close voting mutation
   const closeVoting = api.event.closeVoting.useMutation({
@@ -292,18 +306,24 @@ export default function EventPage() {
       if ("healthConsciousness" in profile && profile.healthConsciousness) {
         healthConsciousness = profile.healthConsciousness;
       } else if (profile.healthConsciousness) {
-        healthConsciousness = 
-          profile.healthConsciousness === "little" ? "little" : 
-          profile.healthConsciousness === "moderate" ? "moderate" : "very";
+        healthConsciousness =
+          profile.healthConsciousness === "little"
+            ? "little"
+            : profile.healthConsciousness === "moderate"
+              ? "moderate"
+              : "very";
       }
-      
+
       let dietaryRestrictions: "none" | "vegan-vege" | "gluten-free" = "none";
       if ("dietaryRestrictions" in profile && profile.dietaryRestrictions) {
         dietaryRestrictions = profile.dietaryRestrictions;
       } else if (profile.dietaryRestrictions) {
-        dietaryRestrictions = 
-          profile.dietaryRestrictions === "none" ? "none" : 
-          profile.dietaryRestrictions === "vegan-vege" ? "vegan-vege" : "gluten-free";
+        dietaryRestrictions =
+          profile.dietaryRestrictions === "none"
+            ? "none"
+            : profile.dietaryRestrictions === "vegan-vege"
+              ? "vegan-vege"
+              : "gluten-free";
       }
 
       addPreferences.mutate({
@@ -311,8 +331,7 @@ export default function EventPage() {
         sessionId: sid,
         userName: profile.name,
         userIcon: "👤",
-        moneyPreference:
-          moneyPreferenceMap[dietaryRestrictions] ?? "moderate",
+        moneyPreference: moneyPreferenceMap[dietaryRestrictions] ?? "moderate",
         activityLevel: activityLevelMap[healthConsciousness] ?? 3,
         latitude,
         longitude,
@@ -428,7 +447,11 @@ export default function EventPage() {
 
   const handleGenerateEvent = () => {
     // Prevent multiple clicks
-    if (generateRecommendations.isPending || eventStatus === "generating" || eventStatus === "generated") {
+    if (
+      generateRecommendations.isPending ||
+      eventStatus === "generating" ||
+      eventStatus === "generated"
+    ) {
       return;
     }
     if (eventData?.id) {
@@ -510,7 +533,7 @@ export default function EventPage() {
   // Mood questions flow hook (prefetch data)
   const moodFlow = useMoodQuestionsFlow({
     groupId: eventData?.id ?? "",
-    sessionId,
+    sessionId: sessionId ?? "",
     participantName: userProfile?.name,
     onComplete: () => {
       setShowOpinionModal(false);
@@ -560,7 +583,11 @@ export default function EventPage() {
                   question={question}
                   value={moodFlow.answers[question.id]}
                   onChange={(value) =>
-                    moodFlow.handleAnswerChange(question.id, question.signalKey, value)
+                    moodFlow.handleAnswerChange(
+                      question.id,
+                      question.signalKey,
+                      value,
+                    )
                   }
                 />
               ))}
@@ -759,7 +786,8 @@ export default function EventPage() {
                     : "text-[#0F172B]"
                 }`}
               >
-                Event ideas ({recommendationsQuery.data?.recommendations.length ?? 0})
+                Event ideas (
+                {recommendationsQuery.data?.recommendations.length ?? 0})
               </button>
             </div>
           </div>
@@ -852,7 +880,9 @@ export default function EventPage() {
                   <div className="space-y-3">
                     {participants.map((participant, idx) => {
                       const moodResponses = (
-                        participant as { moodResponses?: Record<string, unknown> }
+                        participant as {
+                          moodResponses?: Record<string, unknown>;
+                        }
                       ).moodResponses;
                       const currentEnergy =
                         moodResponses &&
@@ -898,6 +928,332 @@ export default function EventPage() {
                       );
                     })}
                   </div>
+
+                  {/* Generate Demo Users Button - Under participants list */}
+                  {isCreator && participantCount <= 1 && (
+                    <div className="mt-6">
+                      <GenerateUsersButton
+                        onGenerateUsers={(count) => {
+                          console.log(`Generated ${count} demo users`);
+                          void refetch();
+                        }}
+                        onAddUsers={async (users: DemoUser[]) => {
+                          const eventId = eventData?.id ?? groupId;
+
+                          // Generate unique sessionIds for all users
+                          const usersWithSessionIds = users.map((user) => ({
+                            user,
+                            sessionId: `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${user.name}`,
+                          }));
+
+                          // Step 1: Add all user preferences in parallel
+                          await Promise.all(
+                            usersWithSessionIds.map(({ user, sessionId }) =>
+                              addPreferences.mutateAsync({
+                                groupId: eventId,
+                                sessionId,
+                                userName: user.name,
+                                userIcon: user.userIcon,
+                                moneyPreference: user.moneyPreference,
+                                activityLevel: user.activityLevel,
+                                latitude: user.latitude,
+                                longitude: user.longitude,
+                              }),
+                            ),
+                          );
+
+                          // Step 2: Wait a bit for preferences to be saved
+                          await new Promise((resolve) =>
+                            setTimeout(resolve, 300),
+                          );
+
+                          // Step 3: Fetch all mood questions in parallel
+                          const moodQuestionsResults = await Promise.all(
+                            usersWithSessionIds.map(({ user, sessionId }) =>
+                              utils.event.getMoodQuestions
+                                .fetch({
+                                  groupId: eventId,
+                                  sessionId,
+                                  participantName: user.name,
+                                })
+                                .then((questions) => ({
+                                  user,
+                                  sessionId,
+                                  questions,
+                                })),
+                            ),
+                          );
+
+                          // Step 4: Generate answers for all users and save in parallel
+                          await Promise.all(
+                            moodQuestionsResults.map(
+                              ({ user, sessionId, questions }) => {
+                                const responses: Record<
+                                  string,
+                                  string | number
+                                > = {};
+
+                                for (const question of questions.questions) {
+                                  let answer: string | number;
+
+                                  // Map answers based on signalKey and user profile
+                                  switch (question.signalKey) {
+                                    case "currentEnergy":
+                                      // Map activityLevel (1-5) to energy responses
+                                      if (user.activityLevel >= 4) {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("high") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("hype") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("pumped"),
+                                          ) ??
+                                          question.options?.[
+                                            question.options.length - 1
+                                          ] ??
+                                          "High";
+                                      } else if (user.activityLevel <= 2) {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("low") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("chill") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("mellow"),
+                                          ) ??
+                                          question.options?.[0] ??
+                                          "Low";
+                                      } else {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("medium") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("moderate") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("balanced"),
+                                          ) ??
+                                          question.options?.[
+                                            Math.floor(
+                                              question.options.length / 2,
+                                            )
+                                          ] ??
+                                          "Medium";
+                                      }
+                                      break;
+
+                                    case "indoorOutdoorPreference":
+                                      // Prefer outdoor for active users, indoor for less active
+                                      if (user.activityLevel >= 4) {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("outdoor") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("air") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("outside"),
+                                          ) ??
+                                          question.options?.[1] ??
+                                          "Get some air";
+                                      } else {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("indoor") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("inside"),
+                                          ) ??
+                                          question.options?.[0] ??
+                                          "Stay inside";
+                                      }
+                                      break;
+
+                                    case "timeAvailable":
+                                      // Premium users might want longer time, budget users shorter
+                                      if (user.moneyPreference === "premium") {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("evening") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("long") ||
+                                              opt.toLowerCase().includes("all"),
+                                          ) ??
+                                          question.options?.[
+                                            question.options.length - 1
+                                          ] ??
+                                          "All evening";
+                                      } else if (
+                                        user.moneyPreference === "budget"
+                                      ) {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("quick") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("short"),
+                                          ) ??
+                                          question.options?.[0] ??
+                                          "Quick";
+                                      } else {
+                                        answer =
+                                          question.options?.[
+                                            Math.floor(
+                                              question.options.length / 2,
+                                            )
+                                          ] ?? "Moderate";
+                                      }
+                                      break;
+
+                                    case "activityPace":
+                                      // Map directly from activity level
+                                      if (user.activityLevel >= 4) {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("all out") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("active") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("high"),
+                                          ) ??
+                                          question.options?.[
+                                            question.options.length - 1
+                                          ] ??
+                                          "Go all out";
+                                      } else if (user.activityLevel <= 2) {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("low") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("key") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("chill"),
+                                          ) ??
+                                          question.options?.[0] ??
+                                          "Low-key";
+                                      } else {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("mix") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("moderate"),
+                                          ) ??
+                                          question.options?.[
+                                            Math.floor(
+                                              question.options.length / 2,
+                                            )
+                                          ] ??
+                                          "Mix it up";
+                                      }
+                                      break;
+
+                                    case "hungerLevel":
+                                      // Health conscious users might prefer lighter options
+                                      if (user.healthConsciousness === "very") {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("light") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("bites"),
+                                          ) ??
+                                          question.options?.[0] ??
+                                          "Light bites";
+                                      } else {
+                                        answer =
+                                          question.options?.find(
+                                            (opt) =>
+                                              opt
+                                                .toLowerCase()
+                                                .includes("full") ||
+                                              opt
+                                                .toLowerCase()
+                                                .includes("meal"),
+                                          ) ??
+                                          question.options?.[1] ??
+                                          "Full meal";
+                                      }
+                                      break;
+
+                                    default:
+                                      // Default: pick middle option or first option
+                                      answer =
+                                        question.options?.[
+                                          Math.floor(
+                                            question.options.length / 2,
+                                          )
+                                        ] ??
+                                        question.options?.[0] ??
+                                        (question.type === "scale"
+                                          ? 2
+                                          : "Option 1");
+                                  }
+
+                                  responses[question.signalKey] = answer;
+                                }
+
+                                // Save mood responses
+                                if (Object.keys(responses).length > 0) {
+                                  return saveMoodResponses.mutateAsync({
+                                    groupId: eventId,
+                                    sessionId,
+                                    responses,
+                                  });
+                                }
+                                return Promise.resolve();
+                              },
+                            ),
+                          );
+                        }}
+                      />
+                    </div>
+                  )}
                 </>
               )}
             </>
@@ -915,126 +1271,130 @@ export default function EventPage() {
                   <p className="text-white/80">Analyzing preferences</p>
                 </div>
               ) : (eventStatus === "generated" ||
-                    eventStatus === "completed") &&
+                  eventStatus === "completed") &&
                 recommendationsQuery.data ? (
                 <>
                   {recommendationsQuery.data.recommendations.length > 0 ? (
                     <>
                       {/* Event Ideas List */}
                       <div className="space-y-3">
-                        {recommendationsQuery.data.recommendations.map((rec: RecommendationItem, idx: number) => {
-                          // Get price level as € symbols
-                          const getPriceSymbols = (level: string) => {
-                            switch (level) {
-                              case "budget":
-                                return "€";
-                              case "moderate":
-                                return "€€";
-                              case "premium":
-                                return "€€€";
-                              default:
-                                return "€€";
-                            }
-                          };
+                        {recommendationsQuery.data.recommendations.map(
+                          (rec: RecommendationItem, idx: number) => {
+                            // Get price level as € symbols
+                            const getPriceSymbols = (level: string) => {
+                              switch (level) {
+                                case "budget":
+                                  return "€";
+                                case "moderate":
+                                  return "€€";
+                                case "premium":
+                                  return "€€€";
+                                default:
+                                  return "€€";
+                              }
+                            };
 
-                          // Get participants who voted (show as avatars)
-                          // We'll show participant avatars based on vote count
-                          // For now, show generic avatars - can be enhanced to show actual participant info
-                          const voterCount = rec.voteCount ?? 0;
+                            // Get participants who voted (show as avatars)
+                            // We'll show participant avatars based on vote count
+                            // For now, show generic avatars - can be enhanced to show actual participant info
+                            const voterCount = rec.voteCount ?? 0;
 
-                          return (
-                            <div
-                              key={rec.eventId ?? idx}
-                              className={`overflow-hidden rounded-2xl bg-white p-4 ${
-                                myVotes.has(rec.eventId)
-                                  ? "border-2 border-[#029DE2]"
-                                  : "border border-slate-200"
-                              }`}
-                            >
-                              {/* Number and Title Row */}
-                              <div className="mb-3 flex items-start gap-3">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#029DE2] text-sm font-bold text-white">
-                                  {idx + 1}
+                            return (
+                              <div
+                                key={rec.eventId ?? idx}
+                                className={`overflow-hidden rounded-2xl bg-white p-4 ${
+                                  myVotes.has(rec.eventId)
+                                    ? "border-2 border-[#029DE2]"
+                                    : "border border-slate-200"
+                                }`}
+                              >
+                                {/* Number and Title Row */}
+                                <div className="mb-3 flex items-start gap-3">
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#029DE2] text-sm font-bold text-white">
+                                    {idx + 1}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h3 className="mb-1 text-base font-semibold text-[#0F172B]">
+                                      {rec.title}
+                                    </h3>
+                                    <p className="line-clamp-2 text-sm text-[#0F172B]/70">
+                                      {rec.description}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="flex-1">
-                                  <h3 className="mb-1 text-base font-semibold text-[#0F172B]">
-                                    {rec.title}
-                                  </h3>
-                                  <p className="text-sm text-[#0F172B]/70 line-clamp-2">
-                                    {rec.description}
-                                  </p>
-                                </div>
-                              </div>
 
-                              {/* Price and Duration Row */}
-                              <div className="mb-3 flex items-center gap-4">
-                                <div className="flex items-center gap-1">
-                                  {getPriceSymbols(rec.priceLevel)
-                                    .split("")
-                                    .map((symbol, i) => (
-                                      <div
-                                        key={i}
-                                        className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow-100 text-xs font-semibold text-yellow-700"
-                                      >
-                                        {symbol}
-                                      </div>
-                                    ))}
+                                {/* Price and Duration Row */}
+                                <div className="mb-3 flex items-center gap-4">
+                                  <div className="flex items-center gap-1">
+                                    {getPriceSymbols(rec.priceLevel)
+                                      .split("")
+                                      .map((symbol, i) => (
+                                        <div
+                                          key={i}
+                                          className="flex h-5 w-5 items-center justify-center rounded-full bg-yellow-100 text-xs font-semibold text-yellow-700"
+                                        >
+                                          {symbol}
+                                        </div>
+                                      ))}
+                                  </div>
+                                  <span className="text-sm text-[#0F172B]/60">
+                                    {rec.duration}
+                                  </span>
                                 </div>
-                                <span className="text-sm text-[#0F172B]/60">
-                                  {rec.duration}
-                                </span>
-                              </div>
 
-                              {/* Participants/Voters Row */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1">
-                                  {voterCount > 0 ? (
-                                    <>
-                                      {Array.from({ length: Math.min(voterCount, 4) }).map(
-                                        (_, vIdx) => (
+                                {/* Participants/Voters Row */}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1">
+                                    {voterCount > 0 ? (
+                                      <>
+                                        {Array.from({
+                                          length: Math.min(voterCount, 4),
+                                        }).map((_, vIdx) => (
                                           <div
                                             key={vIdx}
                                             className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white"
                                           >
                                             MM
                                           </div>
-                                        ),
-                                      )}
-                                      {voterCount > 4 && (
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white">
-                                          +{voterCount - 4}
-                                        </div>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <div className="text-xs text-[#0F172B]/50">
-                                      No votes yet
-                                    </div>
-                                  )}
+                                        ))}
+                                        {voterCount > 4 && (
+                                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white">
+                                            +{voterCount - 4}
+                                          </div>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <div className="text-xs text-[#0F172B]/50">
+                                        No votes yet
+                                      </div>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={() =>
+                                      rec.eventId && handleVote(rec.eventId)
+                                    }
+                                    disabled={
+                                      !rec.eventId ||
+                                      voteMutation.isPending ||
+                                      eventStatus === "completed"
+                                    }
+                                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                                      myVotes.has(rec.eventId)
+                                        ? "bg-[#029DE2] text-white"
+                                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                    } disabled:cursor-not-allowed disabled:opacity-50`}
+                                  >
+                                    {eventStatus === "completed"
+                                      ? "Closed"
+                                      : myVotes.has(rec.eventId)
+                                        ? "Voted"
+                                        : "Vote"}
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={() => rec.eventId && handleVote(rec.eventId)}
-                                  disabled={
-                                    !rec.eventId ||
-                                    voteMutation.isPending ||
-                                    eventStatus === "completed"
-                                  }
-                                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                                    myVotes.has(rec.eventId)
-                                      ? "bg-[#029DE2] text-white"
-                                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                >
-                                  {eventStatus === "completed"
-                                    ? "Closed"
-                                    : myVotes.has(rec.eventId)
-                                      ? "Voted"
-                                      : "Vote"}
-                                </button>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          },
+                        )}
                       </div>
 
                       {/* Close Voting Button */}
@@ -1045,13 +1405,15 @@ export default function EventPage() {
                           className="mt-4 w-full rounded-xl bg-[#029DE2] text-white transition-all hover:bg-[#0287C3] disabled:opacity-50"
                           size="lg"
                         >
-                          {closeVoting.isPending ? "Closing..." : "Close voting"}
+                          {closeVoting.isPending
+                            ? "Closing..."
+                            : "Close voting"}
                         </Button>
                       )}
                       {eventStatus === "completed" && (
                         <div className="mt-4 rounded-xl bg-green-50 p-4 text-center">
                           <p className="text-sm font-medium text-green-800">
-                            ✓ Voting closed
+                            Voting closed
                           </p>
                         </div>
                       )}
@@ -1072,9 +1434,11 @@ export default function EventPage() {
                 </>
               ) : (
                 <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
-                  <div className="mb-3 text-4xl">⏳</div>
+                  <div className="text-l mb-3">Events appear here</div>
                   <h3 className="mb-2 text-xl font-semibold text-white">
-                    {isCreator ? "Ready to generate?" : "Waiting for recommendations"}
+                    {isCreator
+                      ? "Ready to generate?"
+                      : "Waiting for recommendations"}
                   </h3>
                   <p className="text-white/80">
                     {isCreator
@@ -1088,13 +1452,13 @@ export default function EventPage() {
 
           {/* Creator Action Button - Only visible to event creator and when ideas haven't been generated */}
           {isCreator &&
-          hasJoined && eventStatus === "collecting_preferences" ? (
+          hasJoined &&
+          eventStatus === "collecting_preferences" ? (
             <div className="mt-8">
               <Button
                 onClick={handleGenerateEvent}
                 disabled={
-                  participantCount === 0 ||
-                  generateRecommendations.isPending
+                  participantCount === 0 || generateRecommendations.isPending
                 }
                 className="h-16 w-full rounded-xl bg-white text-lg font-bold text-[#029DE2] hover:scale-105 hover:bg-white/90 disabled:opacity-50 disabled:hover:scale-100"
               >
@@ -1113,184 +1477,7 @@ export default function EventPage() {
           {/* Waiting message for non-creators */}
           {!isCreator && hasJoined && (
             <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
-       {/*This should be empty */}
-            </div>
-          )}
-
-          {/* Generate Demo Users Button */}
-          {isCreator && hasJoined && (
-            <div className="mt-6">
-              <GenerateUsersButton
-                onGenerateUsers={(count) => {
-                  console.log(`Generated ${count} demo users`);
-                  void refetch();
-                }}
-                onAddUsers={async (users: DemoUser[]) => {
-                  const eventId = eventData?.id ?? groupId;
-                  
-                  // Generate unique sessionIds for all users
-                  const usersWithSessionIds = users.map(user => ({
-                    user,
-                    sessionId: `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${user.name}`,
-                  }));
-
-                  // Step 1: Add all user preferences in parallel
-                  await Promise.all(
-                    usersWithSessionIds.map(({ user, sessionId }) =>
-                      addPreferences.mutateAsync({
-                        groupId: eventId,
-                        sessionId,
-                        userName: user.name,
-                        userIcon: user.userIcon,
-                        moneyPreference: user.moneyPreference,
-                        activityLevel: user.activityLevel,
-                        latitude: user.latitude,
-                        longitude: user.longitude,
-                      })
-                    )
-                  );
-
-                  // Step 2: Wait a bit for preferences to be saved
-                  await new Promise(resolve => setTimeout(resolve, 300));
-
-                  // Step 3: Fetch all mood questions in parallel
-                  const moodQuestionsResults = await Promise.all(
-                    usersWithSessionIds.map(({ user, sessionId }) =>
-                      utils.event.getMoodQuestions.fetch({
-                        groupId: eventId,
-                        sessionId,
-                        participantName: user.name,
-                      }).then(questions => ({ user, sessionId, questions }))
-                    )
-                  );
-
-                  // Step 4: Generate answers for all users and save in parallel
-                  await Promise.all(
-                    moodQuestionsResults.map(({ user, sessionId, questions }) => {
-                      const responses: Record<string, string | number> = {};
-                      
-                      for (const question of questions.questions) {
-                        let answer: string | number;
-                        
-                        // Map answers based on signalKey and user profile
-                        switch (question.signalKey) {
-                          case "currentEnergy":
-                            // Map activityLevel (1-5) to energy responses
-                            if (user.activityLevel >= 4) {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("high") || 
-                                opt.toLowerCase().includes("hype") || 
-                                opt.toLowerCase().includes("pumped")
-                              ) ?? question.options?.[question.options.length - 1] ?? "High";
-                            } else if (user.activityLevel <= 2) {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("low") || 
-                                opt.toLowerCase().includes("chill") || 
-                                opt.toLowerCase().includes("mellow")
-                              ) ?? question.options?.[0] ?? "Low";
-                            } else {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("medium") || 
-                                opt.toLowerCase().includes("moderate") || 
-                                opt.toLowerCase().includes("balanced")
-                              ) ?? question.options?.[Math.floor(question.options.length / 2)] ?? "Medium";
-                            }
-                            break;
-                          
-                          case "indoorOutdoorPreference":
-                            // Prefer outdoor for active users, indoor for less active
-                            if (user.activityLevel >= 4) {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("outdoor") || 
-                                opt.toLowerCase().includes("air") || 
-                                opt.toLowerCase().includes("outside")
-                              ) ?? question.options?.[1] ?? "Get some air";
-                            } else {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("indoor") || 
-                                opt.toLowerCase().includes("inside")
-                              ) ?? question.options?.[0] ?? "Stay inside";
-                            }
-                            break;
-                          
-                          case "timeAvailable":
-                            // Premium users might want longer time, budget users shorter
-                            if (user.moneyPreference === "premium") {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("evening") || 
-                                opt.toLowerCase().includes("long") || 
-                                opt.toLowerCase().includes("all")
-                              ) ?? question.options?.[question.options.length - 1] ?? "All evening";
-                            } else if (user.moneyPreference === "budget") {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("quick") || 
-                                opt.toLowerCase().includes("short")
-                              ) ?? question.options?.[0] ?? "Quick";
-                            } else {
-                              answer = question.options?.[Math.floor(question.options.length / 2)] ?? "Moderate";
-                            }
-                            break;
-                          
-                          case "activityPace":
-                            // Map directly from activity level
-                            if (user.activityLevel >= 4) {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("all out") || 
-                                opt.toLowerCase().includes("active") || 
-                                opt.toLowerCase().includes("high")
-                              ) ?? question.options?.[question.options.length - 1] ?? "Go all out";
-                            } else if (user.activityLevel <= 2) {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("low") || 
-                                opt.toLowerCase().includes("key") || 
-                                opt.toLowerCase().includes("chill")
-                              ) ?? question.options?.[0] ?? "Low-key";
-                            } else {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("mix") || 
-                                opt.toLowerCase().includes("moderate")
-                              ) ?? question.options?.[Math.floor(question.options.length / 2)] ?? "Mix it up";
-                            }
-                            break;
-                          
-                          case "hungerLevel":
-                            // Health conscious users might prefer lighter options
-                            if (user.healthConsciousness === "very") {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("light") || 
-                                opt.toLowerCase().includes("bites")
-                              ) ?? question.options?.[0] ?? "Light bites";
-                            } else {
-                              answer = question.options?.find(opt => 
-                                opt.toLowerCase().includes("full") || 
-                                opt.toLowerCase().includes("meal")
-                              ) ?? question.options?.[1] ?? "Full meal";
-                            }
-                            break;
-                          
-                          default:
-                            // Default: pick middle option or first option
-                            answer = question.options?.[Math.floor(question.options.length / 2)] ?? 
-                                     question.options?.[0] ?? 
-                                     (question.type === "scale" ? 2 : "Option 1");
-                        }
-                        
-                        responses[question.signalKey] = answer;
-                      }
-
-                      // Save mood responses
-                      if (Object.keys(responses).length > 0) {
-                        return saveMoodResponses.mutateAsync({
-                          groupId: eventId,
-                          sessionId,
-                          responses,
-                        });
-                      }
-                      return Promise.resolve();
-                    })
-                  );
-                }}
-              />
+              {/*This should be empty */}
             </div>
           )}
 
@@ -1309,7 +1496,7 @@ export default function EventPage() {
 
         {/* Fixed "Give your opinion" button - Only on mobile */}
         {hasJoined && !hasMoodResponses && (
-          <div className="fixed bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-white via-white to-transparent px-5 pb-5 pt-8 md:hidden">
+          <div className="fixed right-0 bottom-0 left-0 z-30 bg-gradient-to-t from-white via-white to-transparent px-5 pt-8 pb-5 md:hidden">
             <div className="mx-auto max-w-[500px]">
               <Button
                 onClick={() => setShowOpinionModal(true)}

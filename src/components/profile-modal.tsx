@@ -76,7 +76,13 @@ export function ProfileModal({
   }, [isOpen]);
 
   const handleSave = async () => {
-    if (!name || !dietaryRestrictions || !eatingFrequency || !healthConsciousness) return;
+    if (
+      !name ||
+      !dietaryRestrictions ||
+      !eatingFrequency ||
+      !healthConsciousness
+    )
+      return;
 
     // Always request fresh location permission
     let latitude: number | undefined;
@@ -129,7 +135,7 @@ export function ProfileModal({
     <div className="flex flex-col gap-8">
       {/* Profile/Options Title */}
       <div className="text-sm font-medium text-[#62748E]">Profile/Options</div>
-      
+
       <h1 className="text-4xl font-semibold text-[#0F172B]">Profile</h1>
 
       {/* Name Input */}
@@ -159,7 +165,9 @@ export function ProfileModal({
                   : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
               } `}
             >
-              <span className="text-xl font-semibold leading-none">{option.emoji}</span>
+              <span className="text-xl leading-none font-semibold">
+                {option.emoji}
+              </span>
               <span className="text-sm text-[#62748E]">{option.label}</span>
             </button>
           ))}
@@ -182,7 +190,9 @@ export function ProfileModal({
                   : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
               } `}
             >
-              <span className="text-xl font-semibold leading-none">{option.emoji}</span>
+              <span className="text-xl leading-none font-semibold">
+                {option.emoji}
+              </span>
               <span className="text-sm text-[#62748E]">{option.label}</span>
             </button>
           ))}
@@ -205,7 +215,9 @@ export function ProfileModal({
                   : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
               } `}
             >
-              <span className="text-xl font-semibold leading-none">{option.emoji}</span>
+              <span className="text-xl leading-none font-semibold">
+                {option.emoji}
+              </span>
               <span className="text-sm text-[#62748E]">{option.label}</span>
             </button>
           ))}
@@ -216,7 +228,12 @@ export function ProfileModal({
       <div className="flex flex-col gap-2.5">
         <Button
           onClick={handleSave}
-          disabled={!name || !dietaryRestrictions || !eatingFrequency || !healthConsciousness}
+          disabled={
+            !name ||
+            !dietaryRestrictions ||
+            !eatingFrequency ||
+            !healthConsciousness
+          }
           className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#029DE2]/90 disabled:opacity-50"
         >
           Continue

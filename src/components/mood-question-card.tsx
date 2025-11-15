@@ -58,9 +58,7 @@ export function MoodQuestionCard({
                 type="button"
                 onClick={() => onChange(num)}
                 className={`rounded-xl text-sm font-semibold transition-all ${
-                  isLargeScale
-                    ? "min-w-0 flex-1 px-2 py-3"
-                    : "flex-1 px-4 py-3"
+                  isLargeScale ? "min-w-0 flex-1 px-2 py-3" : "flex-1 px-4 py-3"
                 } ${
                   isSelected
                     ? "bg-[#029DE2] text-white shadow-md"

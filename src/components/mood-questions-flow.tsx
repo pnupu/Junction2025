@@ -12,8 +12,6 @@ type MoodQuestionsFlowProps = {
   onComplete?: () => void;
 };
 
-
-
 // Hook version for easier use
 export function useMoodQuestionsFlow({
   groupId,
@@ -36,7 +34,7 @@ export function useMoodQuestionsFlow({
       answeredSignals: undefined,
     },
     {
-      enabled: !!groupId && !!sessionId,
+      enabled: !!groupId && !!sessionId && groupId !== "" && sessionId !== "",
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
@@ -50,7 +48,7 @@ export function useMoodQuestionsFlow({
 
       // Refetch and complete
       await refetch();
-      
+
       // All questions answered
       if (onComplete) {
         onComplete();
@@ -62,7 +60,11 @@ export function useMoodQuestionsFlow({
     },
   });
 
-  const handleAnswerChange = (questionId: string, signalKey: string, value: string | number) => {
+  const handleAnswerChange = (
+    questionId: string,
+    signalKey: string,
+    value: string | number,
+  ) => {
     setAnswers((prev) => ({
       ...prev,
       [questionId]: value,
@@ -101,9 +103,9 @@ export function useMoodQuestionsFlow({
 
   const questions = moodData?.questions ?? [];
   const followUp = moodData?.followUp;
-  const allAnswered = questions.length > 0 && questions.every(
-    (q) => answers[q.id] !== undefined && answers[q.id] !== "",
-  );
+  const allAnswered =
+    questions.length > 0 &&
+    questions.every((q) => answers[q.id] !== undefined && answers[q.id] !== "");
 
   return {
     isLoading,

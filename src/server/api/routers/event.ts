@@ -296,15 +296,16 @@ export const eventRouter = createTRPCRouter({
         .filter((rec) => rec.event)
         .map((rec) => rec.event!.id);
 
-      const votes = eventIds.length > 0
-        ? await ctx.db.eventGroupEvent.findMany({
-            where: {
-              groupId: input.groupId,
-              eventId: { in: eventIds },
-              status: "voted",
-            },
-          })
-        : [];
+      const votes =
+        eventIds.length > 0
+          ? await ctx.db.eventGroupEvent.findMany({
+              where: {
+                groupId: input.groupId,
+                eventId: { in: eventIds },
+                status: "voted",
+              },
+            })
+          : [];
 
       // Create a map of eventId -> vote count
       const voteCounts = new Map<string, number>();
@@ -315,15 +316,17 @@ export const eventRouter = createTRPCRouter({
       // Fetch venue data for location information
       const venueIds = recommendations
         .filter((rec) => {
-          const features = rec.features as
-            | { highlights?: string[]; venueId?: string }
-            | null;
+          const features = rec.features as {
+            highlights?: string[];
+            venueId?: string;
+          } | null;
           return features?.venueId;
         })
         .map((rec) => {
-          const features = rec.features as
-            | { highlights?: string[]; venueId?: string }
-            | null;
+          const features = rec.features as {
+            highlights?: string[];
+            venueId?: string;
+          } | null;
           return features?.venueId;
         })
         .filter((id): id is string => !!id);
@@ -341,9 +344,10 @@ export const eventRouter = createTRPCRouter({
       const transformed = recommendations
         .filter((rec) => rec.event)
         .map((rec) => {
-          const features = rec.features as
-            | { highlights?: string[]; venueId?: string }
-            | null;
+          const features = rec.features as {
+            highlights?: string[];
+            venueId?: string;
+          } | null;
           const venue = features?.venueId
             ? venueMap.get(features.venueId)
             : undefined;
@@ -418,7 +422,7 @@ export const eventRouter = createTRPCRouter({
         await ctx.db.eventGroupEvent.delete({
           where: { id: existingVote.id },
         });
-        
+
         // Get updated vote count
         const voteCount = await ctx.db.eventGroupEvent.count({
           where: {
@@ -427,7 +431,7 @@ export const eventRouter = createTRPCRouter({
             status: "voted",
           },
         });
-        
+
         return { voted: false, voteCount };
       }
 

@@ -187,7 +187,8 @@ export default function EventResultsPage() {
   useEffect(() => {
     if (recommendationsQuery.data && eventStatus === "generated") {
       setRecommendations(
-        recommendationsQuery.data.recommendations as unknown as Recommendation[],
+        recommendationsQuery.data
+          .recommendations as unknown as Recommendation[],
       );
       setGroupStats(recommendationsQuery.data.groupStats);
     }
