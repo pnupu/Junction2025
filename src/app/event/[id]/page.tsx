@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +52,7 @@ export default function EventPage() {
   const [showMapModal, setShowMapModal] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [L, setL] = useState<typeof import("leaflet") | null>(null);
+  const [L, setL] = useState<(typeof import("leaflet")) | null>(null);
 
   // Try to get event by invite code first (if it looks like a code), otherwise by ID
   const isLikelyInviteCode =
@@ -72,7 +72,7 @@ export default function EventPage() {
     },
   });
 
-  const autoJoinEvent = async (profile: UserProfile, sid: string) => {
+  const autoJoinEvent = useCallback(async (profile: UserProfile, sid: string) => {
     if (!eventData?.id) {
       console.error("Cannot join event: eventData not loaded");
       return;
@@ -135,7 +135,7 @@ export default function EventPage() {
     });
 
     sessionStorage.setItem(`event_${eventIdOrCode}_joined`, "true");
-  };
+  }, [eventData, eventIdOrCode, addPreferences, setUserProfile]);
 
   useEffect(() => {
     let sid = sessionStorage.getItem("sessionId");
@@ -174,18 +174,19 @@ export default function EventPage() {
     if (eventData && userProfile && !hasJoined) {
       const joined = sessionStorage.getItem(`event_${eventIdOrCode}_joined`);
       if (joined !== "true" && sessionId) {
-        autoJoinEvent(userProfile, sessionId);
+        void autoJoinEvent(userProfile, sessionId);
       }
     }
   }, [eventData, userProfile, hasJoined, sessionId, eventIdOrCode, autoJoinEvent]);
 
   // Load Leaflet for inline map
   useEffect(() => {
-    import("leaflet").then((leaflet) => {
+    void import("leaflet").then((leaflet) => {
       setL(leaflet);
       setLeafletLoaded(true);
 
       // Fix default marker icon issue
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       delete (leaflet.Icon.Default.prototype as any)._getIconUrl;
       leaflet.Icon.Default.mergeOptions({
         iconRetinaUrl: "/leaflet/marker-icon-2x.png",
@@ -222,37 +223,27 @@ export default function EventPage() {
   // Filter participants with location data and create ParticipantLocation objects
   const participantLocations: ParticipantLocation[] = useMemo(() => {
     if (!eventData?.preferences) return [];
+
+    type Preference = (typeof eventData.preferences)[number];
+    type PreferenceWithLocation = Preference & { latitude: number; longitude: number };
     
-    const participants = eventData.preferences;
-    return participants
+    return eventData.preferences
       .filter(
-        (
-          p: {
-            latitude?: number | null;
-            longitude?: number | null;
-            userName?: string | null;
-          },
-        ): p is typeof p & { latitude: number; longitude: number } =>
+        (p: Preference): p is PreferenceWithLocation =>
           p.latitude != null && p.longitude != null,
       )
-      .map(
-        (p: {
-          latitude: number;
-          longitude: number;
-          userName?: string | null;
-        }) => ({
-          userName: p.userName ?? "Anonymous",
-          latitude: p.latitude,
-          longitude: p.longitude,
-          initials: (p.userName ?? "A")
-            .split(" ")
-            .map((n: string) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2),
-        }),
-      );
-  }, [eventData?.preferences]);
+      .map((p: PreferenceWithLocation) => ({
+        userName: p.userName ?? "Anonymous",
+        latitude: p.latitude,
+        longitude: p.longitude,
+        initials: (p.userName ?? "A")
+          .split(" ")
+          .map((n: string) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2),
+      }));
+  }, [eventData]);
 
   if (!eventData) {
     return (

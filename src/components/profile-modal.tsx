@@ -55,7 +55,7 @@ export function ProfileModal({
           setName(profile.name);
           setActivityPreference(profile.activityPreference);
           setFoodPreference(profile.foodPreference);
-        } catch (_e) {
+        } catch {
           // Invalid profile, ignore
         }
       }
@@ -90,7 +90,7 @@ export function ProfileModal({
             const oldProfile = JSON.parse(existingProfile) as UserProfile;
             latitude = oldProfile.latitude;
             longitude = oldProfile.longitude;
-          } catch (_e) {
+          } catch {
             // Ignore
           }
         }
@@ -233,7 +233,7 @@ export function getUserProfile(): UserProfile | null {
 
   try {
     return JSON.parse(profileStr) as UserProfile;
-  } catch (_e) {
+  } catch {
     return null;
   }
 }

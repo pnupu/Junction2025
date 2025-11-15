@@ -53,16 +53,17 @@ export function EventMapModal({
   onToggleEnlarge,
 }: EventMapModalProps) {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [L, setL] = useState<typeof import("leaflet") | null>(null);
+  const [L, setL] = useState<(typeof import("leaflet")) | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       // Load Leaflet CSS and library
-      import("leaflet").then((leaflet) => {
+      void import("leaflet").then((leaflet) => {
         setL(leaflet);
         setLeafletLoaded(true);
 
         // Fix default marker icon issue
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
         delete (leaflet.Icon.Default.prototype as any)._getIconUrl;
         leaflet.Icon.Default.mergeOptions({
           iconRetinaUrl: "/leaflet/marker-icon-2x.png",
