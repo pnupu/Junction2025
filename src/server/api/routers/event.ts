@@ -1,12 +1,28 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { generateShortCode } from "@/lib/generate-short-code";
 
 export const eventRouter = createTRPCRouter({
   // Create a new event group (no input needed - auto-creates)
   create: publicProcedure.mutation(async ({ ctx }) => {
+    // Generate a unique short code
+    let inviteCode: string;
+    let isUnique = false;
+    
+    while (!isUnique) {
+      inviteCode = generateShortCode(6); // 6-character code
+      const existing = await ctx.db.eventGroup.findUnique({
+        where: { inviteCode },
+      });
+      if (!existing) {
+        isUnique = true;
+      }
+    }
+
     const eventGroup = await ctx.db.eventGroup.create({
       data: {
         status: "collecting_preferences",
+        inviteCode: inviteCode!,
       },
     });
 
