@@ -66,12 +66,41 @@ export const eventRouter = createTRPCRouter({
         throw new Error("Event not found");
       }
 
-      const preference = eventGroup.preferences.find(
+      let preference = eventGroup.preferences.find(
         (pref) => pref.sessionId === input.sessionId,
       );
 
+      // If preference doesn't exist, create it with default values using upsert
       if (!preference) {
-        throw new Error("Preference not found for this session");
+        preference = await ctx.db.eventGroupPreference.upsert({
+          where: {
+            groupId_sessionId: {
+              groupId: input.groupId,
+              sessionId: input.sessionId,
+            },
+          },
+          create: {
+            groupId: input.groupId,
+            sessionId: input.sessionId,
+            userName: input.participantName,
+            userIcon: "👤",
+            moneyPreference: "moderate",
+            activityLevel: 3,
+          },
+          update: {},
+        });
+        
+        // Refresh eventGroup to include the new preference
+        const refreshedEventGroup = await ctx.db.eventGroup.findUnique({
+          where: { id: input.groupId },
+          include: {
+            preferences: true,
+          },
+        });
+        
+        if (refreshedEventGroup) {
+          eventGroup.preferences = refreshedEventGroup.preferences;
+        }
       }
 
       // Step 1: Filter InfrastructureVenue based on location and preferences
@@ -163,18 +192,24 @@ export const eventRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const preference = await ctx.db.eventGroupPreference.findUnique({
+      // Use upsert to create preference if it doesn't exist
+      const preference = await ctx.db.eventGroupPreference.upsert({
         where: {
           groupId_sessionId: {
             groupId: input.groupId,
             sessionId: input.sessionId,
           },
         },
+        create: {
+          groupId: input.groupId,
+          sessionId: input.sessionId,
+          userName: undefined,
+          userIcon: "👤",
+          moneyPreference: "moderate",
+          activityLevel: 3,
+        },
+        update: {},
       });
-
-      if (!preference) {
-        throw new Error("Preference not found for this session");
-      }
 
       const existing =
         (preference as { moodResponses?: Record<string, unknown> | undefined })

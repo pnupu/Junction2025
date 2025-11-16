@@ -542,8 +542,6 @@ export default function EventPage() {
         .moodResponses ?? {},
     ).length > 0;
 
-  console.log("currentUserPreference", currentUserPreference);
-  console.log("currentUserPreference", currentUserPreference);
 
   // Mood questions flow hook (prefetch data)
   const moodFlow = useMoodQuestionsFlow({
