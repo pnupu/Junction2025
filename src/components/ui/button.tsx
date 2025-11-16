@@ -18,9 +18,9 @@ const buttonVariants = cva(
           "rounded-xl border-2 border-[#029DE2] bg-white text-[#029DE2] hover:bg-[#029DE2] hover:text-white",
         // Option button (for selectable choices)
         option:
-          "rounded-xl border-2 border-[#029DE2] bg-[#EDF7FF] text-[#029DE2] hover:bg-[#029DE2] hover:text-white",
+          "rounded-xl border-2 border-[#029DE2] bg-[#EDF7FF] text-[#029DE2] hover:bg-[#029DE2] hover:text-white hover:[&>span]:text-white",
         // Selected option button
-        selected: "rounded-xl border-2 border-[#029DE2] bg-[#029DE2] text-white shadow-md",
+        selected: "rounded-xl border-2 border-[#029DE2] bg-[#029DE2] text-white [&>span]:text-white shadow-md",
         // Icon/Close button
         icon: "rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm hover:scale-110 hover:bg-white",
         // Ghost button
