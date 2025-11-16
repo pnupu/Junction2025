@@ -164,10 +164,11 @@ export const eventRouter = createTRPCRouter({
       // Fisher-Yates shuffle
       for (let i = shuffledVenues.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffledVenues[i], shuffledVenues[j]] = [
-          shuffledVenues[j],
-          shuffledVenues[i],
-        ];
+        const temp = shuffledVenues[i];
+        if (temp && shuffledVenues[j]) {
+          shuffledVenues[i] = shuffledVenues[j];
+          shuffledVenues[j] = temp;
+        }
       }
       
       const mood = await runMoodCheckAgent({
