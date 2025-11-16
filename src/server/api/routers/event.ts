@@ -66,12 +66,41 @@ export const eventRouter = createTRPCRouter({
         throw new Error("Event not found");
       }
 
-      const preference = eventGroup.preferences.find(
+      let preference = eventGroup.preferences.find(
         (pref) => pref.sessionId === input.sessionId,
       );
 
+      // If preference doesn't exist, create it with default values using upsert
       if (!preference) {
-        throw new Error("Preference not found for this session");
+        preference = await ctx.db.eventGroupPreference.upsert({
+          where: {
+            groupId_sessionId: {
+              groupId: input.groupId,
+              sessionId: input.sessionId,
+            },
+          },
+          create: {
+            groupId: input.groupId,
+            sessionId: input.sessionId,
+            userName: input.participantName,
+            userIcon: "👤",
+            moneyPreference: "moderate",
+            activityLevel: 3,
+          },
+          update: {},
+        });
+        
+        // Refresh eventGroup to include the new preference
+        const refreshedEventGroup = await ctx.db.eventGroup.findUnique({
+          where: { id: input.groupId },
+          include: {
+            preferences: true,
+          },
+        });
+        
+        if (refreshedEventGroup) {
+          eventGroup.preferences = refreshedEventGroup.preferences;
+        }
       }
 
       // Step 1: Filter InfrastructureVenue based on location and preferences
@@ -129,6 +158,19 @@ export const eventRouter = createTRPCRouter({
       };
 
       // Step 2: Generate mood questions with filtered venues context
+      // Add variety by shuffling venues before passing to mood agent
+      // This ensures different venue combinations are analyzed even with same location
+      const shuffledVenues = [...finalFilteredVenues];
+      // Fisher-Yates shuffle
+      for (let i = shuffledVenues.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = shuffledVenues[i];
+        if (temp && shuffledVenues[j]) {
+          shuffledVenues[i] = shuffledVenues[j];
+          shuffledVenues[j] = temp;
+        }
+      }
+      
       const mood = await runMoodCheckAgent({
         participantName:
           input.participantName ?? preference.userName ?? undefined,
@@ -137,7 +179,7 @@ export const eventRouter = createTRPCRouter({
         answeredSignals: input.answeredSignals ?? existingResponses,
         timeOfDayLabel: input.timeOfDayLabel,
         filteredVenues:
-          finalFilteredVenues.length > 0 ? finalFilteredVenues : undefined,
+          shuffledVenues.length > 0 ? shuffledVenues : undefined,
       });
 
       const moodQuestionsData = {
@@ -163,18 +205,24 @@ export const eventRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const preference = await ctx.db.eventGroupPreference.findUnique({
+      // Use upsert to create preference if it doesn't exist
+      const preference = await ctx.db.eventGroupPreference.upsert({
         where: {
           groupId_sessionId: {
             groupId: input.groupId,
             sessionId: input.sessionId,
           },
         },
+        create: {
+          groupId: input.groupId,
+          sessionId: input.sessionId,
+          userName: undefined,
+          userIcon: "👤",
+          moneyPreference: "moderate",
+          activityLevel: 3,
+        },
+        update: {},
       });
-
-      if (!preference) {
-        throw new Error("Preference not found for this session");
-      }
 
       const existing =
         (preference as { moodResponses?: Record<string, unknown> | undefined })
@@ -508,7 +556,7 @@ export const eventRouter = createTRPCRouter({
         return { voted: false, voteCount };
       }
 
-      // Create new vote
+      // Create new vote (multiple people can vote on the same event)
       await ctx.db.eventGroupEvent.create({
         data: {
           groupId: input.groupId,

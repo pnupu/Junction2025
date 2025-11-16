@@ -169,12 +169,12 @@ export default function EventPage() {
     | "completed"
     | undefined;
 
-  // Auto-redirect to results page if voting is closed
+  // Auto-redirect to results page if voting is closed (only for creator)
   useEffect(() => {
-    if (eventStatus === "completed" && groupId) {
+    if (eventStatus === "completed" && groupId && isCreator) {
       router.push(`/event/${groupId}/results`);
     }
-  }, [eventStatus, groupId, router]);
+  }, [eventStatus, groupId, router, isCreator]);
 
   // Load recommendations from database if already generated
   const recommendationsQuery = api.event.getRecommendations.useQuery(
@@ -493,12 +493,7 @@ export default function EventPage() {
         userName: p.userName ?? "Anonymous",
         latitude: p.latitude,
         longitude: p.longitude,
-        initials: (p.userName ?? "A")
-          .split(" ")
-          .map((n: string) => n[0])
-          .join("")
-          .toUpperCase()
-          .slice(0, 2),
+        initials: "MM",
       }));
   }, [eventData]);
 
@@ -541,6 +536,7 @@ export default function EventPage() {
       (currentUserPreference as { moodResponses?: Record<string, unknown> })
         .moodResponses ?? {},
     ).length > 0;
+
 
   // Mood questions flow hook (prefetch data)
   const moodFlow = useMoodQuestionsFlow({

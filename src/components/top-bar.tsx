@@ -51,7 +51,7 @@ export function TopBar() {
               className="flex items-center gap-2 rounded-full bg-[#029DE2]/10 px-4 py-2 transition-all hover:scale-105 hover:bg-[#029DE2]/20"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#029DE2] text-white">
-                {userName.charAt(0).toUpperCase()}
+                MM
               </div>
               <span className="text-sm font-medium text-[#0F172B]">
                 {userName}

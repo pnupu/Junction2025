@@ -236,7 +236,7 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
         <label className="mb-3 block text-sm font-medium text-[#0F172B]">
           {prompt}
         </label>
-        <div className="flex gap-2">
+        <div className="space-y-2">
           {options.map((option, idx) => {
             const isSelected = value === option;
             return (
@@ -244,13 +244,13 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
                 key={idx}
                 type="button"
                 onClick={() => onChange(option)}
-                className={`max-w-[100px] min-w-0 flex-1 rounded-lg px-2 py-3 text-xs font-medium transition-all ${
+                className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-all ${
                   isSelected
                     ? "bg-[#029DE2] text-white shadow-md"
                     : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
                 }`}
               >
-                <span className="block truncate text-center">{option}</span>
+                {option}
               </button>
             );
           })}

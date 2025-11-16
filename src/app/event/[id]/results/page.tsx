@@ -52,6 +52,18 @@ export default function EventResultsPage() {
   const [boughtAddOns, setBoughtAddOns] = useState<Set<string>>(new Set());
   const [bookedSlots, setBookedSlots] = useState<Set<string>>(new Set());
   const [isMainBookingClicked, setIsMainBookingClicked] = useState(false);
+  const [sessionId, setSessionId] = useState<string>("");
+  const [isCreator, setIsCreator] = useState<boolean>(false);
+
+  // Get sessionId
+  useEffect(() => {
+    let sid = localStorage.getItem("sessionId");
+    if (!sid) {
+      sid = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem("sessionId", sid);
+    }
+    setSessionId(sid);
+  }, []);
 
   // Load Leaflet
   useEffect(() => {
@@ -75,6 +87,19 @@ export default function EventResultsPage() {
   const eventData = eventQuery.data;
   const eventStatus = (eventData as { status?: string } | undefined)?.status;
   const isVotingClosed = eventStatus === "completed";
+
+  // Determine if current user is the creator (leader)
+  useEffect(() => {
+    if (eventData && sessionId) {
+      // Creator is the first person who joined (first preference by createdAt)
+      const sortedPreferences = [...(eventData.preferences ?? [])].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+      const firstPreference = sortedPreferences[0];
+      setIsCreator(firstPreference?.sessionId === sessionId);
+    }
+  }, [eventData, sessionId]);
 
   // Load recommendations
   const recommendationsQuery = api.event.getRecommendations.useQuery(
@@ -104,12 +129,7 @@ export default function EventResultsPage() {
         userName: p.userName ?? "Anonymous",
         latitude: p.latitude,
         longitude: p.longitude,
-        initials: (p.userName ?? "A")
-          .split(" ")
-          .map((n: string) => n[0])
-          .join("")
-          .toUpperCase()
-          .slice(0, 2),
+        initials: "MM",
       }));
   }, [eventData]);
 
@@ -163,6 +183,8 @@ export default function EventResultsPage() {
       </div>
     );
   }
+
+  // Show results to everyone, but only creator can see booking/add-ons
 
   return (
     <main className="min-h-screen bg-white">
@@ -434,8 +456,8 @@ export default function EventResultsPage() {
                     </span>
                   </div>
 
-                  {/* Add-ons Section */}
-                  {addOns && addOns.length > 0 && (
+                  {/* Add-ons Section - Only visible to creator */}
+                  {isCreator && addOns && addOns.length > 0 && (
                     <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <h4 className="mb-2 text-xs font-semibold text-slate-900">
                         Available add-ons
@@ -468,8 +490,8 @@ export default function EventResultsPage() {
                     </div>
                   )}
 
-                  {/* CTA Section - Show when voting is closed */}
-                  {isVotingClosed && (
+                  {/* CTA Section - Only visible to creator when voting is closed */}
+                  {isVotingClosed && isCreator && (
                         <div className="mt-4 space-y-3 border-t border-slate-200 pt-3">
                           {/* Availability Slots - show as compact list if multiple */}
                           {availability && availability.length > 1 && (

@@ -49,7 +49,7 @@ export function MoodQuestionCard({
       const isLargeScale = scaleNumbers.length > 6;
 
       return (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <div className="space-y-3">
           {scaleNumbers.map((num) => {
             const isSelected = value === num || value === String(num);
             return (
@@ -57,9 +57,7 @@ export function MoodQuestionCard({
                 key={num}
                 type="button"
                 onClick={() => onChange(num)}
-                className={`w-full rounded-xl text-xs sm:text-sm font-semibold transition-all sm:flex-1 ${
-                  isLargeScale ? "px-1 py-2 sm:px-2 sm:py-3" : "px-2 py-2 sm:px-4 sm:py-3"
-                } ${
+                className={`w-full rounded-xl px-3 py-3 text-left text-sm sm:text-base font-medium transition-all ${
                   isSelected
                     ? "bg-[#029DE2] text-white shadow-md"
                     : "border-2 border-[#029DE2] bg-[#EDF7FF] text-[#029DE2] hover:bg-[#029DE2] hover:text-white"
@@ -75,7 +73,7 @@ export function MoodQuestionCard({
 
     // Handle scale with options (e.g., ["Chill", "Balanced", "Hype"])
     return (
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <div className="space-y-3">
         {options.map((option, idx) => {
           const isSelected = value === option;
           return (
@@ -83,7 +81,7 @@ export function MoodQuestionCard({
               key={idx}
               type="button"
               onClick={() => onChange(option)}
-              className={`w-full rounded-xl px-3 py-3 text-xs sm:text-sm font-semibold transition-all sm:flex-1 ${
+              className={`w-full rounded-xl px-3 py-3 text-left text-sm sm:text-base font-medium transition-all ${
                 isSelected
                   ? "bg-[#029DE2] text-white shadow-md"
                   : "border-2 border-[#029DE2] bg-[#EDF7FF] text-[#029DE2] hover:bg-[#029DE2] hover:text-white"
