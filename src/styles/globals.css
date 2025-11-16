@@ -145,25 +145,11 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-690px);
-  }
-}
-
-@keyframes chevron-slide-offset {
-  0% {
-    transform: translateX(690px);
-  }
-  100% {
-    transform: translateX(0);
+    transform: translateX(-1150px);
   }
 }
 
 .animate-chevron-slide {
   animation: chevron-slide 20s linear infinite;
-  will-change: transform;
-}
-
-.animate-chevron-slide-offset {
-  animation: chevron-slide-offset 20s linear infinite;
   will-change: transform;
 }

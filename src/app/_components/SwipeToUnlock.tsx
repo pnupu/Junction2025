@@ -12,50 +12,34 @@ interface SwipeToUnlockProps {
 
 function ChevronPattern({ color = "#029DE2" }: { color?: string }) {
   const CHEVRON_WIDTH = 23;
-  const CHEVRON_COUNT = 30;
+  const CHEVRON_COUNT = 50;
   const TOTAL_WIDTH = CHEVRON_WIDTH * CHEVRON_COUNT;
+  
+  // Create a seamless loop by duplicating the chevrons
+  const allChevrons = Array.from({ length: CHEVRON_COUNT * 2 }).map((_, i) => (
+    <svg
+      key={i}
+      width={CHEVRON_WIDTH}
+      height="45"
+      viewBox="0 0 23 45"
+      fill="none"
+      className="shrink-0"
+      style={{ opacity: 0.3 }}
+    >
+      <path
+        d="M21 23.3333L11.5567 45H0.725962L10.1692 23.3333L0 0H10.8308L21 23.3333Z"
+        fill={color}
+      />
+    </svg>
+  ));
   
   return (
     <div className="absolute inset-0 overflow-hidden flex items-center">
-      <div className="absolute left-0 flex h-full animate-chevron-slide" style={{ width: `${TOTAL_WIDTH}px` }}>
-        {Array.from({ length: CHEVRON_COUNT }).map((_, i) => (
-          <svg
-            key={i}
-            width={CHEVRON_WIDTH}
-            height="45"
-            viewBox="0 0 23 45"
-            fill="none"
-            className="shrink-0"
-            style={{ opacity: 0.3 }}
-          >
-            <path
-              d="M21 23.3333L11.5567 45H0.725962L10.1692 23.3333L0 0H10.8308L21 23.3333Z"
-              fill={color}
-            />
-          </svg>
-        ))}
-      </div>
       <div 
-        className="absolute left-0 flex h-full animate-chevron-slide-offset" 
-        aria-hidden="true"
-        style={{ width: `${TOTAL_WIDTH}px` }}
+        className="absolute left-0 flex h-full animate-chevron-slide" 
+        style={{ width: `${TOTAL_WIDTH * 2}px` }}
       >
-        {Array.from({ length: CHEVRON_COUNT }).map((_, i) => (
-          <svg
-            key={i}
-            width={CHEVRON_WIDTH}
-            height="45"
-            viewBox="0 0 23 45"
-            fill="none"
-            className="shrink-0"
-            style={{ opacity: 0.3 }}
-          >
-            <path
-              d="M21 23.3333L11.5567 45H0.725962L10.1692 23.3333L0 0H10.8308L21 23.3333Z"
-              fill={color}
-            />
-          </svg>
-        ))}
+        {allChevrons}
       </div>
     </div>
   );

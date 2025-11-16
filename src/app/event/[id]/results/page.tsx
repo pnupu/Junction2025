@@ -576,19 +576,29 @@ export default function EventResultsPage() {
                           {booking?.link && (
                             <>
                               {availability && availability.length > 1 ? (
-                                <SwipeToUnlock
-                                  buttonText="Book"
-                                  buttonColor="#029DE2"
-                                  chevronColor="#029DE2"
-                                  backgroundColor="#FFFFFF"
-                                  borderColor="#029DE2"
-                                  onUnlock={() => {
-                                    setIsMainBookingClicked(true);
-                                    toast.success("Booking initiated", {
-                                      description: `View All Options for ${rec.title}`,
-                                    });
-                                  }}
-                                />
+                                !isMainBookingClicked ? (
+                                  <SwipeToUnlock
+                                    buttonText="Book"
+                                    buttonColor="#029DE2"
+                                    chevronColor="#029DE2"
+                                    backgroundColor="#FFFFFF"
+                                    borderColor="#029DE2"
+                                    onUnlock={() => {
+                                      setIsMainBookingClicked(true);
+                                      toast.success("Booking initiated", {
+                                        description: `View All Options for ${rec.title}`,
+                                      });
+                                    }}
+                                  />
+                                ) : (
+                                  <Button
+                                    className="w-full rounded-xl bg-green-600 py-4 text-base font-semibold text-white shadow-lg opacity-100 cursor-not-allowed"
+                                    size="lg"
+                                    disabled
+                                  >
+                                    Booked
+                                  </Button>
+                                )
                               ) : (
                                 <Button
                                   className="w-full rounded-xl bg-[#029DE2] py-4 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#0287C3] hover:shadow-xl active:scale-[0.98] disabled:bg-green-600 disabled:opacity-100 disabled:cursor-not-allowed"
