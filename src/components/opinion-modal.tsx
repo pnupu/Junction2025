@@ -58,10 +58,29 @@ export function OpinionModal({
 }: OpinionModalProps) {
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   const [L, setL] = useState<LeafletModule | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  // Handle opening and closing states
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      setIsClosing(false);
+    } else if (shouldRender) {
+      // Start closing animation
+      setIsClosing(true);
+      // Wait for animation to complete before unmounting
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+        setIsClosing(false);
+      }, 600); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, shouldRender]);
 
   // Load Leaflet
   useEffect(() => {
-    if (isOpen) {
+    if (shouldRender) {
       void import("leaflet").then((leafletModule) => {
         const leaflet = (leafletModule.default ??
           leafletModule) as LeafletModule;
@@ -77,7 +96,7 @@ export function OpinionModal({
         });
       });
     }
-  }, [isOpen]);
+  }, [shouldRender]);
 
   // Group participants by location
   const groupedLocations = React.useMemo(() => {
@@ -100,12 +119,12 @@ export function OpinionModal({
     return Array.from(locationMap.values());
   }, [participants]);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Map Background - z-index 0 */}
-      <div className="absolute inset-0 z-0">
+      <div className={`absolute inset-0 z-0 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}>
         {leafletLoaded && L && participants.length > 0 ? (
           <div className="relative h-full w-full">
             <MapContainer
@@ -217,7 +236,7 @@ export function OpinionModal({
       </button>
 
       {/* Content - z-index 10 */}
-      <div className="relative z-10 flex h-full w-full items-center justify-center p-10">
+      <div className={`relative z-10 flex h-full w-full items-center justify-center p-10 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}>
         {isLoading ? (
           <div className="flex flex-col items-center justify-center">
             <Loader />
@@ -226,6 +245,69 @@ export function OpinionModal({
           <div className="w-full max-w-[362px]">{children}</div>
         )}
       </div>
+
+      <style jsx global>{`
+        @keyframes scale-in {
+          from {
+            transform: scale(0.8);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1.15);
+            opacity: 1;
+          }
+        }
+
+        @keyframes scale-out {
+          from {
+            transform: scale(1.15);
+            opacity: 1;
+          }
+          to {
+            transform: scale(0.8);
+            opacity: 0;
+          }
+        }
+
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-out {
+          from {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+        }
+
+        .animate-scale-in {
+          animation: scale-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-scale-out {
+          animation: scale-out 0.6s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-out 0.2s forwards;
+          opacity: 0;
+        }
+
+        .animate-fade-out {
+          animation: fade-out 0.3s ease-in forwards;
+        }
+      `}</style>
     </div>
   );
 }
