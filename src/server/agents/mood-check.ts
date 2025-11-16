@@ -254,7 +254,7 @@ export async function runMoodCheckAgent(
         {
           role: "system",
           content:
-            "Wolt Advisor Mood Agent. Generate 1-3 concise questions to match groups to venues. ALL questions MUST be multiple choice - use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Provide options array for all questions with a MAXIMUM of 3 options per question. For preference questions (e.g., 'active or laid-back'), use 'choice' type with descriptive options like ['More active', 'Laid-back']. Use slider/emoji/short-choice formats. Analyze venue differences and create natural questions. NEVER mention venue names/types. Each question must be DISTINCTLY different - varied vocabulary, different structures. Cover different aspects (atmosphere, time, hunger, social).",
+            "Wolt Advisor Mood Agent. Generate 1-3 concise questions to match groups to venues. ALL questions MUST be multiple choice - use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Provide options array for all questions with a MAXIMUM of 3 options per question. For preference questions (e.g., 'active or laid-back'), use 'choice' type with descriptive options like ['More active', 'Laid-back']. Use slider/emoji/short-choice formats. Analyze venue differences and create natural questions. NEVER mention venue names/types. CRITICAL: Each question must cover a COMPLETELY DIFFERENT dimension/aspect. Avoid asking multiple preference questions in a row. Instead, cover diverse aspects like: activity intensity (active vs relaxed), time constraints (quick vs leisurely), social dynamics (group interaction level), setting type (indoor vs outdoor), budget sensitivity, hunger level, or specific activity interests. Use varied question structures - mix 'how much', 'what type', 'when', 'where' formats. Never repeat similar phrasing like 'What kind of X' or 'What type of Y' multiple times.",
         },
         {
           role: "user",
@@ -509,19 +509,20 @@ function buildPromptPayload(input: MoodAgentInput) {
         "Keep tone playful and short.",
         "Return 1-3 questions that help narrow down which venues would be best for this group.",
         "CRITICAL: ALL questions MUST be multiple choice. Use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Always provide an options array with at least 2 choices and a MAXIMUM of 3 options per question. For preference questions (choosing between options), use 'choice' type with descriptive option labels, NOT binary yes/no.",
-        "VARIETY IS CRITICAL: Each question must be completely different from the others. Use different vocabulary, different question structures, and cover different aspects. Avoid repeating similar words or phrases across questions.",
-        "Question structure variety: Mix scales and multiple choice formats. Don't use the same 'X or Y' pattern for multiple questions. For preference questions, use 'choice' type with descriptive options (e.g., ['More active', 'Laid-back']), not binary yes/no.",
-        "Vocabulary variety: If one question uses 'cozy', don't use 'cozy' again. If one uses 'energetic', use different energy-related terms in other questions.",
+        "MANDATORY DIVERSITY: Each question must cover a UNIQUE dimension. DO NOT ask multiple questions about the same type of preference. Examples of distinct dimensions: (1) Activity intensity/energy level, (2) Time constraints/duration, (3) Social interaction style, (4) Setting preference (indoor/outdoor), (5) Budget sensitivity, (6) Hunger level, (7) Group size dynamics, (8) Specific activity interests. If you ask about 'vibe' in one question, the next question MUST cover something completely different like time constraints or budget, NOT another vibe-related preference.",
+        "Question structure variety: Use DIFFERENT question formats across questions. Mix 'How much...', 'What type of...', 'When do you...', 'Where would you...', 'How do you feel about...' patterns. Never use the same question structure twice. Avoid asking 'What kind of X' followed by 'What type of Y' - these are too similar.",
+        "Vocabulary and phrasing variety: If one question uses 'vibe' or 'mood', don't use those words again. If one uses 'prefer', use different phrasing in other questions. If one asks about 'setting', don't ask about 'space' or 'environment' in another - these overlap. Each question should feel like it's asking about a completely different aspect of the experience.",
+        "BAD EXAMPLE (too similar): 'What kind of vibe are you in the mood for?' followed by 'What type of setting do you prefer?' - both are preference questions about atmosphere. GOOD EXAMPLE (diverse): 'How much time do you have?' (time constraint) followed by 'What's your energy level right now?' (intensity scale) followed by 'How important is budget?' (priority question).",
         venueAnalysis && venueAnalysis.differentiatingFactors.length > 0
-          ? `Venues differ by: ${venueAnalysis.differentiatingFactors.slice(0, 3).join(", ")}. Types: ${venueAnalysis.venueTypes.slice(0, 4).join(", ")}. Create questions that distinguish between options. Cover different aspects.`
+          ? `Venues differ by: ${venueAnalysis.differentiatingFactors.slice(0, 3).join(", ")}. Types: ${venueAnalysis.venueTypes.slice(0, 4).join(", ")}. Create questions that distinguish between options. Each question must cover a DIFFERENT differentiating factor - don't ask about the same aspect twice.`
           : venueContext
             ? `Available venues: ${venueContext
                 .slice(0, 8)
                 .map((v) => `${v.name} (${v.type})`)
                 .join(
                   ", ",
-                )}. Create questions to match group to venues. Cover different aspects.`
-            : "Generate general mood questions covering different aspects.",
+                )}. Create questions to match group to venues. Cover COMPLETELY DIFFERENT aspects - don't repeat similar preference questions.`
+            : "Generate general mood questions covering COMPLETELY DIFFERENT aspects (time, energy, social, setting, budget, etc.).",
       ],
     },
   };
