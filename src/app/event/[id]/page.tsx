@@ -603,7 +603,7 @@ export default function EventPage() {
               <Button
                 onClick={moodFlow.handleSubmit}
                 disabled={!moodFlow.allAnswered || moodFlow.isSubmitting}
-                className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3] disabled:opacity-50"
+                className="w-full"
               >
                 {moodFlow.isSubmitting ? "Saving..." : "Continue"}
               </Button>
@@ -614,9 +614,10 @@ export default function EventPage() {
       <main className="min-h-screen bg-white">
         {/* Back button */}
         <div className="absolute top-4 left-4 z-20">
-          <button
+          <Button
             onClick={() => router.push("/")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-white"
+            variant="icon"
+            size="icon"
             aria-label="Go to home"
           >
             <svg
@@ -632,7 +633,7 @@ export default function EventPage() {
             >
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         {/* Inline Map Preview - Full Width */}
@@ -649,7 +650,7 @@ export default function EventPage() {
                     e.stopPropagation();
                     setShowInviteModal(true);
                   }}
-                  className="h-12 w-full max-w-[500px] rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3]"
+                  className="w-full max-w-[500px]"
                 >
                   Invite friends
                 </Button>
@@ -757,7 +758,7 @@ export default function EventPage() {
               </h2>
               <Button
                 onClick={() => setShowInviteModal(true)}
-                className="h-12 rounded-xl bg-[#029DE2] px-8 text-base font-semibold text-white hover:bg-[#0287C3]"
+                className="px-8"
               >
                 Invite friends
               </Button>
@@ -775,19 +776,21 @@ export default function EventPage() {
 
             {/* Tabs */}
             <div className="flex border-b border-slate-200">
-              <button
+              <Button
                 onClick={() => setActiveTab("participants")}
-                className={`flex-1 px-3 py-4 text-base font-semibold transition-colors ${
+                variant="ghost"
+                className={`flex-1 px-3 py-4 text-base h-auto rounded-none ${
                   activeTab === "participants"
                     ? "border-b-2 border-[#029DE2] text-[#029DE2]"
                     : "text-[#0F172B]"
                 }`}
               >
                 Participants ({participantCount})
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setActiveTab("ideas")}
-                className={`flex-1 px-3 py-4 text-base font-semibold transition-colors ${
+                variant="ghost"
+                className={`flex-1 px-3 py-4 text-base h-auto rounded-none ${
                   activeTab === "ideas"
                     ? "border-b-2 border-[#029DE2] text-[#029DE2]"
                     : "text-[#0F172B]"
@@ -795,7 +798,7 @@ export default function EventPage() {
               >
                 Event ideas (
                 {recommendationsQuery.data?.recommendations.length ?? 0})
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -842,12 +845,13 @@ export default function EventPage() {
                 </div>
 
                 {/* Copy Link Button */}
-                <button
+                <Button
                   onClick={() => void handleCopyLink()}
-                  className="w-full rounded-[12px] bg-white px-6 py-3.5 text-base font-semibold text-[#029DE2] transition-colors hover:bg-white/90"
+                  variant="white"
+                  className="w-full"
                 >
                   Copy link to clipboard
-                </button>
+                </Button>
               </div>
             </DrawerContent>
           </Drawer>
@@ -1293,7 +1297,7 @@ export default function EventPage() {
                               router.push(`/event/${groupId}/results`);
                             }
                           }}
-                          className="shrink-0 rounded-lg bg-[#029DE2] px-6 font-semibold text-white hover:bg-[#0287C3]"
+                          className="shrink-0 px-6"
                           size="lg"
                         >
                           View Results & Book
@@ -1396,7 +1400,7 @@ export default function EventPage() {
                                       </div>
                                     )}
                                   </div>
-                                  <button
+                                  <Button
                                     onClick={() =>
                                       rec.eventId && handleVote(rec.eventId)
                                     }
@@ -1405,18 +1409,16 @@ export default function EventPage() {
                                       voteMutation.isPending ||
                                       eventStatus === "completed"
                                     }
-                                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                                      myVotes.has(rec.eventId)
-                                        ? "bg-[#029DE2] text-white"
-                                        : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                    } disabled:cursor-not-allowed disabled:opacity-50`}
+                                    variant={myVotes.has(rec.eventId) ? "selected" : "ghost"}
+                                    size="sm"
+                                    className={myVotes.has(rec.eventId) ? "" : "bg-slate-100 hover:bg-slate-200"}
                                   >
                                     {eventStatus === "completed"
                                       ? "Closed"
                                       : myVotes.has(rec.eventId)
                                         ? "Voted"
                                         : "Vote"}
-                                  </button>
+                                  </Button>
                                 </div>
                               </div>
                             );
@@ -1429,7 +1431,7 @@ export default function EventPage() {
                         <Button
                           onClick={handleCloseVoting}
                           disabled={closeVoting.isPending || !isCreator}
-                          className="mt-4 w-full rounded-xl bg-[#029DE2] text-white transition-all hover:bg-[#0287C3] disabled:opacity-50"
+                          className="mt-4 w-full"
                           size="lg"
                         >
                           {closeVoting.isPending
@@ -1449,7 +1451,7 @@ export default function EventPage() {
                                   router.push(`/event/${groupId}/results`);
                                 }
                               }}
-                              className="w-full rounded-xl bg-[#029DE2] text-white transition-all hover:bg-[#0287C3]"
+                              className="w-full"
                               size="lg"
                             >
                               View Results & Book
@@ -1487,7 +1489,8 @@ export default function EventPage() {
                  disabled={
                    participantCount === 0 || generateRecommendations.isPending
                  }
-                 className="h-14 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white shadow-lg hover:bg-[#0287C3] disabled:opacity-50 disabled:hover:bg-[#029DE2]"
+                 size="lg"
+                 className="w-full shadow-lg"
                >
                  {generateRecommendations.isPending
                    ? "Cooking events..."
@@ -1514,7 +1517,8 @@ export default function EventPage() {
             <div className="mt-6 hidden md:block">
               <Button
                 onClick={() => setShowOpinionModal(true)}
-                className="h-14 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white shadow-lg hover:bg-[#0287C3]"
+                size="lg"
+                className="w-full shadow-lg"
               >
                 Give your opinion
               </Button>
@@ -1528,7 +1532,8 @@ export default function EventPage() {
             <div className="mx-auto max-w-[500px]">
               <Button
                 onClick={() => setShowOpinionModal(true)}
-                className="h-14 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white shadow-lg hover:bg-[#0287C3]"
+                size="lg"
+                className="w-full shadow-lg"
               >
                 Give your opinion
               </Button>

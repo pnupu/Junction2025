@@ -153,20 +153,17 @@ export function ProfileModal({
         </label>
         <div className="flex gap-2">
           {dietaryOptions.map((option) => (
-            <button
+            <Button
               key={option.id}
               onClick={() => setDietaryRestrictions(option.id)}
-              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-8 transition-all ${
-                dietaryRestrictions === option.id
-                  ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
-                  : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
-              } `}
+              variant={dietaryRestrictions === option.id ? "selected" : "option"}
+              className="flex grow basis-0 flex-col items-center justify-center gap-2 px-4 py-8 h-auto"
             >
               <span className="text-xl leading-none font-semibold">
                 {option.emoji}
               </span>
               <span className="text-sm text-[#62748E]">{option.label}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -178,20 +175,17 @@ export function ProfileModal({
         </label>
         <div className="flex gap-2">
           {frequencyOptions.map((option) => (
-            <button
+            <Button
               key={option.id}
               onClick={() => setEatingFrequency(option.id)}
-              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-8 transition-all ${
-                eatingFrequency === option.id
-                  ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
-                  : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
-              } `}
+              variant={eatingFrequency === option.id ? "selected" : "option"}
+              className="flex grow basis-0 flex-col items-center justify-center gap-2 px-4 py-8 h-auto"
             >
               <span className="text-xl leading-none font-semibold">
                 {option.emoji}
               </span>
               <span className="text-sm text-[#62748E]">{option.label}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -203,20 +197,17 @@ export function ProfileModal({
         </label>
         <div className="flex gap-2">
           {healthOptions.map((option) => (
-            <button
+            <Button
               key={option.id}
               onClick={() => setHealthConsciousness(option.id)}
-              className={`flex grow basis-0 flex-col items-center justify-center gap-2 rounded-xl border-[1.5px] px-4 py-8 transition-all ${
-                healthConsciousness === option.id
-                  ? "border-2 border-[#029DE2] bg-[#EDF7FF]"
-                  : "border-[#CAD5E2] bg-white hover:border-[#029DE2]/50"
-              } `}
+              variant={healthConsciousness === option.id ? "selected" : "option"}
+              className="flex grow basis-0 flex-col items-center justify-center gap-2 px-4 py-8 h-auto"
             >
               <span className="text-xl leading-none font-semibold">
                 {option.emoji}
               </span>
               <span className="text-sm text-[#62748E]">{option.label}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -231,7 +222,7 @@ export function ProfileModal({
             !eatingFrequency ||
             !healthConsciousness
           }
-          className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#029DE2]/90 disabled:opacity-50"
+          className="w-full"
         >
           Continue
         </Button>

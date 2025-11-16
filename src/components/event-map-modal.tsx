@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 
 // Type for Leaflet module (only what we need)
@@ -284,12 +285,14 @@ export function EventMapModal({
 
         {/* Enlarge/Shrink button */}
         {onToggleEnlarge && (
-          <button
+          <Button
             onClick={onToggleEnlarge}
-            className="absolute top-4 right-4 z-[1000] rounded-lg bg-white px-3 py-2 text-sm font-medium text-[#029DE2] shadow-lg transition-all hover:scale-105 hover:bg-[#029DE2] hover:text-white"
+            variant="white"
+            size="sm"
+            className="absolute top-4 right-4 z-[1000] shadow-lg hover:scale-105"
           >
             {isEnlarged ? "📉 Shrink" : "📈 Enlarge"}
-          </button>
+          </Button>
         )}
       </div>
     ) : (
@@ -307,12 +310,14 @@ export function EventMapModal({
             <h2 className="text-2xl font-semibold text-[#0F172B]">
               {eventName ? `${eventName}'s Event` : "Participant Locations"}
             </h2>
-            <button
+            <Button
               onClick={onClose}
+              variant="ghost"
+              size="icon-sm"
               className="text-2xl text-[#62748E] hover:text-[#0F172B]"
             >
               ✕
-            </button>
+            </Button>
           </div>
           <div className="relative flex-1">
             {mapContent}
@@ -320,20 +325,22 @@ export function EventMapModal({
             <div className="absolute right-0 bottom-0 left-0 z-[1000] border-t border-slate-200 bg-white/95 px-6 py-4 backdrop-blur">
               <div className="flex max-h-24 flex-wrap gap-2 overflow-y-auto">
                 {participants.map((participant, idx) => (
-                  <button
+                  <Button
                     key={idx}
                     onClick={() => handleParticipantClick(participant.userName)}
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all ${
+                    variant={selectedParticipant === participant.userName ? undefined : "default"}
+                    size="sm"
+                    className={`inline-flex items-center gap-2 rounded-full ${
                       selectedParticipant === participant.userName
-                        ? "scale-105 bg-[#FFD700] text-white shadow-lg"
-                        : "bg-[#029DE2] text-white hover:scale-105 hover:bg-[#0287C3]"
+                        ? "scale-105 bg-[#FFD700] text-white shadow-lg hover:bg-[#FFD700]"
+                        : ""
                     }`}
                   >
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/30 text-xs font-bold">
                       {participant.initials}
                     </span>
                     <span>{participant.userName}</span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

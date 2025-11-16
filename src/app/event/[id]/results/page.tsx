@@ -191,9 +191,10 @@ export default function EventResultsPage() {
     <main className="min-h-screen bg-white">
       {/* Back button */}
       <div className="absolute top-4 left-4 z-20">
-        <button
+        <Button
           onClick={() => router.push("/")}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-white"
+          variant="icon"
+          size="icon"
           aria-label="Go to home"
         >
           <svg
@@ -209,7 +210,7 @@ export default function EventResultsPage() {
           >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-        </button>
+        </Button>
       </div>
 
       {/* Inline Map Preview - Full Width */}
@@ -472,7 +473,7 @@ export default function EventResultsPage() {
                             <span className="text-xs text-slate-700">{addOn}</span>
                             <Button
                               size="sm"
-                              className="h-6 bg-[#029DE2] px-3 text-xs text-white hover:bg-[#0287C3] disabled:bg-green-600 disabled:opacity-100"
+                              variant={boughtAddOns.has(addOn) ? "success" : "default"}
                               disabled={boughtAddOns.has(addOn)}
                               onClick={(e) => {
                                 e.preventDefault();
@@ -519,7 +520,7 @@ export default function EventResultsPage() {
                                     </div>
                                     <Button
                                       size="sm"
-                                      className="ml-2 h-7 bg-[#029DE2] text-xs text-white hover:bg-[#029DE2]/90 disabled:bg-green-600 disabled:opacity-100"
+                                      variant={bookedSlots.has(slot.label ?? `${slot.start}-${slot.end}`) ? "success" : "default"}
                                       disabled={bookedSlots.has(slot.label ?? `${slot.start}-${slot.end}`)}
                                       onClick={(e) => {
                                         e.preventDefault();
@@ -601,7 +602,8 @@ export default function EventResultsPage() {
                                 )
                               ) : (
                                 <Button
-                                  className="w-full rounded-xl bg-[#029DE2] py-4 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#0287C3] hover:shadow-xl active:scale-[0.98] disabled:bg-green-600 disabled:opacity-100 disabled:cursor-not-allowed"
+                                  className="w-full shadow-lg hover:shadow-xl active:scale-[0.98]"
+                                  variant={isMainBookingClicked ? "success" : "default"}
                                   size="lg"
                                   disabled={isMainBookingClicked}
                                   onClick={(e) => {
@@ -663,7 +665,7 @@ export default function EventResultsPage() {
                           {/* Fallback if no booking link */}
                           {!booking?.link && !availability && (
                             <Button
-                              className="w-full rounded-xl bg-slate-200 py-4 text-base font-semibold text-slate-700"
+                              className="w-full bg-slate-200 text-slate-700 hover:bg-slate-200"
                               size="lg"
                               disabled
                             >

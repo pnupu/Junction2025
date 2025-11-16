@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Loader } from "@/components/ui/loader";
+import { Button } from "@/components/ui/button";
 import type { ParticipantLocation } from "@/components/event-map-modal";
 
 // Type for Leaflet module
@@ -214,9 +215,11 @@ export function OpinionModal({
       </div>
 
       {/* Close button - top left */}
-      <button
+      <Button
         onClick={onClose}
-        className="absolute top-5 left-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:scale-110 hover:bg-white"
+        variant="icon"
+        size="icon"
+        className="absolute top-5 left-5 z-20"
         aria-label="Close"
       >
         <svg
@@ -233,7 +236,7 @@ export function OpinionModal({
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-      </button>
+      </Button>
 
       {/* Content - z-index 10 */}
       <div className={`relative z-10 flex h-full w-full items-start justify-center overflow-y-auto px-4 py-6 sm:p-10 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}>
