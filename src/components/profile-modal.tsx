@@ -132,10 +132,7 @@ export function ProfileModal({
   if (!isOpen) return null;
 
   const formContent = (
-    <div className="flex flex-col gap-8">
-      {/* Profile/Options Title */}
-      <div className="text-sm font-medium text-[#62748E]">Profile/Options</div>
-
+    <div className="flex flex-col gap-4 relative">
       <h1 className="text-4xl font-semibold text-[#0F172B]">Profile</h1>
 
       {/* Name Input */}
@@ -225,7 +222,7 @@ export function ProfileModal({
       </div>
 
       {/* Submit Button */}
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col fixed bottom-0 left-0 right-0 p-5 bg-white">
         <Button
           onClick={handleSave}
           disabled={
@@ -239,7 +236,11 @@ export function ProfileModal({
           Continue
         </Button>
       </div>
+
+      {/* 88px spacer for the bottom button */}
+      <div className="h-24" />
     </div>
+
   );
 
   if (showAsModal) {

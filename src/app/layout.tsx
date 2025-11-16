@@ -5,7 +5,6 @@ import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { TopBar } from "@/components/top-bar";
 
 export const metadata: Metadata = {
   title: "Wolt Events",
