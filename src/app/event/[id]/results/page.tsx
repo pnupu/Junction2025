@@ -171,8 +171,12 @@ export default function EventResultsPage() {
     }
   }, []);
 
-  // Show loading state
-  if (eventQuery.isLoading || recommendationsQuery.isLoading) {
+  // Show loading state only if we don't have event data yet
+  // Once we have event data, show the page structure and load recommendations in the background
+  const isLoadingInitialData = eventQuery.isLoading && !eventQuery.data;
+
+  // Show loading state only for initial data fetch
+  if (isLoadingInitialData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
@@ -337,7 +341,19 @@ export default function EventResultsPage() {
         </div>
 
         {/* Recommendations Section */}
-        {recommendationsQuery.data?.recommendations.length ? (
+        {(recommendationsQuery.isLoading || 
+          (eventStatus !== "generated" && eventStatus !== "completed")) && 
+          !recommendationsQuery.data ? (
+          <div className="rounded-2xl bg-slate-50 p-8 text-center">
+            <div className="mb-3 text-4xl">✨</div>
+            <h3 className="mb-2 text-xl font-semibold text-[#0F172B]">
+              Generating recommendations...
+            </h3>
+            <p className="text-[#0F172B]/80">
+              We&apos;re finding the perfect options for your group.
+            </p>
+          </div>
+        ) : recommendationsQuery.data?.recommendations.length ? (
           <>
             {/* Banner when voting is closed */}
             {isVotingClosed && (

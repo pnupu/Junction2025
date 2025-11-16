@@ -42,13 +42,13 @@ export function useMoodQuestionsFlow({
   );
 
   const saveMoodResponses = api.event.saveMoodResponses.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       setAnswers({});
       setIsSubmitting(false);
 
-      // Refetch and complete
-      await refetch();
-
+      // Don't refetch if we're navigating away - it's unnecessary and slows things down
+      // The results page will fetch fresh data anyway
+      
       // All questions answered
       if (onComplete) {
         onComplete();
