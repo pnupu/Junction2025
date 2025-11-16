@@ -58,7 +58,7 @@ export default function Home() {
         src="/happy-times.png"
         alt=""
         fill
-        className="object-cover object-bottom md:object-contain"
+        className="object-cover object-bottom md:object-contain animate-jump-on-load"
         priority
       />
     </div>
