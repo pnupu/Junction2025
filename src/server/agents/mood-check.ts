@@ -183,14 +183,242 @@ export type MoodAgentInput = {
   filteredVenues?: FilteredVenue[]; // Venues to narrow down with questions
 };
 
+// Question theme categories
+type QuestionCategory = "preference" | "factual" | "constraint";
+
+// Question theme definition
+type QuestionTheme = {
+  id: string;
+  category: QuestionCategory;
+  prompt: string;
+  signalKey: string;
+  description: string; // What this theme captures
+};
+
+// Predefined question themes based on venue data structure
+const QUESTION_THEMES: QuestionTheme[] = [
+  // FACTUAL/CONSTRAINT themes
+  {
+    id: "time-availability",
+    category: "factual",
+    prompt: "How much time do you have?",
+    signalKey: "timeAvailability",
+    description: "Time constraint - maps to timeSlotsMinutes",
+  },
+  {
+    id: "budget-sensitivity",
+    category: "constraint",
+    prompt: "How important is staying within budget?",
+    signalKey: "budgetSensitivity",
+    description: "Budget constraint - maps to budgetTiers",
+  },
+  {
+    id: "hunger-level",
+    category: "factual",
+    prompt: "How hungry are you right now?",
+    signalKey: "hungerLevel",
+    description: "Hunger level - maps to hungerLevels",
+  },
+  {
+    id: "weather-dependency",
+    category: "constraint",
+    prompt: "How does weather affect your plans?",
+    signalKey: "weatherDependency",
+    description: "Weather constraint - maps to weatherFlex",
+  },
+  
+  // PREFERENCE themes
+  {
+    id: "energy-level",
+    category: "preference",
+    prompt: "What's your energy level right now?",
+    signalKey: "energyLevel",
+    description: "Energy preference - maps to energyLevels",
+  },
+  {
+    id: "adventure-novelty",
+    category: "preference",
+    prompt: "How adventurous are you feeling?",
+    signalKey: "adventureLevel",
+    description: "Novelty preference - maps to noveltyPreference",
+  },
+  {
+    id: "experience-intensity",
+    category: "preference",
+    prompt: "What kind of experience are you looking for?",
+    signalKey: "experienceIntensity",
+    description: "Experience depth - maps to experienceIntensity",
+  },
+  {
+    id: "social-vibe",
+    category: "preference",
+    prompt: "What kind of social vibe are you looking for?",
+    signalKey: "socialDynamics",
+    description: "Social atmosphere - maps to vibeTags",
+  },
+  {
+    id: "activity-vs-dining",
+    category: "preference",
+    prompt: "What sounds more appealing?",
+    signalKey: "activityFocus",
+    description: "Activity vs dining focus - maps to category",
+  },
+  {
+    id: "setting-preference",
+    category: "preference",
+    prompt: "Where would you rather be?",
+    signalKey: "settingPreference",
+    description: "Indoor vs outdoor - maps to weatherSuitability",
+  },
+];
+
+/**
+ * Select appropriate question themes based on venue context
+ * Ensures diversity by mixing preference, factual, and constraint questions
+ */
+function selectQuestionThemes(
+  input: MoodAgentInput,
+  venueAnalysis?: {
+    venueTypes: string[];
+    keyCharacteristics: string[];
+    differentiatingFactors: string[];
+  },
+): QuestionTheme[] {
+  const answeredSignals = input.answeredSignals ?? {};
+  const availableThemes = QUESTION_THEMES.filter(
+    (theme) => !answeredSignals[theme.signalKey],
+  );
+
+  if (availableThemes.length === 0) {
+    return QUESTION_THEMES.slice(0, 3);
+  }
+
+  // Analyze venue context to prioritize relevant themes
+  const venueContext = venueAnalysis?.differentiatingFactors ?? [];
+  const hasIndoorOutdoor = venueContext.some((f) =>
+    f.toLowerCase().includes("indoor") || f.toLowerCase().includes("outdoor"),
+  );
+  const hasFood = venueAnalysis?.venueTypes.some((t) =>
+    t.toLowerCase().includes("restaurant") ||
+    t.toLowerCase().includes("cafe") ||
+    t.toLowerCase().includes("dining"),
+  );
+  const hasActivityVariety = venueContext.some((f) =>
+    f.toLowerCase().includes("activity"),
+  );
+
+  // Score themes based on relevance
+  const scoredThemes = availableThemes.map((theme) => {
+    let score = 0;
+
+    // Boost themes relevant to venue context (but not too much)
+    if (hasIndoorOutdoor && theme.id === "setting-preference") score += 3;
+    if (hasFood && theme.id === "hunger-level") score += 3;
+    if (hasActivityVariety && theme.id === "activity-vs-dining") score += 3;
+    if (input.timeOfDayLabel && theme.id === "time-availability") score += 2;
+
+    // Add significant randomization to ensure variety
+    // This ensures different questions even with same venue context
+    score += Math.random() * 10;
+
+    return { theme, score };
+  });
+
+  // Shuffle first, then sort by score to break ties randomly
+  // This adds more variety even when scores are similar
+  for (let i = scoredThemes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = scoredThemes[i];
+    if (temp && scoredThemes[j]) {
+      scoredThemes[i] = scoredThemes[j];
+      scoredThemes[j] = temp;
+    }
+  }
+  
+  // Sort by score
+  scoredThemes.sort((a, b) => b.score - a.score);
+
+  // Select 1-3 themes ensuring diversity
+  const selected: QuestionTheme[] = [];
+  const selectedCategories = new Set<QuestionCategory>();
+  const selectedIds = new Set<string>();
+
+  // First pass: ensure diversity by mixing categories
+  for (const { theme } of scoredThemes) {
+    if (selected.length >= 3) break;
+    if (selectedIds.has(theme.id)) continue;
+
+    // Prefer mixing categories
+    if (selected.length === 0) {
+      // First question: any category
+      selected.push(theme);
+      selectedCategories.add(theme.category);
+      selectedIds.add(theme.id);
+    } else if (selected.length === 1) {
+      // Second question: prefer different category
+      const firstCategory = selected[0]?.category;
+      if (theme.category !== firstCategory) {
+        selected.push(theme);
+        selectedCategories.add(theme.category);
+        selectedIds.add(theme.id);
+      }
+    } else {
+      // Third question: prefer different category from both previous
+      const categories = Array.from(selectedCategories);
+      if (!categories.includes(theme.category) || categories.length === 2) {
+        selected.push(theme);
+        selectedCategories.add(theme.category);
+        selectedIds.add(theme.id);
+      }
+    }
+  }
+
+  // Fill remaining slots if we don't have 3 yet
+  if (selected.length < 3) {
+    for (const { theme } of scoredThemes) {
+      if (selected.length >= 3) break;
+      if (!selectedIds.has(theme.id)) {
+        selected.push(theme);
+        selectedIds.add(theme.id);
+      }
+    }
+  }
+
+  // Enforce diversity: if all selected are preference, replace one
+  const allPreference = selected.every((t) => t.category === "preference");
+  if (allPreference && selected.length > 1) {
+    const nonPreference = scoredThemes.find(
+      ({ theme }) =>
+        theme.category !== "preference" && !selectedIds.has(theme.id),
+    );
+    if (nonPreference) {
+      selected[selected.length - 1] = nonPreference.theme;
+      selectedIds.delete(selected[selected.length - 1]?.id ?? "");
+      selectedIds.add(nonPreference.theme.id);
+    }
+  }
+
+  // Final shuffle to randomize order (so same themes don't always appear in same position)
+  for (let i = selected.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = selected[i];
+    if (temp && selected[j]) {
+      selected[i] = selected[j];
+      selected[j] = temp;
+    }
+  }
+
+  return selected.slice(0, 3);
+}
+
 /**
  * Generate a cache key from the input
  */
 function generateCacheKey(input: MoodAgentInput): string {
   // Create a hash from:
   // 1. Venue IDs (sorted for consistency)
-  // 2. Stats (participant count, energy, budget)
-  // 3. Summary keywords
+  // 2. Answered signals (to ensure different questions after answers)
+  // 3. Time of day (to vary by time)
 
   const venueIds = input.filteredVenues
     ? input.filteredVenues
@@ -199,10 +427,15 @@ function generateCacheKey(input: MoodAgentInput): string {
         .join(",")
     : "no-venues";
 
-  const statsKey = `${input.stats.participantCount}-${input.stats.energyLabel}-${input.stats.popularMoneyPreference}`;
-  const keywordsKey = input.summary.vibeKeywords.slice(0, 4).sort().join(",");
+  const answeredSignalsKey = input.answeredSignals
+    ? Object.keys(input.answeredSignals)
+        .sort()
+        .join(",")
+    : "none";
+  
+  const timeOfDay = input.timeOfDayLabel ?? "unknown";
 
-  const keyString = `${venueIds}|${statsKey}|${keywordsKey}`;
+  const keyString = `${venueIds}|${answeredSignalsKey}|${timeOfDay}`;
 
   // Create SHA-256 hash for shorter, consistent key
   return createHash("sha256").update(keyString).digest("hex").slice(0, 16);
@@ -254,7 +487,7 @@ export async function runMoodCheckAgent(
         {
           role: "system",
           content:
-            "Wolt Advisor Mood Agent. Generate 1-3 concise questions to match groups to venues. ALL questions MUST be multiple choice - use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Provide options array for all questions with a MAXIMUM of 3 options per question. For preference questions (e.g., 'active or laid-back'), use 'choice' type with descriptive options like ['More active', 'Laid-back']. Use slider/emoji/short-choice formats. Analyze venue differences and create natural questions. NEVER mention venue names/types. CRITICAL: Each question must cover a COMPLETELY DIFFERENT dimension/aspect. Avoid asking multiple preference questions in a row. Instead, cover diverse aspects like: activity intensity (active vs relaxed), time constraints (quick vs leisurely), social dynamics (group interaction level), setting type (indoor vs outdoor), budget sensitivity, hunger level, or specific activity interests. Use varied question structures - mix 'how much', 'what type', 'when', 'where' formats. Never repeat similar phrasing like 'What kind of X' or 'What type of Y' multiple times.",
+            "Select 1-3 question themes that best match the venue context. Mix preference themes with factual/constraint themes. Use the theme prompts as a guide but adapt naturally.",
         },
         {
           role: "user",
@@ -325,18 +558,7 @@ export async function runMoodCheckAgent(
 }
 
 function buildPromptPayload(input: MoodAgentInput) {
-  const { stats, summary } = input;
-
-  // Build venue context and analyze venue characteristics
-  let venueContext:
-    | Array<{
-        name: string;
-        type: string;
-        description: string;
-        distanceKm?: string;
-      }>
-    | undefined;
-
+  // Build venue analysis for theme selection
   let venueAnalysis:
     | {
         venueTypes: string[];
@@ -346,18 +568,20 @@ function buildPromptPayload(input: MoodAgentInput) {
     | undefined;
 
   if (input.filteredVenues && input.filteredVenues.length > 0) {
-    // Limit to top 12 venues to reduce context size and speed up processing
-    const topVenues = input.filteredVenues.slice(0, 12);
-
-    venueContext = topVenues.map((venue) => ({
-      name: venue.name,
-      type: venue.type,
-      // Truncate description to first 100 chars to reduce token count
-      description: venue.description ? venue.description.slice(0, 100) : "",
-      distanceKm: venue.distanceMeters
-        ? (venue.distanceMeters / 1000).toFixed(1)
-        : undefined,
-    }));
+    // Take a random sample of venues (up to 12) to ensure variety in analysis
+    // This prevents same venue set from always producing same questions
+    const sampleSize = Math.min(12, input.filteredVenues.length);
+    const shuffled = [...input.filteredVenues];
+    // Shuffle to get random sample
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = shuffled[i];
+      if (temp && shuffled[j]) {
+        shuffled[i] = shuffled[j];
+        shuffled[j] = temp;
+      }
+    }
+    const topVenues = shuffled.slice(0, sampleSize);
 
     // Analyze venue characteristics to help generate better questions
     const venueTypes = new Set<string>();
@@ -480,51 +704,27 @@ function buildPromptPayload(input: MoodAgentInput) {
     };
   }
 
+  // Select themes based on venue context
+  const selectedThemes = selectQuestionThemes(input, venueAnalysis);
+
   return {
-    participantName: input.participantName,
-    // Simplified summary - only essential fields to reduce token count
-    summary: {
-      headline: summary.headline,
-      summary: summary.summary.slice(0, 150), // Truncate summary text
-      vibeKeywords: summary.vibeKeywords.slice(0, 4), // Limit keywords
-      budgetTier: summary.budgetTier,
-      energyLevel: summary.energyLevel,
-      timeWindow: summary.timeWindow,
-      hungerLevel: summary.hungerLevel,
-      callToAction: summary.callToAction,
-    },
-    stats: {
-      participantCount: stats.participantCount,
-      energyLabel: stats.energyLabel,
-      popularMoneyPreference: stats.popularMoneyPreference,
-    },
+    timeOfDay: input.timeOfDayLabel ?? deriveTimeOfDayLabel(),
     answeredSignals: input.answeredSignals ?? {},
-    timeOfDayLabel: input.timeOfDayLabel ?? deriveTimeOfDayLabel(),
-    availableVenues: venueContext?.slice(0, 10), // Limit to 10 venues in payload
-    venueCount: input.filteredVenues?.length ?? 0,
-    venueAnalysis,
-    request: {
-      answeredSignals: input.answeredSignals ?? {},
-      instructions: [
-        "Keep tone playful and short.",
-        "Return 1-3 questions that help narrow down which venues would be best for this group.",
-        "CRITICAL: ALL questions MUST be multiple choice. Use 'choice' or 'scale' types ONLY. NEVER use 'text' or 'binary' types. Always provide an options array with at least 2 choices and a MAXIMUM of 3 options per question. For preference questions (choosing between options), use 'choice' type with descriptive option labels, NOT binary yes/no.",
-        "MANDATORY DIVERSITY: Each question must cover a UNIQUE dimension. DO NOT ask multiple questions about the same type of preference. Examples of distinct dimensions: (1) Activity intensity/energy level, (2) Time constraints/duration, (3) Social interaction style, (4) Setting preference (indoor/outdoor), (5) Budget sensitivity, (6) Hunger level, (7) Group size dynamics, (8) Specific activity interests. If you ask about 'vibe' in one question, the next question MUST cover something completely different like time constraints or budget, NOT another vibe-related preference.",
-        "Question structure variety: Use DIFFERENT question formats across questions. Mix 'How much...', 'What type of...', 'When do you...', 'Where would you...', 'How do you feel about...' patterns. Never use the same question structure twice. Avoid asking 'What kind of X' followed by 'What type of Y' - these are too similar.",
-        "Vocabulary and phrasing variety: If one question uses 'vibe' or 'mood', don't use those words again. If one uses 'prefer', use different phrasing in other questions. If one asks about 'setting', don't ask about 'space' or 'environment' in another - these overlap. Each question should feel like it's asking about a completely different aspect of the experience.",
-        "BAD EXAMPLE (too similar): 'What kind of vibe are you in the mood for?' followed by 'What type of setting do you prefer?' - both are preference questions about atmosphere. GOOD EXAMPLE (diverse): 'How much time do you have?' (time constraint) followed by 'What's your energy level right now?' (intensity scale) followed by 'How important is budget?' (priority question).",
-        venueAnalysis && venueAnalysis.differentiatingFactors.length > 0
-          ? `Venues differ by: ${venueAnalysis.differentiatingFactors.slice(0, 3).join(", ")}. Types: ${venueAnalysis.venueTypes.slice(0, 4).join(", ")}. Create questions that distinguish between options. Each question must cover a DIFFERENT differentiating factor - don't ask about the same aspect twice.`
-          : venueContext
-            ? `Available venues: ${venueContext
-                .slice(0, 8)
-                .map((v) => `${v.name} (${v.type})`)
-                .join(
-                  ", ",
-                )}. Create questions to match group to venues. Cover COMPLETELY DIFFERENT aspects - don't repeat similar preference questions.`
-            : "Generate general mood questions covering COMPLETELY DIFFERENT aspects (time, energy, social, setting, budget, etc.).",
-      ],
-    },
+    venueContext: venueAnalysis
+      ? {
+          differentiatingFactors: venueAnalysis.differentiatingFactors.slice(
+            0,
+            2,
+          ),
+        }
+      : undefined,
+    questionThemes: selectedThemes.map((theme) => ({
+      id: theme.id,
+      category: theme.category,
+      prompt: theme.prompt,
+      signalKey: theme.signalKey,
+      description: theme.description,
+    })),
   };
 }
 

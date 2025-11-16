@@ -318,16 +318,16 @@ model EventGroupEvent {
     event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
     // Status for this event in the group
-    status      String   @default("suggested") // e.g., "suggested", "shortlisted", "selected", "rejected"
-    notes       String?  // User notes about this event
+    status      String   @default("suggested") // e.g., "suggested", "shortlisted", "selected", "rejected", "voted"
+    notes       String?  // User notes about this event (stores sessionId for votes)
 
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 
-    @@unique([groupId, eventId])
     @@index([groupId])
     @@index([eventId])
     @@index([status])
+    @@index([groupId, eventId, status]) // Composite index for efficient vote queries
 }
 
 // AI-generated event recommendations

@@ -158,6 +158,18 @@ export const eventRouter = createTRPCRouter({
       };
 
       // Step 2: Generate mood questions with filtered venues context
+      // Add variety by shuffling venues before passing to mood agent
+      // This ensures different venue combinations are analyzed even with same location
+      const shuffledVenues = [...finalFilteredVenues];
+      // Fisher-Yates shuffle
+      for (let i = shuffledVenues.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledVenues[i], shuffledVenues[j]] = [
+          shuffledVenues[j],
+          shuffledVenues[i],
+        ];
+      }
+      
       const mood = await runMoodCheckAgent({
         participantName:
           input.participantName ?? preference.userName ?? undefined,
@@ -166,7 +178,7 @@ export const eventRouter = createTRPCRouter({
         answeredSignals: input.answeredSignals ?? existingResponses,
         timeOfDayLabel: input.timeOfDayLabel,
         filteredVenues:
-          finalFilteredVenues.length > 0 ? finalFilteredVenues : undefined,
+          shuffledVenues.length > 0 ? shuffledVenues : undefined,
       });
 
       const moodQuestionsData = {
@@ -543,7 +555,7 @@ export const eventRouter = createTRPCRouter({
         return { voted: false, voteCount };
       }
 
-      // Create new vote
+      // Create new vote (multiple people can vote on the same event)
       await ctx.db.eventGroupEvent.create({
         data: {
           groupId: input.groupId,
