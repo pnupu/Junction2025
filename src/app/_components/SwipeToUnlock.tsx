@@ -56,7 +56,7 @@ interface ButtonProps {
 function Button({ translateX, isDragging, isUnlocked, text, color }: ButtonProps) {
   return (
     <div
-      className="absolute box-border content-stretch flex flex-col gap-[10px] items-center justify-center overflow-clip px-[24px] py-[14px] rounded-xl top-0 w-[94px] touch-none select-none cursor-grab active:cursor-grabbing"
+      className="absolute box-border content-stretch flex flex-col gap-[10px] items-center justify-center overflow-clip px-[24px] h-full rounded-xl top-0 w-[94px] touch-none select-none cursor-grab active:cursor-grabbing"
       style={{
         backgroundColor: color,
         left: `${translateX}px`,
