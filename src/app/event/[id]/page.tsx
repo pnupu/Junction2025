@@ -545,7 +545,6 @@ export default function EventPage() {
     participantName: userProfile?.name,
     onComplete: () => {
       setShowOpinionModal(false);
-      void refetch();
     },
   });
 
@@ -1271,16 +1270,10 @@ export default function EventPage() {
           {activeTab === "ideas" && (
             <div className="space-y-4">
               {eventStatus === "generating" ? (
-                <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
-                  <div className="mb-3 text-4xl">🎨</div>
-                  <h3 className="mb-2 text-xl font-semibold text-white">
-                    Generating recommendations...
-                  </h3>
-                  <p className="text-white/80">Analyzing preferences</p>
-                </div>
+                <></>
               ) : (eventStatus === "generated" ||
                   eventStatus === "completed") &&
-                recommendationsQuery.data ? (
+                recommendationsQuery.data && (
                 <>
                   {/* Banner when voting is closed */}
                   {eventStatus === "completed" && (
@@ -1478,22 +1471,7 @@ export default function EventPage() {
                       </p>
                     </div>
                   )}
-                </>
-              ) : (
-                <div className="mt-8 rounded-2xl bg-white/10 p-8 text-center backdrop-blur">
-                  <div className="text-l mb-3">Events appear here</div>
-                  <h3 className="mb-2 text-xl font-semibold text-white">
-                    {isCreator
-                      ? "Ready to generate?"
-                      : "Waiting for recommendations"}
-                  </h3>
-                  <p className="text-white/80">
-                    {isCreator
-                      ? "Generate event recommendations when ready"
-                      : "The event creator will generate activities when ready"}
-                  </p>
-                </div>
-              )}
+                </>)}
             </div>
           )}
 
@@ -1501,23 +1479,26 @@ export default function EventPage() {
           {isCreator &&
           hasJoined &&
           eventStatus === "collecting_preferences" ? (
-            <div className="mt-8">
-              <Button
-                onClick={handleGenerateEvent}
-                disabled={
-                  participantCount === 0 || generateRecommendations.isPending
-                }
-                className="h-16 w-full rounded-xl bg-white text-lg font-bold text-[#029DE2] hover:scale-105 hover:bg-white/90 disabled:opacity-50 disabled:hover:scale-100"
-              >
-                {generateRecommendations.isPending
-                  ? "Cooking events..."
-                  : "🎉 Let's cook some events!"}
-              </Button>
-              {participantCount === 0 && (
-                <p className="mt-2 text-center text-sm text-white/70">
-                  Wait for at least one participant to join
-                </p>
-              )}
+            <div className="fixed bottom-0 left-0 right-0 p-5 bg-white">
+             <div className="max-w-[500px] mx-auto"
+             >
+               <Button
+                 onClick={handleGenerateEvent}
+                 disabled={
+                   participantCount === 0 || generateRecommendations.isPending
+                 }
+                 className="h-14 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white shadow-lg hover:bg-[#0287C3] disabled:opacity-50 disabled:hover:bg-[#029DE2]"
+               >
+                 {generateRecommendations.isPending
+                   ? "Cooking events..."
+                   : "🎉 Let's cook some events!"}
+               </Button>
+               {participantCount === 0 && (
+                 <p className="mt-2 text-center text-sm text-white/70">
+                   Wait for at least one participant to join
+                 </p>
+               )}
+             </div>
             </div>
           ) : null}
 
