@@ -22,7 +22,7 @@ const questionSchema = z.object({
   prompt: z.string(),
   type: z.enum(["scale", "choice"]),
   signalKey: z.string(),
-  options: z.array(z.string()).max(3).optional(),
+  options: z.array(z.string()).optional(),
   suggestedResponse: z.string().optional(),
   reason: z.string().optional(),
 });
@@ -487,7 +487,7 @@ export async function runMoodCheckAgent(
         {
           role: "system",
           content:
-            "Select 1-3 question themes that best match the venue context. Mix preference themes with factual/constraint themes. Use the theme prompts as a guide but adapt naturally.",
+            "Select 1-3 question themes that best match the venue context. Mix preference themes with factual/constraint themes. Use the theme prompts as a guide but adapt naturally. IMPORTANT: Each question must have exactly 3 options. For scale questions, provide exactly 3 option strings. For choice questions, provide exactly 3 distinct choices.",
         },
         {
           role: "user",
@@ -508,24 +508,43 @@ export async function runMoodCheckAgent(
     const moodPayload: unknown = JSON.parse(raw);
     const parsed = moodAgentResponseSchema.parse(moodPayload);
 
-    // Safety check: Ensure all questions have options and limit to max 3
+    // Safety check: Ensure all questions have exactly 3 options
     const validatedQuestions = parsed.questions.map((q) => {
-      // Ensure scale and choice questions have options
-      if (
-        (q.type === "scale" || q.type === "choice") &&
-        (!q.options || q.options.length === 0)
-      ) {
-        // If no options provided, add default options based on type
-        if (q.type === "scale") {
-          q.options = ["Low", "Medium", "High"];
-        } else {
-          q.options = ["Option 1", "Option 2"];
+      // Clean options: trim whitespace and remove surrounding quotes
+      if (q.options && q.options.length > 0) {
+        q.options = q.options
+          .map((opt) => {
+            if (typeof opt === "string") {
+              return opt.trim().replace(/^["']+|["']+$/g, "");
+            }
+            return String(opt).trim();
+          })
+          .filter((opt) => opt.length > 0);
+      }
+      
+      // Ensure scale and choice questions have exactly 3 options
+      if (q.type === "scale" || q.type === "choice") {
+        if (!q.options || q.options.length === 0) {
+          // If no options provided, add default options
+          if (q.type === "scale") {
+            q.options = ["Low", "Medium", "High"];
+          } else {
+            q.options = ["Option 1", "Option 2", "Option 3"];
+          }
+        } else if (q.options.length < 3) {
+          // If fewer than 3 options, pad with defaults
+          const defaults = q.type === "scale" 
+            ? ["Low", "Medium", "High"]
+            : ["Option 1", "Option 2", "Option 3"];
+          while (q.options.length < 3) {
+            q.options.push(defaults[q.options.length] ?? `Option ${q.options.length + 1}`);
+          }
+        } else if (q.options.length > 3) {
+          // If more than 3 options, take only the first 3
+          q.options = q.options.slice(0, 3);
         }
       }
-      // Limit options to maximum of 3
-      if (q.options && q.options.length > 3) {
-        q.options = q.options.slice(0, 3);
-      }
+      
       return q;
     });
 

@@ -610,9 +610,7 @@ export default function EventResultsPage() {
                                     ) {
                                       return "Reserve";
                                     }
-                                    return booking?.provider
-                                      ? `Reserve via ${booking.provider}`
-                                      : "Book";
+                                    return "Book";
                                   })()}
                                   buttonColor="#029DE2"
                                   chevronColor="#029DE2"
@@ -635,9 +633,7 @@ export default function EventResultsPage() {
                                       ) {
                                         return "Reserve table";
                                       }
-                                      return booking?.provider
-                                        ? `Reserve via ${booking.provider}`
-                                        : "Book";
+                                      return "Book";
                                     })();
                                     
                                     toast.success("Booking initiated", {

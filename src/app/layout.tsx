@@ -7,7 +7,7 @@ import { Toaster } from "sonner";
 import { TRPCReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
-  title: "Wolt Events",
+  title: "Wolt Meet",
   description: "Plan hyper-personal city experiences with AI",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
