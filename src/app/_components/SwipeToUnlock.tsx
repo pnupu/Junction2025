@@ -168,11 +168,17 @@ export default function SwipeToUnlock({
   }, [isDragging, isUnlocked]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    handleStart(e.touches[0].clientX);
+    const touch = e.touches?.[0];
+    if (touch) {
+      handleStart(touch.clientX);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    handleMove(e.touches[0].clientX);
+    const touch = e.touches?.[0];
+    if (touch) {
+      handleMove(touch.clientX);
+    }
   };
 
   const handleTouchEnd = () => {
