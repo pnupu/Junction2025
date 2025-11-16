@@ -105,7 +105,7 @@ export function UnifiedMap({
           participants.length,
       ] as [number, number];
     }
-    return [60.1695, 24.9354] as [number, number]; // Default to Helsinki
+    return [60.1570518, 24.6108047] as [number, number]; // Default to Hype Areena
   }, [participants]);
 
   if (participants.length === 0) return null;

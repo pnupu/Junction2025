@@ -102,17 +102,9 @@ export function ProfileModal({
         longitude = position.coords.longitude;
       } catch (error) {
         console.log("Location permission denied or unavailable", error);
-        // Continue without location - try to preserve old location if it exists
-        const existingProfile = localStorage.getItem("userProfile");
-        if (existingProfile) {
-          try {
-            const oldProfile = JSON.parse(existingProfile) as UserProfile;
-            latitude = oldProfile.latitude;
-            longitude = oldProfile.longitude;
-          } catch {
-            // Ignore
-          }
-        }
+        // Use Hype Areena as default location
+        latitude = 60.1570518;
+        longitude = 24.6108047;
       }
     }
 

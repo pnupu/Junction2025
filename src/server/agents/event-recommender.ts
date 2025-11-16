@@ -145,7 +145,7 @@ export async function generateEventRecommendations(
         availableVenues: venueContext,
         instructions: [
           "Select the best venues from the available list that match the group's preferences and mood.",
-          "Generate 3-5 recommendations with match scores, reasoning, and highlights.",
+          "Generate 3 recommendations with match scores, reasoning, and highlights.",
           "Consider distance, venue type, and group preferences.",
         ],
       };
@@ -219,7 +219,7 @@ function generateFallbackRecommendations(
   // Sort by match score and take top venues
   const sorted = [...filteredVenues]
     .sort((a, b) => b.matchScore - a.matchScore)
-    .slice(0, 5);
+    .slice(0, 3);
 
   const recommendations = sorted.map((venue) => {
     const distanceText = venue.distanceMeters

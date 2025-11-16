@@ -363,7 +363,14 @@ export default function EventPage() {
             setUserProfile(updatedProfile);
           } catch (error) {
             console.log("Location permission denied or unavailable", error);
-            // Continue without location
+            // Use Hype Areena as default location
+            latitude = 60.1570518;
+            longitude = 24.6108047;
+            
+            // Update stored profile with default location
+            const updatedProfile = { ...profile, latitude, longitude };
+            localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+            setUserProfile(updatedProfile);
           }
         }
       }
@@ -762,7 +769,7 @@ export default function EventPage() {
                             0,
                           ) / participantLocations.length,
                         ]
-                      : [60.1695, 24.9354] // Default to Helsinki
+                      : [60.1570518, 24.6108047] // Default to Hype Areena
                   }
                   zoom={13}
                   style={{ height: "100%", width: "100%" }}

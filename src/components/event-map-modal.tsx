@@ -152,12 +152,12 @@ export function EventMapModal({
     participants.length > 0
       ? participants.reduce((sum, p) => sum + p.latitude, 0) /
         participants.length
-      : 60.1695; // Default to Helsinki
+      : 60.1570518; // Default to Hype Areena
   const centerLng =
     participants.length > 0
       ? participants.reduce((sum, p) => sum + p.longitude, 0) /
         participants.length
-      : 24.9354;
+      : 24.6108047;
 
   // Create custom marker icons with initials or count
   const createCustomIcon = (display: string, isHighlighted = false) => {

@@ -242,7 +242,7 @@ export default function EventResultsPage() {
                           0,
                         ) / participantLocations.length,
                       ]
-                    : [60.1695, 24.9354] // Default to Helsinki
+                    : [60.1570518, 24.6108047] // Default to Hype Areena
                 }
                 zoom={13}
                 style={{ height: "100%", width: "100%" }}
@@ -593,39 +593,32 @@ export default function EventResultsPage() {
                           {/* Main Booking CTA Button */}
                           {booking?.link && (
                             <>
-                              {availability && availability.length > 1 ? (
-                                !isMainBookingClicked ? (
-                                  <SwipeToUnlock
-                                    buttonText="Book"
-                                    buttonColor="#029DE2"
-                                    chevronColor="#029DE2"
-                                    backgroundColor="#FFFFFF"
-                                    borderColor="#029DE2"
-                                    onUnlock={() => {
-                                      setIsMainBookingClicked(true);
-                                      toast.success("Booking initiated", {
-                                        description: `View All Options for ${rec.title}`,
-                                      });
-                                    }}
-                                  />
-                                ) : (
-                                  <Button
-                                    className="w-full rounded-xl bg-green-600 py-4 text-base font-semibold text-white shadow-lg opacity-100 cursor-not-allowed"
-                                    size="lg"
-                                    disabled
-                                  >
-                                    Booked
-                                  </Button>
-                                )
-                              ) : (
-                                <Button
-                                  className="w-full shadow-lg hover:shadow-xl active:scale-[0.98]"
-                                  variant={isMainBookingClicked ? "success" : "default"}
-                                  size="lg"
-                                  disabled={isMainBookingClicked}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
+                              {!isMainBookingClicked ? (
+                                <SwipeToUnlock
+                                  buttonText={(() => {
+                                    if (availability?.[0] && availability.length === 1) {
+                                      const slot = availability[0];
+                                      if (slot.label?.toLowerCase().includes("table")) {
+                                        return "Reserve table";
+                                      }
+                                      return "Reserve";
+                                    }
+                                    if (
+                                      rec.type?.toLowerCase().includes("dining") ||
+                                      rec.type?.toLowerCase().includes("restaurant") ||
+                                      rec.type?.toLowerCase().includes("cafe")
+                                    ) {
+                                      return "Reserve";
+                                    }
+                                    return booking?.provider
+                                      ? `Reserve via ${booking.provider}`
+                                      : "Book";
+                                  })()}
+                                  buttonColor="#029DE2"
+                                  chevronColor="#029DE2"
+                                  backgroundColor="#FFFFFF"
+                                  borderColor="#029DE2"
+                                  onUnlock={() => {
                                     setIsMainBookingClicked(true);
                                     const buttonText = (() => {
                                       if (availability?.[0] && availability.length === 1) {
@@ -644,36 +637,21 @@ export default function EventResultsPage() {
                                       }
                                       return booking?.provider
                                         ? `Reserve via ${booking.provider}`
-                                        : "Reserve table";
+                                        : "Book";
                                     })();
                                     
                                     toast.success("Booking initiated", {
                                       description: `${buttonText} for ${rec.title}`,
                                     });
                                   }}
+                                />
+                              ) : (
+                                <Button
+                                  className="w-full rounded-xl bg-green-600 py-4 text-base font-semibold text-white shadow-lg opacity-100 cursor-not-allowed"
+                                  size="lg"
+                                  disabled
                                 >
-                                  {(() => {
-                                    if (isMainBookingClicked) {
-                                      return "Booked";
-                                    }
-                                    if (availability?.[0] && availability.length === 1) {
-                                      const slot = availability[0];
-                                      if (slot.label?.toLowerCase().includes("table")) {
-                                        return "Reserve table";
-                                      }
-                                      return "Reserve now";
-                                    }
-                                    if (
-                                      rec.type?.toLowerCase().includes("dining") ||
-                                      rec.type?.toLowerCase().includes("restaurant") ||
-                                      rec.type?.toLowerCase().includes("cafe")
-                                    ) {
-                                      return "Reserve table";
-                                    }
-                                    return booking?.provider
-                                      ? `Reserve via ${booking.provider}`
-                                      : "Reserve table";
-                                  })()}
+                                  Booked
                                 </Button>
                               )}
                             </>

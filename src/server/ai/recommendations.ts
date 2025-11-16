@@ -25,7 +25,7 @@ const recommendationSchema = z.object({
       }),
     )
     .min(3)
-    .max(5),
+    .max(3),
 });
 
 export type RecommendationResponse = z.infer<typeof recommendationSchema>;
@@ -181,7 +181,7 @@ function buildPrompt({ name, city, selections }: RecommendationRequest) {
   );
 
   lines.push(
-    "Output 3-5 experience cards. Mix venues, pacing, and social energy. Include highlight bullets if relevant.",
+    "Output 3 experience cards. Mix venues, pacing, and social energy. Include highlight bullets if relevant.",
   );
 
   return lines.join("\n");

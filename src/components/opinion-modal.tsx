@@ -137,7 +137,7 @@ export function OpinionModal({
                       participants.reduce((sum, p) => sum + p.longitude, 0) /
                         participants.length,
                     ]
-                  : [60.1695, 24.9354]
+                  : [60.1570518, 24.6108047] // Default to Hype Areena
               }
               zoom={13}
               style={{ height: "100%", width: "100%" }}
