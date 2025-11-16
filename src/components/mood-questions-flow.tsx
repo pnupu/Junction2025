@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { api, type RouterOutputs } from "@/trpc/react";
-import { MoodQuestionCard } from "@/components/mood-question-card";
-import type { MoodQuestion } from "@/server/agents/mood-check";
+import { useState } from "react";
+import { api } from "@/trpc/react";
+import type { Prisma } from "@prisma/client";
 
 type MoodQuestionsFlowProps = {
   groupId: string;
@@ -27,7 +26,6 @@ export function useMoodQuestionsFlow({
   const {
     data: moodData,
     isLoading,
-    refetch,
   } = api.event.getMoodQuestions.useQuery(
     {
       groupId,
@@ -63,14 +61,22 @@ export function useMoodQuestionsFlow({
           if (!old) return old;
           const updatedPreferences = old.preferences?.map((pref) => {
             if (pref.sessionId === sessionId) {
+              const existingMoodResponses = (pref as {
+                moodResponses?: Prisma.JsonValue | null;
+              }).moodResponses;
+              const mergedResponses: Prisma.JsonValue = {
+                ...(existingMoodResponses &&
+                typeof existingMoodResponses === "object" &&
+                !Array.isArray(existingMoodResponses) &&
+                existingMoodResponses !== null
+                  ? (existingMoodResponses as Record<string, unknown>)
+                  : {}),
+                ...variables.responses,
+              } as Prisma.JsonValue;
               return {
                 ...pref,
-                moodResponses: {
-                  ...((pref as { moodResponses?: Record<string, unknown> })
-                    .moodResponses ?? {}),
-                  ...variables.responses,
-                },
-              };
+                moodResponses: mergedResponses,
+              } as typeof pref;
             }
             return pref;
           });
@@ -93,7 +99,7 @@ export function useMoodQuestionsFlow({
         utils.event.get.setData(context.queryKey, context.previousEventData);
       }
     },
-    onSuccess: (_data, _variables, context) => {
+    onSuccess: () => {
       setAnswers({});
       setIsSubmitting(false);
 
