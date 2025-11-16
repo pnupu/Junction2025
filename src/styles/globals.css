@@ -142,14 +142,14 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes chevron-slide {
   0% {
-    transform: translateX(0);
+    transform: translateX(-1150px);
   }
   100% {
-    transform: translateX(-1150px);
+    transform: translateX(0);
   }
 }
 
 .animate-chevron-slide {
-  animation: chevron-slide 20s linear infinite;
+  animation: chevron-slide 90s linear infinite;
   will-change: transform;
 }
