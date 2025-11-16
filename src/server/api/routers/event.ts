@@ -374,7 +374,7 @@ export const eventRouter = createTRPCRouter({
                   bookingLink?: string;
                 }>;
                 addOns?: string[];
-                budgetLevel?: "budget" | "moderate" | "premium" | string;
+                budgetLevel?: "budget" | "moderate" | "premium";
                 durationMinutes?: {
                   standard?: number;
                   min?: number;

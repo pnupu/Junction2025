@@ -287,7 +287,7 @@ export async function saveEventRecommendations(
       // Extract enriched data for price and duration
       const enrichedData = venue.enrichedData as
         | {
-            budgetLevel?: "budget" | "moderate" | "premium" | string;
+            budgetLevel?: "budget" | "moderate" | "premium";
             durationMinutes?: {
               standard?: number;
               min?: number;

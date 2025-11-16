@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -63,7 +64,7 @@ async function seedVenues() {
             ? new Date(venue.lastVerifiedAt)
             : undefined,
           enrichedData: venue.enriched
-            ? (venue.enriched as Record<string, unknown>)
+            ? (venue.enriched as Prisma.InputJsonValue)
             : undefined,
         },
         update: {
@@ -84,7 +85,7 @@ async function seedVenues() {
             ? new Date(venue.lastVerifiedAt)
             : undefined,
           enrichedData: venue.enriched
-            ? (venue.enriched as Record<string, unknown>)
+            ? (venue.enriched as Prisma.InputJsonValue)
             : undefined,
           updatedAt: new Date(),
         },
