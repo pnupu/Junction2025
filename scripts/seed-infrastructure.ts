@@ -21,6 +21,7 @@ type SeedVenue = {
   notes?: string;
   woltPartnerTier?: string;
   lastVerifiedAt?: string;
+  enriched?: unknown; // Stores enriched booking/availability data
 };
 
 async function loadVenuesFromFile(filePath: string) {
@@ -61,6 +62,9 @@ async function seedVenues() {
           lastVerifiedAt: venue.lastVerifiedAt
             ? new Date(venue.lastVerifiedAt)
             : undefined,
+          enrichedData: venue.enriched
+            ? (venue.enriched as Record<string, unknown>)
+            : undefined,
         },
         update: {
           name: venue.name,
@@ -78,6 +82,9 @@ async function seedVenues() {
           woltPartnerTier: venue.woltPartnerTier,
           lastVerifiedAt: venue.lastVerifiedAt
             ? new Date(venue.lastVerifiedAt)
+            : undefined,
+          enrichedData: venue.enriched
+            ? (venue.enriched as Record<string, unknown>)
             : undefined,
           updatedAt: new Date(),
         },

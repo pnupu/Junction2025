@@ -351,6 +351,33 @@ export const eventRouter = createTRPCRouter({
           const venue = features?.venueId
             ? venueMap.get(features.venueId)
             : undefined;
+
+          // Extract booking/CTA data from enrichedData
+          const enrichedData = venue?.enrichedData as
+            | {
+                booking?: {
+                  provider?: string;
+                  link?: string;
+                  qrPayload?: string;
+                  leadTimeMinutes?: number;
+                  supportsGroupPaymentSplit?: boolean;
+                };
+                availability?: Array<{
+                  label?: string;
+                  start?: string;
+                  end?: string;
+                  priceTotal?: number;
+                  pricePerPerson?: number;
+                  currency?: string;
+                  capacity?: number;
+                  status?: string;
+                  bookingLink?: string;
+                }>;
+                addOns?: string[];
+              }
+            | null
+            | undefined;
+
           return {
             eventId: rec.event!.id,
             title: rec.event!.title,
@@ -369,6 +396,10 @@ export const eventRouter = createTRPCRouter({
             latitude: venue?.latitude,
             longitude: venue?.longitude,
             address: venue?.address ?? rec.event!.customLocation,
+            // Booking/CTA data
+            booking: enrichedData?.booking,
+            availability: enrichedData?.availability,
+            addOns: enrichedData?.addOns,
           };
         });
 

@@ -189,6 +189,7 @@ model InfrastructureVenue {
     notes          String?
     woltPartnerTier String?
     lastVerifiedAt DateTime?
+    enrichedData   Json?    // Stores enriched booking/availability data from espoo.json
 
     opportunities OpportunityVenueRef[]
 

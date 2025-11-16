@@ -165,6 +165,13 @@ export default function EventPage() {
     | "completed"
     | undefined;
 
+  // Auto-redirect to results page if voting is closed
+  useEffect(() => {
+    if (eventStatus === "completed" && groupId) {
+      router.push(`/event/${groupId}/results`);
+    }
+  }, [eventStatus, groupId, router]);
+
   // Load recommendations from database if already generated
   const recommendationsQuery = api.event.getRecommendations.useQuery(
     { groupId },
@@ -231,6 +238,10 @@ export default function EventPage() {
     onSuccess: () => {
       void refetch();
       void recommendationsQuery.refetch();
+      // Navigate to results page after voting is closed
+      if (groupId) {
+        router.push(`/event/${groupId}/results`);
+      }
     },
   });
 
@@ -1274,6 +1285,32 @@ export default function EventPage() {
                   eventStatus === "completed") &&
                 recommendationsQuery.data ? (
                 <>
+                  {/* Banner when voting is closed */}
+                  {eventStatus === "completed" && (
+                    <div className="mb-4 rounded-xl border-2 border-[#029DE2] bg-[#029DE2]/10 p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="mb-1 text-lg font-semibold text-white">
+                            🎉 Voting is closed!
+                          </h3>
+                          <p className="text-sm text-white/80">
+                            Ready to book? View results and reserve your spot.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            if (groupId) {
+                              router.push(`/event/${groupId}/results`);
+                            }
+                          }}
+                          className="shrink-0 rounded-lg bg-[#029DE2] px-6 font-semibold text-white hover:bg-[#0287C3]"
+                          size="lg"
+                        >
+                          View Results & Book
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   {recommendationsQuery.data.recommendations.length > 0 ? (
                     <>
                       {/* Event Ideas List */}
@@ -1411,10 +1448,23 @@ export default function EventPage() {
                         </Button>
                       )}
                       {eventStatus === "completed" && (
-                        <div className="mt-4 rounded-xl bg-green-50 p-4 text-center">
-                          <p className="text-sm font-medium text-green-800">
-                            Voting closed
-                          </p>
+                        <div className="mt-4 space-y-3">
+                          <div className="rounded-xl bg-green-50 p-4 text-center">
+                            <p className="mb-3 text-sm font-medium text-green-800">
+                              Voting closed
+                            </p>
+                            <Button
+                              onClick={() => {
+                                if (groupId) {
+                                  router.push(`/event/${groupId}/results`);
+                                }
+                              }}
+                              className="w-full rounded-xl bg-[#029DE2] text-white transition-all hover:bg-[#0287C3]"
+                              size="lg"
+                            >
+                              View Results & Book
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </>
