@@ -374,9 +374,54 @@ export const eventRouter = createTRPCRouter({
                   bookingLink?: string;
                 }>;
                 addOns?: string[];
+                budgetLevel?: "budget" | "moderate" | "premium" | string;
+                durationMinutes?: {
+                  standard?: number;
+                  min?: number;
+                  max?: number;
+                };
               }
             | null
             | undefined;
+
+          // Determine price level from enriched data or event data
+          const priceLevel = (() => {
+            if (enrichedData?.budgetLevel) {
+              const level = enrichedData.budgetLevel.toLowerCase();
+              if (level === "budget") return "budget" as const;
+              if (level === "premium") return "premium" as const;
+              return "moderate" as const;
+            }
+            const eventPriceRange = rec.event!.priceRange?.toLowerCase();
+            if (eventPriceRange === "low" || eventPriceRange === "budget") return "budget" as const;
+            if (eventPriceRange === "high" || eventPriceRange === "premium") return "premium" as const;
+            return "moderate" as const;
+          })();
+
+          // Determine duration from enriched data or event data
+          const duration = (() => {
+            if (enrichedData?.durationMinutes?.standard) {
+              const minutes = enrichedData.durationMinutes.standard;
+              if (minutes < 60) return `${minutes} min`;
+              const hours = Math.floor(minutes / 60);
+              const remainingMinutes = minutes % 60;
+              if (remainingMinutes === 0) {
+                return `${hours}${hours === 1 ? "h" : "h"}`;
+              }
+              return `${hours}h ${remainingMinutes}min`;
+            }
+            if (rec.event!.duration) {
+              const minutes = rec.event!.duration;
+              if (minutes < 60) return `${minutes} min`;
+              const hours = Math.floor(minutes / 60);
+              const remainingMinutes = minutes % 60;
+              if (remainingMinutes === 0) {
+                return `${hours}${hours === 1 ? "h" : "h"}`;
+              }
+              return `${hours}h ${remainingMinutes}min`;
+            }
+            return "90 min"; // Fallback
+          })();
 
           return {
             eventId: rec.event!.id,
@@ -386,11 +431,8 @@ export const eventRouter = createTRPCRouter({
             matchScore: rec.matchScore,
             reasoning: rec.reasoning ?? "",
             type: "balanced" as const, // Could be derived from event data
-            priceLevel: (rec.event!.priceRange ?? "moderate") as
-              | "budget"
-              | "moderate"
-              | "premium",
-            duration: "90 min", // Could be derived from event data
+            priceLevel,
+            duration,
             voteCount: voteCounts.get(rec.event!.id) ?? 0,
             venueId: features?.venueId,
             latitude: venue?.latitude,

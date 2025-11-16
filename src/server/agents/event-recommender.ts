@@ -284,6 +284,33 @@ export async function saveEventRecommendations(
         return;
       }
 
+      // Extract enriched data for price and duration
+      const enrichedData = venue.enrichedData as
+        | {
+            budgetLevel?: "budget" | "moderate" | "premium" | string;
+            durationMinutes?: {
+              standard?: number;
+              min?: number;
+              max?: number;
+            };
+          }
+        | null
+        | undefined;
+
+      // Map budgetLevel to priceRange
+      const priceRange = (() => {
+        if (enrichedData?.budgetLevel) {
+          const level = enrichedData.budgetLevel.toLowerCase();
+          if (level === "budget") return "low";
+          if (level === "premium") return "high";
+          return "medium";
+        }
+        return "medium"; // Default
+      })();
+
+      // Get duration from enriched data
+      const duration = enrichedData?.durationMinutes?.standard ?? null;
+
       // Create Event (using cuid for ID)
       const event = await db.event.create({
         data: {
@@ -292,7 +319,8 @@ export async function saveEventRecommendations(
           venueId: null, // InfrastructureVenue is separate from Venue model
           customLocation: venue.address ?? undefined,
           tags: rec.highlights,
-          priceRange: "moderate", // Could be enhanced
+          priceRange,
+          duration,
           isActive: true,
         },
       });

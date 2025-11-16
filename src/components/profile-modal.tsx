@@ -246,15 +246,15 @@ export function ProfileModal({
     // Full screen with animation
     return (
       <div
-        className={`fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-center bg-white px-5 py-6 ${animate ? "animate-drop-in" : ""}`}
+        className={`fixed inset-0 z-50 flex min-h-screen flex-col items-center justify-start overflow-y-auto bg-white px-5 py-6 ${animate ? "animate-drop-in" : ""}`}
       >
-        <div className="w-full max-w-lg">{formContent}</div>
+        <div className="w-full max-w-lg py-6">{formContent}</div>
       </div>
     );
   } else {
     // Full screen on all devices
     return (
-      <div className="fixed inset-0 z-50 flex min-h-screen flex-col bg-white px-5 py-6">
+      <div className="fixed inset-0 z-50 flex min-h-screen flex-col overflow-y-auto bg-white px-5 py-6">
         <div className="flex flex-col gap-8">
           {/* Top spacing */}
           <div className="h-6" />

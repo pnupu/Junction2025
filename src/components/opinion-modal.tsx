@@ -236,13 +236,13 @@ export function OpinionModal({
       </button>
 
       {/* Content - z-index 10 */}
-      <div className={`relative z-10 flex h-full w-full items-center justify-center p-10 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}>
+      <div className={`relative z-10 flex h-full w-full items-start justify-center overflow-y-auto px-4 py-6 sm:p-10 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}>
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center w-full max-w-[362px] py-6">
             <Loader />
           </div>
         ) : (
-          <div className="w-full max-w-[362px]">{children}</div>
+          <div className="w-full max-w-[362px] py-6">{children}</div>
         )}
       </div>
 
