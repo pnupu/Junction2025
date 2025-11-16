@@ -31,3 +31,32 @@ export function calculateDistance(
 function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
+
+/**
+ * Generate initials from a name
+ * @param name - The name to generate initials from
+ * @returns Two-letter initials (e.g., "John Doe" -> "JD", "Alice" -> "AL")
+ */
+export function getInitials(name: string | null | undefined): string {
+  if (!name || name.trim().length === 0) {
+    return "??";
+  }
+
+  const trimmed = name.trim();
+  const words = trimmed.split(/\s+/).filter((word) => word.length > 0);
+
+  if (words.length === 0) {
+    return "??";
+  }
+
+  if (words.length === 1) {
+    // Single word: take first two letters, uppercase
+    const firstTwo = trimmed.substring(0, 2).toUpperCase();
+    return firstTwo.length === 1 ? `${firstTwo}${firstTwo}` : firstTwo;
+  }
+
+  // Multiple words: take first letter of first and last word
+  const first = words[0]?.[0]?.toUpperCase() ?? "";
+  const last = words[words.length - 1]?.[0]?.toUpperCase() ?? "";
+  return `${first}${last}`;
+}

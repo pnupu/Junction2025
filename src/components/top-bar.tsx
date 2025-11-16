@@ -8,6 +8,7 @@ import {
   ProfileModal,
   type UserProfile,
 } from "./profile-modal";
+import { getInitials } from "@/lib/utils";
 
 export function TopBar() {
   const [userName, setUserName] = useState<string | null>(null);
@@ -52,8 +53,8 @@ export function TopBar() {
               variant="ghost"
               className="h-auto rounded-full bg-[#029DE2]/10 px-4 py-2 hover:scale-105 hover:bg-[#029DE2]/20"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#029DE2] text-white">
-                MM
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#029DE2] text-white text-xs font-semibold">
+                {getInitials(userName)}
               </div>
               <span className="text-sm font-medium text-[#0F172B]">
                 {userName}

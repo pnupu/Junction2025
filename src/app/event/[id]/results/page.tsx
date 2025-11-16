@@ -10,6 +10,7 @@ import {
   type ParticipantLocation,
 } from "@/components/event-map-modal";
 import SwipeToUnlock from "@/app/_components/SwipeToUnlock";
+import { getInitials } from "@/lib/utils";
 import nextDynamic from "next/dynamic";
 
 // Type for Leaflet module (only what we need)
@@ -130,7 +131,7 @@ export default function EventResultsPage() {
         userName: p.userName ?? "Anonymous",
         latitude: p.latitude,
         longitude: p.longitude,
-        initials: "MM",
+        initials: getInitials(p.userName ?? null),
       }));
   }, [eventData]);
 

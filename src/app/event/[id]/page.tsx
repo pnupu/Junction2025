@@ -33,6 +33,7 @@ import {
 import { OpinionModal } from "@/components/opinion-modal";
 import { useMoodQuestionsFlow } from "@/components/mood-questions-flow";
 import { MoodQuestionCard } from "@/components/mood-question-card";
+import { getInitials } from "@/lib/utils";
 import nextDynamic from "next/dynamic";
 
 // Force dynamic rendering - prevent static generation
@@ -201,6 +202,7 @@ export default function EventPage() {
   );
 
   const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
+  const [hasAutoVoted, setHasAutoVoted] = useState(false);
 
   // Update myVotes when query data changes
   useEffect(() => {
@@ -226,10 +228,83 @@ export default function EventPage() {
     });
   };
 
+  // Automatically vote for demo users when recommendations are generated
+  useEffect(() => {
+    if (
+      !groupId ||
+      !eventData ||
+      hasAutoVoted ||
+      eventStatus !== "generated" ||
+      !recommendationsQuery.data ||
+      recommendationsQuery.data.recommendations.length === 0
+    ) {
+      return;
+    }
+
+    // Find all demo users (sessionIds starting with "demo_")
+    const demoUsers = eventData.preferences?.filter(
+      (p) => p.sessionId?.startsWith("demo_"),
+    ) ?? [];
+
+    if (demoUsers.length === 0) {
+      return;
+    }
+
+    // Get all event IDs from recommendations
+    const eventIds = recommendationsQuery.data.recommendations
+      .map((rec) => rec.eventId)
+      .filter((id): id is string => !!id);
+
+    if (eventIds.length === 0) {
+      return;
+    }
+
+    // Mark as auto-voted to prevent duplicate voting
+    setHasAutoVoted(true);
+
+    // Make each demo user vote on 1-2 random events
+    const votes: Promise<unknown>[] = [];
+    for (const demoUser of demoUsers) {
+      const sessionId = demoUser.sessionId;
+      if (!sessionId) continue;
+
+      // Each user votes on 1-2 random events
+      const numVotes = Math.random() < 0.5 ? 1 : 2;
+      const shuffled = [...eventIds].sort(() => Math.random() - 0.5);
+      const eventsToVote = shuffled.slice(0, numVotes);
+
+      for (const eventId of eventsToVote) {
+        votes.push(
+          voteMutation.mutateAsync({
+            groupId,
+            eventId,
+            sessionId,
+          }),
+        );
+      }
+    }
+
+    // Wait for all votes to complete (fire and forget)
+    Promise.all(votes).catch((error) => {
+      console.error("Error making auto-votes for demo users:", error);
+      // Reset hasAutoVoted on error so it can retry
+      setHasAutoVoted(false);
+    });
+  }, [
+    groupId,
+    eventData,
+    hasAutoVoted,
+    eventStatus,
+    recommendationsQuery.data,
+    voteMutation,
+  ]);
+
   // Generate recommendations mutation
   const generateRecommendations = api.event.generateRecommendations.useMutation(
     {
       onSuccess: () => {
+        // Reset auto-vote flag when new recommendations are generated
+        setHasAutoVoted(false);
         void recommendationsQuery.refetch();
         void refetch();
         setActiveTab("ideas");
@@ -493,7 +568,7 @@ export default function EventPage() {
         userName: p.userName ?? "Anonymous",
         latitude: p.latitude,
         longitude: p.longitude,
-        initials: "MM",
+        initials: getInitials(p.userName ?? null),
       }));
   }, [eventData]);
 
@@ -1326,9 +1401,21 @@ export default function EventPage() {
                             };
 
                             // Get participants who voted (show as avatars)
-                            // We'll show participant avatars based on vote count
-                            // For now, show generic avatars - can be enhanced to show actual participant info
                             const voterCount = rec.voteCount ?? 0;
+                            
+                            // Get actual voter sessionIds from recommendation
+                            const voterSessionIds = (rec as unknown as { voterSessionIds?: string[] }).voterSessionIds ?? [];
+                            
+                            // Create a map of sessionId -> preference for quick lookup
+                            const sessionIdToPreference = new Map(
+                              (eventData?.preferences ?? []).map((p) => [p.sessionId, p])
+                            );
+                            
+                            // Get actual voters by matching sessionIds to preferences
+                            const actualVoters = voterSessionIds
+                              .map((sessionId) => sessionIdToPreference.get(sessionId))
+                              .filter((p): p is NonNullable<typeof p> => p != null)
+                              .slice(0, 4); // Limit to 4 for display
 
                             return (
                               <div
@@ -1378,16 +1465,32 @@ export default function EventPage() {
                                   <div className="flex items-center gap-1">
                                     {voterCount > 0 ? (
                                       <>
-                                        {Array.from({
-                                          length: Math.min(voterCount, 4),
-                                        }).map((_, vIdx) => (
-                                          <div
-                                            key={vIdx}
-                                            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white"
-                                          >
-                                            MM
-                                          </div>
-                                        ))}
+                                        {actualVoters.length > 0 ? (
+                                          actualVoters.map((voter, vIdx) => {
+                                            const userName = voter.userName;
+                                            const initials = getInitials(userName ?? null);
+                                            return (
+                                              <div
+                                                key={voter.sessionId ?? vIdx}
+                                                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white"
+                                              >
+                                                {initials}
+                                              </div>
+                                            );
+                                          })
+                                        ) : (
+                                          // Fallback: show generic avatars if we can't match voters
+                                          Array.from({
+                                            length: Math.min(voterCount, 4),
+                                          }).map((_, vIdx) => (
+                                            <div
+                                              key={vIdx}
+                                              className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white"
+                                            >
+                                              ??
+                                            </div>
+                                          ))
+                                        )}
                                         {voterCount > 4 && (
                                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-white">
                                             +{voterCount - 4}

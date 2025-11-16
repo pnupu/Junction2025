@@ -355,10 +355,31 @@ export const eventRouter = createTRPCRouter({
             })
           : [];
 
-      // Create a map of eventId -> vote count
+      // Create a map of eventId -> vote count and voter sessionIds
       const voteCounts = new Map<string, number>();
+      const voterSessionIds = new Map<string, string[]>();
+      
       for (const vote of votes) {
         voteCounts.set(vote.eventId, (voteCounts.get(vote.eventId) ?? 0) + 1);
+        
+        // Extract sessionId from vote notes
+        let sessionId: string | null = null;
+        if (vote.notes) {
+          try {
+            const parsed = JSON.parse(vote.notes) as { sessionId?: string };
+            sessionId = parsed.sessionId ?? null;
+          } catch {
+            // Fallback: try to extract sessionId from string
+            sessionId = vote.notes.includes("sessionId") 
+              ? vote.notes.split("sessionId")[1]?.replace(/[^a-zA-Z0-9_]/g, "") ?? null
+              : null;
+          }
+        }
+        
+        if (sessionId) {
+          const existing = voterSessionIds.get(vote.eventId) ?? [];
+          voterSessionIds.set(vote.eventId, [...existing, sessionId]);
+        }
       }
 
       // Fetch venue data for location information
@@ -482,6 +503,7 @@ export const eventRouter = createTRPCRouter({
             priceLevel,
             duration,
             voteCount: voteCounts.get(rec.event!.id) ?? 0,
+            voterSessionIds: voterSessionIds.get(rec.event!.id) ?? [],
             venueId: features?.venueId,
             latitude: venue?.latitude,
             longitude: venue?.longitude,
