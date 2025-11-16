@@ -153,3 +153,24 @@ h1, h2, h3, h4, h5, h6 {
   animation: chevron-slide 90s linear infinite;
   will-change: transform;
 }
+
+@keyframes pulse-gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-pulse-gradient {
+  background: linear-gradient(135deg, 
+    rgba(2, 157, 226, 0.75) 0%,
+    rgba(2, 157, 226, 0.85) 25%,
+    #029DE2 50%,
+    rgba(2, 157, 226, 0.85) 75%,
+    rgba(2, 157, 226, 0.75) 100%
+  );
+  background-size: 200% 200%;
+  animation: pulse-gradient 4s ease-in-out infinite;
+}
