@@ -9,6 +9,7 @@ import {
   EventMapModal,
   type ParticipantLocation,
 } from "@/components/event-map-modal";
+import SwipeToUnlock from "@/app/_components/SwipeToUnlock";
 import nextDynamic from "next/dynamic";
 
 // Type for Leaflet module (only what we need)
@@ -573,68 +574,80 @@ export default function EventResultsPage() {
 
                           {/* Main Booking CTA Button */}
                           {booking?.link && (
-                            <Button
-                              className="w-full rounded-xl bg-[#029DE2] py-4 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#0287C3] hover:shadow-xl active:scale-[0.98] disabled:bg-green-600 disabled:opacity-100 disabled:cursor-not-allowed"
-                              size="lg"
-                              disabled={isMainBookingClicked}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setIsMainBookingClicked(true);
-                                const buttonText = (() => {
-                                  if (availability?.[0] && availability.length === 1) {
-                                    const slot = availability[0];
-                                    if (slot.label?.toLowerCase().includes("table")) {
+                            <>
+                              {availability && availability.length > 1 ? (
+                                <SwipeToUnlock
+                                  buttonText="Book"
+                                  buttonColor="#029DE2"
+                                  chevronColor="#029DE2"
+                                  backgroundColor="#FFFFFF"
+                                  borderColor="#029DE2"
+                                  onUnlock={() => {
+                                    setIsMainBookingClicked(true);
+                                    toast.success("Booking initiated", {
+                                      description: `View All Options for ${rec.title}`,
+                                    });
+                                  }}
+                                />
+                              ) : (
+                                <Button
+                                  className="w-full rounded-xl bg-[#029DE2] py-4 text-base font-semibold text-white shadow-lg transition-all hover:bg-[#0287C3] hover:shadow-xl active:scale-[0.98] disabled:bg-green-600 disabled:opacity-100 disabled:cursor-not-allowed"
+                                  size="lg"
+                                  disabled={isMainBookingClicked}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsMainBookingClicked(true);
+                                    const buttonText = (() => {
+                                      if (availability?.[0] && availability.length === 1) {
+                                        const slot = availability[0];
+                                        if (slot.label?.toLowerCase().includes("table")) {
+                                          return "Reserve table";
+                                        }
+                                        return "Reserve now";
+                                      }
+                                      if (
+                                        rec.type?.toLowerCase().includes("dining") ||
+                                        rec.type?.toLowerCase().includes("restaurant") ||
+                                        rec.type?.toLowerCase().includes("cafe")
+                                      ) {
+                                        return "Reserve table";
+                                      }
+                                      return booking?.provider
+                                        ? `Reserve via ${booking.provider}`
+                                        : "Reserve table";
+                                    })();
+                                    
+                                    toast.success("Booking initiated", {
+                                      description: `${buttonText} for ${rec.title}`,
+                                    });
+                                  }}
+                                >
+                                  {(() => {
+                                    if (isMainBookingClicked) {
+                                      return "Booked";
+                                    }
+                                    if (availability?.[0] && availability.length === 1) {
+                                      const slot = availability[0];
+                                      if (slot.label?.toLowerCase().includes("table")) {
+                                        return "Reserve table";
+                                      }
+                                      return "Reserve now";
+                                    }
+                                    if (
+                                      rec.type?.toLowerCase().includes("dining") ||
+                                      rec.type?.toLowerCase().includes("restaurant") ||
+                                      rec.type?.toLowerCase().includes("cafe")
+                                    ) {
                                       return "Reserve table";
                                     }
-                                    return "Reserve now";
-                                  }
-                                  if (availability && availability.length > 1) {
-                                    return "View All Options";
-                                  }
-                                  if (
-                                    rec.type?.toLowerCase().includes("dining") ||
-                                    rec.type?.toLowerCase().includes("restaurant") ||
-                                    rec.type?.toLowerCase().includes("cafe")
-                                  ) {
-                                    return "Reserve table";
-                                  }
-                                  return booking?.provider
-                                    ? `Reserve via ${booking.provider}`
-                                    : "Reserve table";
-                                })();
-                                
-                                toast.success("Booking initiated", {
-                                  description: `${buttonText} for ${rec.title}`,
-                                });
-                              }}
-                            >
-                              {(() => {
-                                if (isMainBookingClicked) {
-                                  return "Booked";
-                                }
-                                if (availability?.[0] && availability.length === 1) {
-                                  const slot = availability[0];
-                                  if (slot.label?.toLowerCase().includes("table")) {
-                                    return "Reserve table";
-                                  }
-                                  return "Reserve now";
-                                }
-                                if (availability && availability.length > 1) {
-                                  return "View All Options";
-                                }
-                                if (
-                                  rec.type?.toLowerCase().includes("dining") ||
-                                  rec.type?.toLowerCase().includes("restaurant") ||
-                                  rec.type?.toLowerCase().includes("cafe")
-                                ) {
-                                  return "Reserve table";
-                                }
-                                return booking?.provider
-                                  ? `Reserve via ${booking.provider}`
-                                  : "Reserve table";
-                              })()}
-                            </Button>
+                                    return booking?.provider
+                                      ? `Reserve via ${booking.provider}`
+                                      : "Reserve table";
+                                  })()}
+                                </Button>
+                              )}
+                            </>
                           )}
 
                           {/* Fallback if no booking link */}
