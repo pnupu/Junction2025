@@ -615,6 +615,17 @@ export default function EventPage() {
         .moodResponses ?? {},
     ).length > 0;
 
+  // Check if creator has completed mood questions
+  const creatorPreference = participants[0]; // Creator is the first participant
+  const creatorHasMoodResponses =
+    creatorPreference &&
+    (creatorPreference as { moodResponses?: Record<string, unknown> })
+      .moodResponses &&
+    Object.keys(
+      (creatorPreference as { moodResponses?: Record<string, unknown> })
+        .moodResponses ?? {},
+    ).length > 0;
+
 
   // Mood questions flow hook (prefetch data)
   const moodFlow = useMoodQuestionsFlow({
@@ -1586,26 +1597,21 @@ export default function EventPage() {
           {/* Creator Action Button - Only visible to event creator and when ideas haven't been generated */}
           {isCreator &&
           hasJoined &&
-          eventStatus === "collecting_preferences" && !generateRecommendations.isPending ? (
+          eventStatus === "collecting_preferences" && 
+          !generateRecommendations.isPending &&
+          creatorHasMoodResponses &&
+          participantCount > 0 ? (
             <div className="fixed bottom-0 left-0 right-0 p-5 bg-white">
              <div className="max-w-[500px] mx-auto"
              >
                <Button
                  onClick={handleGenerateEvent}
-                 disabled={
-                   participantCount === 0 || generateRecommendations.isPending
-                 }
+                 disabled={generateRecommendations.isPending}
                  size="lg"
                  className="w-full shadow-lg"
                >
-        
-                    🎉 Let&apos;s cook some events!
+                 🎉 Let&apos;s cook some events!
                </Button>
-               {participantCount === 0 && (
-                 <p className="mt-2 text-center text-sm text-white/70">
-                   Wait for at least one participant to join
-                 </p>
-               )}
              </div>
             </div>
           ) : null}

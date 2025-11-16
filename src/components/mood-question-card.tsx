@@ -20,7 +20,7 @@ export function MoodQuestionCard({
   return (
     <div className="mb-6 w-full">
       {/* Question Text */}
-      <label className="mb-3 block text-sm font-medium text-[#0F172B]">
+      <label className="mb-3 block text-sm font-medium text-[#0F172B] break-words">
         {prompt}
       </label>
 
@@ -58,7 +58,7 @@ export function MoodQuestionCard({
                 type="button"
                 onClick={() => onChange(num)}
                 variant={isSelected ? "selected" : "option"}
-                className="w-full px-3 py-3 text-left text-sm sm:text-base h-auto justify-start"
+                className="w-full px-3 py-3 text-left text-sm sm:text-base h-auto justify-start whitespace-normal"
               >
                 {num}
               </Button>
@@ -74,15 +74,15 @@ export function MoodQuestionCard({
         {options.map((option, idx) => {
           const isSelected = value === option;
           return (
-            <Button
-              key={idx}
-              type="button"
-              onClick={() => onChange(option)}
-              variant={isSelected ? "selected" : "option"}
-              className="w-full px-3 py-3 text-left text-sm sm:text-base h-auto justify-start"
-            >
-              <span className="break-words">{option}</span>
-            </Button>
+              <Button
+                key={idx}
+                type="button"
+                onClick={() => onChange(option)}
+                variant={isSelected ? "selected" : "option"}
+                className="w-full px-3 py-3 text-left text-sm sm:text-base h-auto justify-start whitespace-normal overflow-hidden"
+              >
+                <span className="break-words break-all">{option}</span>
+              </Button>
           );
         })}
       </div>
@@ -97,15 +97,15 @@ export function MoodQuestionCard({
         {options.map((option, idx) => {
           const isSelected = value === option;
           return (
-            <Button
-              key={idx}
-              type="button"
-              onClick={() => onChange(option)}
-              variant={isSelected ? "selected" : "option"}
-              className="w-full px-3 py-3 text-left text-sm sm:text-base h-auto justify-start"
-            >
-              <span className="break-words">{option}</span>
-            </Button>
+              <Button
+                key={idx}
+                type="button"
+                onClick={() => onChange(option)}
+                variant={isSelected ? "selected" : "option"}
+                className="w-full px-3 py-3 text-left text-sm sm:text-base h-auto justify-start whitespace-normal overflow-hidden"
+              >
+                <span className="break-words break-all">{option}</span>
+              </Button>
           );
         })}
       </div>

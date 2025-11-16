@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { api } from "@/trpc/react";
+import { api, type RouterOutputs } from "@/trpc/react";
 import { MoodQuestionCard } from "@/components/mood-question-card";
 import type { MoodQuestion } from "@/server/agents/mood-check";
 
@@ -21,6 +21,8 @@ export function useMoodQuestionsFlow({
 }: MoodQuestionsFlowProps) {
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const utils = api.useUtils();
 
   const {
     data: moodData,
@@ -42,21 +44,66 @@ export function useMoodQuestionsFlow({
   );
 
   const saveMoodResponses = api.event.saveMoodResponses.useMutation({
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await utils.event.get.cancel();
+
+      // Snapshot the previous value - try both id and inviteCode
+      const isLikelyInviteCode =
+        groupId.length <= 10 && /^[A-Z0-9]+$/i.test(groupId);
+      const queryKey = isLikelyInviteCode
+        ? { inviteCode: groupId.toUpperCase() }
+        : { id: groupId };
+
+      const previousEventData = utils.event.get.getData(queryKey);
+
+      // Optimistically update the event data to include mood responses
+      if (previousEventData) {
+        utils.event.get.setData(queryKey, (old) => {
+          if (!old) return old;
+          const updatedPreferences = old.preferences?.map((pref) => {
+            if (pref.sessionId === sessionId) {
+              return {
+                ...pref,
+                moodResponses: {
+                  ...((pref as { moodResponses?: Record<string, unknown> })
+                    .moodResponses ?? {}),
+                  ...variables.responses,
+                },
+              };
+            }
+            return pref;
+          });
+          return {
+            ...old,
+            preferences: updatedPreferences,
+          };
+        });
+      }
+
+      // Return context with the snapshotted value and query key
+      return { previousEventData, queryKey };
+    },
+    onError: (error, _variables, context) => {
+      console.error("Failed to save mood responses:", error);
+      setIsSubmitting(false);
+      
+      // Rollback optimistic update on error
+      if (context?.previousEventData && context?.queryKey) {
+        utils.event.get.setData(context.queryKey, context.previousEventData);
+      }
+    },
+    onSuccess: (_data, _variables, context) => {
       setAnswers({});
       setIsSubmitting(false);
 
-      // Don't refetch if we're navigating away - it's unnecessary and slows things down
-      // The results page will fetch fresh data anyway
+      // Invalidate to refetch fresh data (will handle both id and inviteCode)
+      void utils.event.get.invalidate();
       
       // All questions answered
       if (onComplete) {
         onComplete();
       }
-    },
-    onError: (error) => {
-      console.error("Failed to save mood responses:", error);
-      setIsSubmitting(false);
     },
   });
 
