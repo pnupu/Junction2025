@@ -40,6 +40,8 @@ import nextDynamic from "next/dynamic";
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
 
+import EventOptionsLoading from "@/components/event-options-loading";
+
 type RecommendationItem =
   RouterOutputs["event"]["getRecommendations"]["recommendations"][number];
 
@@ -537,6 +539,7 @@ export default function EventPage() {
 
   const handleGenerateEvent = () => {
     // Prevent multiple clicks
+    setActiveTab("ideas");
     if (
       generateRecommendations.isPending ||
       eventStatus === "generating" ||
@@ -1348,8 +1351,8 @@ export default function EventPage() {
           {/* Event Ideas Tab */}
           {activeTab === "ideas" && (
             <div className="space-y-4">
-              {eventStatus === "generating" ? (
-                <></>
+              {eventStatus === "generating" || generateRecommendations.isPending ? (
+                <EventOptionsLoading />
               ) : (eventStatus === "generated" ||
                   eventStatus === "completed") &&
                 recommendationsQuery.data && (
@@ -1583,7 +1586,7 @@ export default function EventPage() {
           {/* Creator Action Button - Only visible to event creator and when ideas haven't been generated */}
           {isCreator &&
           hasJoined &&
-          eventStatus === "collecting_preferences" ? (
+          eventStatus === "collecting_preferences" && !generateRecommendations.isPending ? (
             <div className="fixed bottom-0 left-0 right-0 p-5 bg-white">
              <div className="max-w-[500px] mx-auto"
              >
@@ -1595,9 +1598,8 @@ export default function EventPage() {
                  size="lg"
                  className="w-full shadow-lg"
                >
-                 {generateRecommendations.isPending
-                   ? "Cooking events..."
-                   : "🎉 Let's cook some events!"}
+        
+                    🎉 Let&apos;s cook some events!
                </Button>
                {participantCount === 0 && (
                  <p className="mt-2 text-center text-sm text-white/70">
