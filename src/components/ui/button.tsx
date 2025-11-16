@@ -5,25 +5,41 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        // Primary Wolt blue button
+        default: "rounded-xl bg-[#029DE2] text-white hover:bg-[#0287C3]",
+        // White button (for use on blue backgrounds)
+        white: "rounded-xl bg-white text-[#029DE2] hover:bg-white/90",
+        // Outline button with Wolt blue
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "rounded-xl border-2 border-[#029DE2] bg-white text-[#029DE2] hover:bg-[#029DE2] hover:text-white",
+        // Option button (for selectable choices)
+        option:
+          "rounded-xl border-2 border-[#029DE2] bg-[#EDF7FF] text-[#029DE2] hover:bg-[#029DE2] hover:text-white",
+        // Selected option button
+        selected: "rounded-xl border-2 border-[#029DE2] bg-[#029DE2] text-white shadow-md",
+        // Icon/Close button
+        icon: "rounded-full bg-white/90 text-slate-700 shadow-lg backdrop-blur-sm hover:scale-110 hover:bg-white",
+        // Ghost button
+        ghost: "hover:bg-slate-100 text-[#0F172B]",
+        // Disabled/Success state (green)
+        success: "rounded-xl bg-green-600 text-white cursor-not-allowed",
+        // Destructive button
+        destructive:
+          "rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        // Secondary button
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
+        default: "h-12 px-6 text-base",
+        sm: "h-7 px-3 text-xs",
+        lg: "h-14 px-8 text-base",
         icon: "h-10 w-10",
+        "icon-sm": "h-8 w-8",
       },
     },
     defaultVariants: {

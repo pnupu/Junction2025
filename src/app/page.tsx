@@ -114,14 +114,15 @@ export default function Home() {
                     setIsJumping(false);
                   }, 200);
                 }}
-                className="h-12 w-full rounded-xl bg-white text-base font-semibold text-[#029DE2] hover:bg-white/90"
+                variant="white"
+                className="w-full"
               >
                 Create DEMO profile
               </Button>
             ) : (
               <>
                 <Link href="/create" className="block">
-                  <Button className="h-12 w-full rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3]">
+                  <Button className="w-full">
                     Create Event
                   </Button>
                 </Link>
@@ -146,7 +147,7 @@ export default function Home() {
                     onClick={handleJoinEvent}
                     disabled={!eventCode.trim()}
                     variant="outline"
-                    className="h-12 w-full rounded-xl border-2 border-[#029DE2] bg-white text-base font-semibold text-[#029DE2] transition-colors hover:bg-[#029DE2] hover:text-white focus-visible:ring-0 focus-visible:ring-offset-0 disabled:border-slate-300 disabled:text-slate-400 disabled:opacity-100 disabled:hover:bg-white disabled:hover:text-slate-400"
+                    className="w-full disabled:border-slate-300 disabled:text-slate-400 disabled:hover:bg-white disabled:hover:text-slate-400"
                   >
                     Join with Code
                   </Button>

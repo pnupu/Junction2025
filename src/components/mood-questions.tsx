@@ -164,7 +164,7 @@ export function MoodQuestions({
         <Button
           onClick={handleSubmit}
           disabled={!allAnswered || isSubmitting}
-          className="flex-1 rounded-xl bg-[#029DE2] text-base font-semibold text-white hover:bg-[#0287C3] disabled:opacity-50"
+          className="flex-1"
         >
           {isSubmitting ? `Saving${loadingDots}` : "Continue"}
         </Button>
@@ -207,22 +207,19 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
             {scaleNumbers.map((num) => {
               const isSelected = value === num || value === String(num);
               return (
-                <button
+                <Button
                   key={num}
                   type="button"
                   onClick={() => onChange(num)}
-                  className={`rounded-lg text-sm font-medium transition-all ${
+                  variant={isSelected ? "selected" : "option"}
+                  className={`text-sm ${
                     isLargeScale
-                      ? "min-w-0 flex-1 px-1.5 py-2"
-                      : "flex-1 px-3 py-2.5"
-                  } ${
-                    isSelected
-                      ? "bg-[#029DE2] text-white shadow-md"
-                      : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
+                      ? "min-w-0 flex-1 px-1.5 py-2 h-auto"
+                      : "flex-1 px-3 py-2.5 h-auto"
                   }`}
                 >
                   {num}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -240,18 +237,15 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
           {options.map((option, idx) => {
             const isSelected = value === option;
             return (
-              <button
+              <Button
                 key={idx}
                 type="button"
                 onClick={() => onChange(option)}
-                className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-all ${
-                  isSelected
-                    ? "bg-[#029DE2] text-white shadow-md"
-                    : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
-                }`}
+                variant={isSelected ? "selected" : "option"}
+                className="w-full px-4 py-3 text-left text-sm h-auto justify-start"
               >
                 {option}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -269,18 +263,15 @@ function QuestionInput({ question, value, onChange }: QuestionInputProps) {
           {options.map((option, idx) => {
             const isSelected = value === option;
             return (
-              <button
+              <Button
                 key={idx}
                 type="button"
                 onClick={() => onChange(option)}
-                className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-all ${
-                  isSelected
-                    ? "bg-[#029DE2] text-white shadow-md"
-                    : "border border-slate-200 bg-white text-[#0F172B] hover:bg-slate-50"
-                }`}
+                variant={isSelected ? "selected" : "option"}
+                className="w-full px-4 py-3 text-left text-sm h-auto justify-start"
               >
                 {option}
-              </button>
+              </Button>
             );
           })}
         </div>

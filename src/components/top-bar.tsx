@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   getUserProfile,
   ProfileModal,
@@ -46,9 +47,10 @@ export function TopBar() {
       <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-lg">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-end px-4 sm:px-8">
           {userName && (
-            <button
+            <Button
               onClick={() => setShowProfileModal(true)}
-              className="flex items-center gap-2 rounded-full bg-[#029DE2]/10 px-4 py-2 transition-all hover:scale-105 hover:bg-[#029DE2]/20"
+              variant="ghost"
+              className="h-auto rounded-full bg-[#029DE2]/10 px-4 py-2 hover:scale-105 hover:bg-[#029DE2]/20"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#029DE2] text-white">
                 MM
@@ -56,7 +58,7 @@ export function TopBar() {
               <span className="text-sm font-medium text-[#0F172B]">
                 {userName}
               </span>
-            </button>
+            </Button>
           )}
         </div>
       </header>
