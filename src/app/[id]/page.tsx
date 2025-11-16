@@ -33,7 +33,11 @@ import {
 import { OpinionModal } from "@/components/opinion-modal";
 import { useMoodQuestionsFlow } from "@/components/mood-questions-flow";
 import { MoodQuestionCard } from "@/components/mood-question-card";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
+
+// Force dynamic rendering - prevent static generation
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
 type RecommendationItem =
   RouterOutputs["event"]["getRecommendations"]["recommendations"][number];
@@ -62,17 +66,17 @@ type LeafletModule = {
 };
 
 // Dynamically import React Leaflet components for inline map
-const MapContainer = dynamic(
+const MapContainer = nextDynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
   { ssr: false },
 );
 
-const TileLayer = dynamic(
+const TileLayer = nextDynamic(
   () => import("react-leaflet").then((mod) => mod.TileLayer),
   { ssr: false },
 );
 
-const Marker = dynamic(
+const Marker = nextDynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
   { ssr: false },
 );

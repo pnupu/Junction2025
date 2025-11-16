@@ -9,7 +9,7 @@ import {
   EventMapModal,
   type ParticipantLocation,
 } from "@/components/event-map-modal";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 
 // Type for Leaflet module (only what we need)
 type LeafletModule = {
@@ -21,18 +21,22 @@ type LeafletModule = {
   }) => HTMLElement;
 };
 
+// Force dynamic rendering - prevent static generation
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+
 // Dynamically import React Leaflet components for inline map
-const MapContainer = dynamic(
+const MapContainer = nextDynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
   { ssr: false },
 );
 
-const TileLayer = dynamic(
+const TileLayer = nextDynamic(
   () => import("react-leaflet").then((mod) => mod.TileLayer),
   { ssr: false },
 );
 
-const Marker = dynamic(
+const Marker = nextDynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
   { ssr: false },
 );
