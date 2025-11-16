@@ -1373,10 +1373,10 @@ export default function EventPage() {
                     <div className="mb-4 rounded-xl border-2 border-[#029DE2] bg-[#029DE2]/10 p-4">
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="mb-1 text-lg font-semibold text-white">
+                          <h3 className="mb-1 text-lg font-semibold text-[#0F172B]">
                             🎉 Voting is closed!
                           </h3>
-                          <p className="text-sm text-white/80">
+                          <p className="text-sm text-[#0F172B]/70">
                             Ready to book? View results and reserve your spot.
                           </p>
                         </div>
